@@ -1,9 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import app from "../firebase.config";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { signInWithRedirect, GoogleAuthProvider } from "firebase/auth";
 import ProfileScreen from "./profile/page";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,9 +22,23 @@ export default function Home() {
   useEffect(() => {
     const auth = getAuth(app);
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
+    // Handle redirect result first
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+          router.push("/profile");
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting redirect result:", error);
+      });
+
+    // Then set up auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        router.push("/profile");
       } else {
         setUser(null);
       }
@@ -26,19 +46,46 @@ export default function Home() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signinWithGoogle = async () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
     try {
-      await signInWithRedirect(auth, provider);
-      router.push("/profile");
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      await router.push("/profile"); // Add await here
     } catch (error) {
-      console.error("Error signing in with Google", error.message);
+      if (
+        error.code === "auth/popup-closed-by-user" ||
+        error.code === "auth/popup-blocked"
+      ) {
+        console.log("Popup blocked or closed, falling back to redirect");
+        signInWithRedirect(auth, provider);
+      } else {
+        console.error("Error signing in with Google:", error);
+      }
     }
   };
+
+  useEffect(() => {
+    const auth = getAuth(app);
+    // Check if the user was redirected after login
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          setUser(result.user);
+          router.push("/profile"); // Redirect to profile after successful login
+        }
+      } catch (error) {
+        console.error("Error getting redirect result: ", error.message);
+      }
+    };
+
+    checkRedirectResult();
+  }, [router]);
 
   if (loading) {
     return (
@@ -61,7 +108,7 @@ export default function Home() {
         <ProfileScreen user={user} />
       ) : (
         <div className="container text-center flex flex-col">
-          <div className=" h-[50vh] flex flex-col items-center justify-center   gap-3">
+          <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
             <Image
               src="/icon.png"
               alt="icon"
