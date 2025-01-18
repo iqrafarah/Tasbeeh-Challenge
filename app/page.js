@@ -49,25 +49,56 @@ export default function Home() {
   }, [router]);
 
   const signinWithGoogle = async () => {
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
     try {
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-      await router.push("/profile"); // Add await here
+
+      if (result?.user) {
+        setUser(result.user);
+        await router.replace("/profile"); // Use replace instead of push
+      }
     } catch (error) {
-      if (
-        error.code === "auth/popup-closed-by-user" ||
-        error.code === "auth/popup-blocked"
-      ) {
-        console.log("Popup blocked or closed, falling back to redirect");
-        signInWithRedirect(auth, provider);
-      } else {
-        console.error("Error signing in with Google:", error);
+      console.error("Google sign in error:", error);
+      if (error.code === "auth/popup-blocked") {
+        // Fall back to redirect method
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirectError) {
+          console.error("Redirect error:", redirectError);
+        }
       }
     }
   };
+
+  useEffect(() => {
+    const auth = getAuth(app);
+
+    // Handle redirect result
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+          router.replace("/profile");
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting redirect result:", error);
+      });
+
+    // Set up auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        router.replace("/profile");
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     const auth = getAuth(app);

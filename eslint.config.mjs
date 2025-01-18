@@ -1,12 +1,16 @@
-export default {
-  extends: ["next/core-web-vitals"],
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
+import nextjs from "eslint-config-next";
+
+export default [
+  {
+    ...nextjs,
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+    },
+    env: {
+      browser: true,
+      node: true,
+      es6: true,
+    },
   },
-  env: {
-    browser: true,
-    node: true,
-    es6: true,
-  },
-};
+];
