@@ -1,0 +1,15 @@
+{
+  "name": "Tasbeeh Challenge",
+  "short_name": "Tasbeeh",
+  "theme_color": "#000",
+  "background_color": "#ffffff",
+  "display": "browser",
+  "orientation": "natural",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "/icon.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon.png", "type": "image/png", "sizes": "256x256" },
+    { "src": "/icon.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}
