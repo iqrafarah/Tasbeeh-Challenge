@@ -4,6 +4,7 @@ const config = {
   output: "standalone",
   images: {
     unoptimized: true,
+    domains: ["lh3.googleusercontent.com"],
   },
   swcMinify: true,
 };
