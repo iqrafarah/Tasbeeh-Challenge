@@ -19,50 +19,24 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const auth = getAuth(app);
-
-    // Handle redirect result first
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          setUser(result.user);
-          router.push("/profile");
-        }
-      })
-      .catch((error) => {
-        console.error("Error getting redirect result:", error);
-      });
-
-    // Then set up auth state listener
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        router.push("/profile");
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
   const signinWithGoogle = async () => {
     try {
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
+
       const result = await signInWithPopup(auth, provider);
 
       if (result?.user) {
         setUser(result.user);
-        await router.replace("/profile"); // Use replace instead of push
+        await router.replace("/profile"); // Using replace instead of push
       }
     } catch (error) {
       console.error("Google sign in error:", error);
+      // Handle popup blocked case
       if (error.code === "auth/popup-blocked") {
-        // Fall back to redirect method
         try {
+          const auth = getAuth(app);
+          const provider = new GoogleAuthProvider();
           await signInWithRedirect(auth, provider);
         } catch (redirectError) {
           console.error("Redirect error:", redirectError);
@@ -98,24 +72,6 @@ export default function Home() {
     });
 
     return () => unsubscribe();
-  }, [router]);
-
-  useEffect(() => {
-    const auth = getAuth(app);
-    // Check if the user was redirected after login
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          setUser(result.user);
-          router.push("/profile"); // Redirect to profile after successful login
-        }
-      } catch (error) {
-        console.error("Error getting redirect result: ", error.message);
-      }
-    };
-
-    checkRedirectResult();
   }, [router]);
 
   if (loading) {

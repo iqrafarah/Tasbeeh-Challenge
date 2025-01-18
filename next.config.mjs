@@ -5,9 +5,7 @@ const config = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    appDir: true,
-  },
+  swcMinify: true,
 };
 
 export default withPWA({
