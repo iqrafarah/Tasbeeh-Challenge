@@ -30,7 +30,6 @@ export default function ChallengesPage() {
     const loadChallenges = async () => {
       try {
         const challengesList = await challengeService.getChallenges();
-        console.log("Challenges:", challengesList);
         setChallenges(challengesList);
       } catch (error) {
         console.error("Error loading challenges:", error);
