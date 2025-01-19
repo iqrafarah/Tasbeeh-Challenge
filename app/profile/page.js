@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import app from "../lib/firebase.config";
 import { getDoc, doc, getFirestore } from "firebase/firestore";
 import LoadingScreen from "../components/loadingScreen";
+import ProtectedRoute from "../components/protectedRoute";
 
 export default function ProfileScreen() {
   const auth = getAuth();
@@ -48,11 +49,12 @@ export default function ProfileScreen() {
   }
 
   return (
-    <div className="container">
-      <h1>Profile, {user.displayName}</h1>
-      <p>Profile page</p>
-
-      <button onClick={handleLogout}>Sign out</button>
-    </div>
+    <ProtectedRoute>
+      <div className="">
+        <h1>Profile, {user.displayName}</h1>
+        <p>Profile page</p>
+        <button onClick={handleLogout}>Sign out</button>
+      </div>
+    </ProtectedRoute>
   );
 }

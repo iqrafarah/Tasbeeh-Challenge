@@ -5,7 +5,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { authService } from "./lib/services/authService";
 import { userService } from "./lib/services/userService";
 import { useRouter } from "next/navigation";
-import ProfileScreen from "./profile/page";
+import ChallengesScreen from "./challenges/page";
 import LoadingScreen from "./components/loadingScreen";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,7 +20,7 @@ export default function Home() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        router.push("/profile");
+        router.push("/challenges");
       } else {
         setUser(null);
       }
@@ -35,7 +35,7 @@ export default function Home() {
       const result = await authService.signInWithGoogle();
       if (result?.user) {
         await userService.saveUser(result.user);
-        router.push("/profile");
+        router.push("/challenges");
       }
     } catch (error) {
       console.error("Error signing in:", error);
@@ -49,9 +49,9 @@ export default function Home() {
   return (
     <div>
       {user ? (
-        <ProfileScreen user={user} />
+        <LoadingScreen />
       ) : (
-        <div className="container text-center flex flex-col">
+        <div className="text-center flex flex-col">
           <div className="h-[50vh] flex flex-col items-center justify-center gap-3">
             <Image
               src="/icon.png"
