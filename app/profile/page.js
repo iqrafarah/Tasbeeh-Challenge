@@ -2,24 +2,33 @@
 import React, { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import app from "../../firebase.config";
+import app from "../lib/firebase.config";
+import { getDoc, doc, getFirestore } from "firebase/firestore";
+import LoadingScreen from "../components/loadingScreen";
 
 export default function ProfileScreen() {
   const auth = getAuth();
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const db = getFirestore();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (!authUser) {
         router.push("/");
+        return;
       }
+
+      const userDoc = await getDoc(doc(db, "users", authUser.uid));
+      if (userDoc.exists()) {
+        setUser({ ...authUser, ...userDoc.data() });
+      }
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [router]);
 
   const handleLogout = async () => {
     try {
@@ -30,9 +39,17 @@ export default function ProfileScreen() {
     }
   };
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div>
-      <h1>Profile, {user ? user.displayName : "Geust"}</h1>
+    <div className="container">
+      <h1>Profile, {user.displayName}</h1>
       <p>Profile page</p>
 
       <button onClick={handleLogout}>Sign out</button>
