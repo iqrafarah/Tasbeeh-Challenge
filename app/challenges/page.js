@@ -47,8 +47,8 @@ export default function ChallengesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white pb-safe pt-safe">
-        <h1 className="title sticky top-0 bg-white pb-4">Challenges</h1>
+      <div className="min-h-screen pb-safe pt-safe">
+        <h1 className="title sticky top-0  pb-4">Challenges</h1>
         <div className="overflow-y-auto h-[calc(100vh-160px)]">
           <div className="mt-4 flex flex-col gap-4 pb-4">
             {challenges.map((challenge, index) => (
