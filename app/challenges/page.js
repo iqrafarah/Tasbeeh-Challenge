@@ -54,20 +54,20 @@ export default function ChallengesPage() {
             {challenges.map((challenge, index) => (
               <div
                 key={challenge.id}
-                className="challenge-card flex flex-col justify-between gap-4 min-h-[175px] p-4 rounded-xl"
+                className="challenge-card flex flex-col justify-between gap-4 min-h-[180px] p-4 rounded-xl"
                 style={{ backgroundColor: getColorForIndex(index) }}
               >
                 <div className="">
                   <h3 className="text-xl font-bold">{challenge.title}</h3>
-                  <p className="text-sm mb-2">{challenge.meaning}</p>
-                  <p className="text-xs">{challenge.whenToUse}</p>
+                  <p className="text-sm mb-1">{challenge.meaning}</p>
+                  <p className="text-xs italic">{challenge.whenToUse}</p>
                 </div>
                 <div className="flex justify-between">
-                  <div className="flex gap-2">
-                    <span className="bg-black text-white px-4 text-sm py-1 h-fit rounded-full">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-black text-white px-3 text-xs py-1 h-fit rounded-full">
                       {challenge.points} points
                     </span>
-                    <span className="bg-black text-white px-4 text-sm py-1 h-fit rounded-full">
+                    <span className="bg-black text-white px-3 text-xs py-1 h-fit rounded-full">
                       {challenge.requiredCount} times
                     </span>
                   </div>
