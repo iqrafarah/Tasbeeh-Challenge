@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import CircleProgressBar from "../components/circleProgressBaressBar";
+import CircleProgressBar from "../components/circleProgressBar";
 
 export default function CounterPage() {
   const [count, setCount] = useState(0);
@@ -23,7 +23,7 @@ export default function CounterPage() {
 
   return (
     <div
-      className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer"
+      className="flex flex-col items-center justify-center min-h-screen bg-white p-4 cursor-pointer"
       onClick={handleClick}
     >
       <div className="bg-black text-white px-4 py-1 rounded-full text-sm mb-8">
