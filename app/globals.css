@@ -12,31 +12,26 @@
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background-color: white;
+  color: var(--primary);
+  background: var(--border);
+  font-size: 16px;
+  font-family: "Poppins", serif;
 }
 
 .container {
-  max-width: 100%;
+  max-width: 375px;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
   margin: 0 auto;
-  padding: 0;
-  background-color: white;
-  position: relative;
+  padding: 20px 20px 0 20px;
+  background-color: white !important;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .container {
-    max-width: 375px;
-  }
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
