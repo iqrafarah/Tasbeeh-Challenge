@@ -1,4 +1,10 @@
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import app from "../firebase.config";
 
 export const userService = {
@@ -28,46 +34,12 @@ export const userService = {
           vibrationEnabled: true,
         },
 
-        createdAt: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
+        createdAt: serverTimestamp(),
+        lastActive: serverTimestamp(),
       };
       await setDoc(doc(db, "users", userData.uid), userDoc, { merge: true });
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
-      throw error;
-    }
-  },
-
-  updateChallenge: async (uid, challengeProgress) => {
-    const db = getFirestore(app);
-    try {
-      await setDoc(
-        doc(db, "users", uid),
-        {
-          currentChallenge: challengeProgress,
-        },
-        { merge: true }
-      );
-    } catch (error) {
-      console.error("Error updating challenge:", error);
-      throw error;
-    }
-  },
-
-  updateProgress: async (uid, progressData) => {
-    const db = getFirestore(app);
-    try {
-      await setDoc(
-        doc(db, "users", uid),
-        {
-          totalPoints: progressData.points,
-          level: progressData.level,
-          levelProgress: progressData.progress,
-        },
-        { merge: true }
-      );
-    } catch (error) {
-      console.error("Error updating progress:", error);
       throw error;
     }
   },

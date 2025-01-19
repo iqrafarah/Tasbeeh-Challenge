@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { challengeService } from "../lib/services/challengeService";
 import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
+import { useRouter } from "next/navigation";
 
 const baseColors = [
   { hex: "#f6f2c0" }, // Light Yellow (original)
@@ -23,6 +24,7 @@ const getColorForIndex = (index) => {
 };
 
 export default function ChallengesPage() {
+  const router = useRouter();
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +46,9 @@ export default function ChallengesPage() {
   if (loading) {
     return <LoadingScreen />;
   }
+  const handleChallengeClick = (challenge) => {
+    router.push(`/counter?id=${challenge.id}`);
+  };
 
   return (
     <ProtectedRoute>
@@ -54,8 +59,9 @@ export default function ChallengesPage() {
             {challenges.map((challenge, index) => (
               <div
                 key={challenge.id}
-                className="challenge-card flex flex-col justify-between gap-4 min-h-[180px] p-4 rounded-xl"
+                className="cursor-pointer flex flex-col justify-between gap-4 min-h-[180px] p-4 rounded-xl"
                 style={{ backgroundColor: getColorForIndex(index) }}
+                onClick={() => handleChallengeClick(challenge)}
               >
                 <div className="">
                   <h3 className="text-xl font-bold">{challenge.title}</h3>
