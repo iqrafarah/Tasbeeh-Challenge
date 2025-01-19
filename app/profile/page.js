@@ -21,7 +21,6 @@ export default function ProfileScreen() {
     const loadUserData = async (uid) => {
       try {
         const data = await userService.getUser(uid);
-        console.log("doat", data);
         setUserData(data);
       } catch (error) {
         console.error("Error loading user data:", error);
