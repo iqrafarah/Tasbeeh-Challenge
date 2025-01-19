@@ -34,7 +34,11 @@ const CircleProgressBar = ({
         r={radius}
         cx={size / 2}
         cy={size / 2}
-        style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }}
+        style={{
+          transition: "stroke-dashoffset 0.5s ease-in-out",
+          transform: "rotate(-90deg)",
+          transformOrigin: "50% 50%",
+        }}
       />
     </svg>
   );

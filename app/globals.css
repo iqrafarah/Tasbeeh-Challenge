@@ -56,7 +56,7 @@ body {
 }
 .count {
   font-family: "Titan One", serif;
-  font-size: 5rem;
+  font-size: 3rem;
   color: var(--primary);
 }
 .button {
