@@ -43,4 +43,20 @@ export const userService = {
       throw error;
     }
   },
+
+  // getusers
+  getUser: async (uid) => {
+    if (!uid) return null;
+    const db = getFirestore(app);
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        return userDoc.data();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      throw error;
+    }
+  },
 };
