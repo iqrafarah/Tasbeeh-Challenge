@@ -11,6 +11,9 @@ export default {
         primary: "var(--primary)",
         secondary: "var(--secondary)",
         lightgray: "var(--lightgray)",
+        spacing: {
+          safe: "env(safe-area-inset-top)",
+        },
       },
     },
   },

@@ -47,7 +47,7 @@ export default function ChallengesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="">
+      <div className="min-h-screen bg-white pb-safe pt-safe">
         <h1 className="title sticky top-0 bg-white pb-4">Challenges</h1>
         <div className="overflow-y-auto h-[calc(100vh-160px)]">
           <div className="mt-4 flex flex-col gap-4 pb-4">
@@ -59,7 +59,8 @@ export default function ChallengesPage() {
               >
                 <div className="">
                   <h3 className="text-xl font-bold">{challenge.title}</h3>
-                  <p className="arabic-text">{challenge.meaning}</p>
+                  <p className="text-sm mb-2">{challenge.meaning}</p>
+                  <p className="text-xs">{challenge.whenToUse}</p>
                 </div>
                 <div className="flex justify-between">
                   <div className="flex gap-2">
