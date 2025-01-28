@@ -1,12 +1,13 @@
 import withPWA from "next-pwa";
 
+/** @type {import('next').NextConfig} */
 const config = {
   output: "standalone",
   images: {
     unoptimized: true,
-    domains: ["lh3.googleusercontent.com"],
   },
-  swcMinify: true,
+  reactStrictMode: true,
+  trailingSlash: true,
 };
 
 export default withPWA({
