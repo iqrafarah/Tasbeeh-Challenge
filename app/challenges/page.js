@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { challengeService } from "../lib/services/challengeService";
+import { userService } from "../lib/services/userService"; // Import userService
 import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import app from "../lib/firebase.config";
 
 const baseColors = [
   { hex: "#f6f2c0" }, // Light Yellow (original)
@@ -27,6 +30,7 @@ export default function ChallengesPage() {
   const router = useRouter();
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const auth = getAuth(app);
 
   useEffect(() => {
     const loadChallenges = async () => {
@@ -40,12 +44,29 @@ export default function ChallengesPage() {
       }
     };
 
+    const updateLastActive = async (uid) => {
+      try {
+        await userService.updateLastActive(uid);
+      } catch (error) {
+        console.error("Error updating last active:", error);
+      }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        updateLastActive(user.uid);
+      }
+    });
+
     loadChallenges();
-  }, []);
+
+    return () => unsubscribe();
+  }, [auth]);
 
   if (loading) {
     return <LoadingScreen />;
   }
+
   const handleChallengeClick = (challenge) => {
     router.push(`/counter?id=${challenge.id}`);
   };
