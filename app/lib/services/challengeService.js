@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import app from "../firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { get } from "http";
 
 export const challengeService = {
   getChallenges: async () => {
@@ -80,6 +81,31 @@ export const challengeService = {
       }
     } catch (error) {
       console.error("Error saving challenge:", error);
+      throw error;
+    }
+  },
+
+  getUserChallenge: async (userId, challengeId) => {
+    const db = getFirestore(app);
+    const userChallengeRef = collection(
+      db,
+      "userChallenges",
+      userId,
+      "challenges"
+    );
+
+    try {
+      const challengeQuery = query(
+        userChallengeRef,
+        where("challengeId", "==", challengeId)
+      );
+      const userChallengeSnapshot = await getDocs(challengeQuery);
+
+      if (!userChallengeSnapshot.empty) {
+        return userChallengeSnapshot.docs[0].data();
+      }
+    } catch (error) {
+      console.error("Error fetching user challenge:", error);
       throw error;
     }
   },

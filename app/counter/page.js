@@ -60,6 +60,27 @@ function CounterPageContent() {
       }
     };
 
+    const fetchUserChallenge = async () => {
+      try {
+        if (user) {
+          const userChallenge = await challengeService.getUserChallenge(
+            user.uid,
+            challengeId
+          );
+          if (userChallenge) {
+            setCount(userChallenge.count);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user challenge:", error);
+      }
+    };
+
+    fetchChallenge();
+    fetchUserChallenge();
+  }, [challengeId, user]);
+
+  useEffect(() => {
     const saveChallenge = async () => {
       try {
         if (user) {
@@ -77,8 +98,7 @@ function CounterPageContent() {
     };
 
     saveChallenge();
-    fetchChallenge();
-  }, [challengeId, user, count]);
+  }, [count, user, challengeId]);
 
   if (!challenge) {
     return <LoadingScreen />;
