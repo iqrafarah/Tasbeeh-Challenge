@@ -8,7 +8,7 @@ import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import Image from "next/image";
 import { userService } from "../lib/services/userService";
-
+import Statistics from "../components/statistics"
 export default function ProfileScreen() {
   const auth = getAuth();
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        {/* <button onClick={handleLogout}>Sign out</button> */}
+        <Statistics />
       </div>
     </ProtectedRoute>
   );
