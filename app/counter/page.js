@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
 import { challengeService } from "../lib/services/challengeService";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { userService } from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 
-export default function CounterPage() {
+function CounterPageContent() {
   const [count, setCount] = useState(0);
   const [challenge, setChallenge] = useState(null);
   const searchParams = useSearchParams();
@@ -127,5 +127,13 @@ export default function CounterPage() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function CounterPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <CounterPageContent />
+    </Suspense>
   );
 }
