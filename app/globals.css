@@ -80,3 +80,7 @@ body {
   width: 100%;
   font-weight: 500;
 }
+
+canvas {
+  margin: auto;
+}

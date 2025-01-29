@@ -1,6 +1,7 @@
 import Image from "next/image";
 
-export default function Statistics() {
+export default function Statistics(stats) {
+    const userData = stats.stats;
     return (
         <div className="mt-5">
             <h3 className="title">Statistics</h3>
@@ -10,7 +11,7 @@ export default function Statistics() {
                         <Image src="/challengeIcon.png" width={20} height={20} alt="" className="object-cover" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="title">304</span>
+                        <span className="title">{userData.ChallengesCompleted}</span>
                         <span className="text-sm">Challenges</span>
                     </div>
                 </div>
@@ -28,7 +29,7 @@ export default function Statistics() {
                         <Image src="/pointsIcon.png" width={20} height={20} alt="" className="object-cover" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="title">1000</span>
+                        <span className="title">{userData.levelPoints}</span>
                         <span className="text-sm">Points</span>
                     </div>
                 </div>

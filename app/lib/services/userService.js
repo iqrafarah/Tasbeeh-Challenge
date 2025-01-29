@@ -77,7 +77,7 @@ export const userService = {
     try {
       const userRef = doc(db, "users", uid);
       const userDoc = await getDoc(userRef);
-      if (userDoc.exist()) {
+      if (userDoc.exists()) {
         const userData = userDoc.data();
         await setDoc(
           userRef,

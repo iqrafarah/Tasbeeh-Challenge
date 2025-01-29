@@ -90,7 +90,7 @@ export default function ProfileScreen() {
           </div>
         </div>
 
-        <Statistics />
+        <Statistics stats={userData} />
       </div>
     </ProtectedRoute>
   );
