@@ -106,16 +106,13 @@ function CounterPageContent() {
 
   const percentage = (count / challenge.requiredCount) * 100;
 
-  onst handleClick = async () => {
+  const handleClick = async () => {
     setCount((prevCount) => {
       if (prevCount < challenge.requiredCount) {
         const newCount = prevCount + 1;
         if (newCount === challenge.requiredCount) {
           // Challenge completed, update user stats
           userService.updateUserStats(user.uid, challenge.points);
-
-             1
-
         }
         return newCount;
       }
