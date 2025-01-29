@@ -11,6 +11,7 @@ export default {
         primary: "var(--primary)",
         secondary: "var(--secondary)",
         lightgray: "var(--lightgray)",
+        white: "var(--white)",
       },
     },
   },

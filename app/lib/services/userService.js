@@ -70,4 +70,27 @@ export const userService = {
       throw error;
     }
   },
+
+  updateUserStats: async (uid, points) => {
+    const db = getFirestore(app);
+
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exist()) {
+        const userData = userDoc.data();
+        await setDoc(
+          userRef,
+          {
+            ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
+            levelPoints: (userData.levelPoints || 0) + points,
+          },
+          { merge: true }
+        )
+      }
+    } catch (error) {
+      console.error("Error updating user stats:", error);
+      throw error;
+    }
+  }
 };

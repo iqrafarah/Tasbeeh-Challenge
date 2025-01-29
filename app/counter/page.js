@@ -106,10 +106,18 @@ function CounterPageContent() {
 
   const percentage = (count / challenge.requiredCount) * 100;
 
-  const handleClick = () => {
+  onst handleClick = async () => {
     setCount((prevCount) => {
       if (prevCount < challenge.requiredCount) {
-        return prevCount + 1;
+        const newCount = prevCount + 1;
+        if (newCount === challenge.requiredCount) {
+          // Challenge completed, update user stats
+          userService.updateUserStats(user.uid, challenge.points);
+
+             1
+
+        }
+        return newCount;
       }
       return prevCount;
     });
@@ -121,27 +129,24 @@ function CounterPageContent() {
         className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer"
         onClick={handleClick}
       >
-        <div className="bg-black text-white px-4 py-1 rounded-full text-sm mb-8">
-          Goals
-        </div>
 
         <h3 className="text-xl font-bold">{challenge.title}</h3>
         <p className="text-sm mb-1">{challenge.meaning}</p>
         <p className="text-xs italic text-center">{challenge.whenToUse}</p>
 
-        <div className="w-72 h-72 flex items-center justify-center mt-8 relative">
+        <div className="w-72 h-72 flex items-center justify-center mt-16 relative">
           <CircleProgressBar
             completed={percentage}
             bgcolor="#000"
             baseBgColor="#E5E5E5"
             size={220}
-            strokeWidth={10}
+            strokeWidth={12}
           />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center">
               <span className="count">{count}</span>
-              <span className="text-lg ml-1">/{challenge.requiredCount}</span>
+              <span className="text-lg ml-1 font-semibold">/{challenge.requiredCount}</span>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@
   --secondary: #fff;
   --lightgray: #f5f5f5;
   --border: #e8e8e8;
+  --white: #fff;
 }
 
 body {
@@ -27,7 +28,7 @@ body {
   height: 100vh;
   margin: 0 auto;
   padding: 20px 20px 0 20px;
-  background-color: white !important;
+  background-color: var(--white) !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
