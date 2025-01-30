@@ -2,7 +2,7 @@
     import React, { useState, useEffect, Suspense } from "react";
     import CircleProgressBar from "../components/circleProgressBar";
     import { challengeService } from "../lib/services/challengeService";
-    import { useSearchParams, useRouter } from "next/navigation"; // Import useRouter
+    import { useSearchParams, useRouter } from "next/navigation";
     import LoadingScreen from "../components/loadingScreen";
     import app from "../lib/firebase.config";
     import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -21,6 +21,7 @@
         const [user, setUser] = useState(null);
         const [userData, setUserData] = useState([]);
         const router = useRouter();
+        const [showTapInstruction, setShowTapInstruction] = useState(true);
 
         useEffect(() => {
             const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -112,6 +113,10 @@
         const handleClick = async () => {
             if (completed) return;
 
+            if (showTapInstruction) {
+                setShowTapInstruction(false); // Hide the instruction after the first tap
+            }
+
             setCount((prevCount) => {
                 const newCount = prevCount + 1;
                 if (newCount >= challenge.requiredCount) {
@@ -177,25 +182,26 @@
                         </>
                     )}
 
-                    <div className="w-72 h-72 flex items-center justify-center mt-16 relative">
+                    <div className="w-72 h-72 flex items-center justify-center mt-32 relative">
                         <CircleProgressBar
                             completed={percentage}
                             bgcolor="#000"
                             baseBgColor="#E5E5E5"
-                            size={220}
+                            size={250}
                             strokeWidth={12}
                         />
 
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <div className="flex flex-col items-center justify-center">
                                 <span className="count">{count}</span>
-                                <span className="text-lg ml-1 font-semibold">/{challenge.requiredCount}</span>
+                                <span className="text-lg ml-1 font-semibold">total {challenge.requiredCount}</span>
                             </div>
                         </div>
+
                     </div>
 
                     {completed && (
-                        <div className="mt-8 flex gap-4 w-full">
+                        <div className="mt-[60px] flex gap-4 w-full">
                             <button onClick={handleRetry} className="buttonSecondary">
                                 Try again
                             </button>

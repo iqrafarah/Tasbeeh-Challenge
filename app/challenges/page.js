@@ -30,7 +30,7 @@ export default function ChallengesPage() {
     const router = useRouter();
     const [challenges, setChallenges] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [userProgress, setUserProgress] = useState({}); // Store user progress for each challenge
+    const [userProgress, setUserProgress] = useState({});
     const auth = getAuth(app);
     const [user, setUser] = useState(null);
 

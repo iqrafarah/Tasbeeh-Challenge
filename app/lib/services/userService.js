@@ -24,6 +24,7 @@ export const userService = {
                 pointsToNextLevel: 100,
                 totalDhikr: 0,
                 ChallengesCompleted: 0,
+                longestStreak: 0,
                 settings: {
                     theme: "light",
                     notifications: true,
@@ -72,11 +73,16 @@ export const userService = {
                         newStreak = 1;
                     }
 
-                    // Update Firestore with the new streak and last active date
+                    // Check if the new streak is the longest streak
+                    const longestStreak = userData.longestStreak || 0;
+                    const newLongestStreak = newStreak > longestStreak ? newStreak : longestStreak;
+
+                    // Update Firestore with the new streak, longest streak, and last active date
                     await setDoc(
                         userRef,
                         {
                             streak: newStreak,
+                            longestStreak: newLongestStreak, // Update longest streak
                             lastActive: serverTimestamp(), // Update the last active timestamp
                         },
                         { merge: true }
@@ -120,16 +126,32 @@ export const userService = {
         try {
             const userRef = doc(db, "users", uid);
             const userDoc = await getDoc(userRef);
+
             if (userDoc.exists()) {
                 const userData = userDoc.data();
+                const numericLevelPoints = Number(userData.levelPoints) || 0; // Ensure levelPoints is a number
+                const numericPoints = Number(points); // Ensure points is a number
+
+                const newLevelPoints = numericLevelPoints + numericPoints;
+                let newLevel = Number(userData.level) || 1;
+                let newPointsToNextLevel = Number(userData.pointsToNextLevel) || 100;
+
+                console.log('data', newPointsToNextLevel, newLevelPoints);
+                if (newLevelPoints >= newPointsToNextLevel) {
+                    newLevel += 1;
+                    newPointsToNextLevel = Math.round(newPointsToNextLevel * 1.05); // increase by 5%
+                }
+
                 await setDoc(
                     userRef,
                     {
                         ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
-                        levelPoints: (userData.levelPoints || 0) + points,
+                        levelPoints: newLevelPoints >= newPointsToNextLevel ? 0 : newLevelPoints,
+                        level: newLevel,
+                        pointsToNextLevel: newPointsToNextLevel,
                     },
                     {merge: true}
-                )
+                );
             }
         } catch (error) {
             console.error("Error updating user stats:", error);
