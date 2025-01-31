@@ -1,6 +1,5 @@
 import "./globals.css";
 import BottomNav from "./components/bottomNav";
-import ClientLayout from "./ClientLayout"; // Import the ClientLayout
 
 export const metadata = {
     title: "Tasbeeh Challenge",
@@ -22,12 +21,10 @@ export default function RootLayout({ children }) {
             <meta name="mobile-web-app-capable" content="yes" />
         </head>
         <body>
-        <ClientLayout>
             <main className="container">
                 {children}
                 <BottomNav />
             </main>
-        </ClientLayout>
         </body>
         </html>
     );

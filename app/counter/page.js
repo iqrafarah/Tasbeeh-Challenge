@@ -9,6 +9,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { userService } from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 import Confetti from "react-confetti";
+import LevelUpModal from "../components/newLevelModal";
 
 // Debounce function
 const debounce = (func, wait) => {
@@ -33,6 +34,22 @@ function CounterPageContent() {
     const [showTapInstruction, setShowTapInstruction] = useState(true);
     const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
     const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0);
+    const [levelUpModalVisible, setLevelUpModalVisible] = useState(false);
+    const [newLevel, setNewLevel] = useState(null);
+
+    const updateUserStats = async (uid, earnedPoints) => {
+        try {
+            const result = await userService.updateUserStats(uid, earnedPoints);
+
+            // Check if the level has changed, then show the modal
+            if (result.hasLevelChanged) {
+                setNewLevel(result.newLevel); // Set the new level
+                setLevelUpModalVisible(true); // Show the modal
+            }
+        } catch (error) {
+            console.error("Error updating user stats:", error);
+        }
+    };
 
     // Update window dimensions for Confetti
     useEffect(() => {
@@ -148,7 +165,7 @@ function CounterPageContent() {
         setCount((prevCount) => {
             const newCount = prevCount + 1;
             if (newCount >= challenge.requiredCount) {
-                userService.updateUserStats(user.uid, challenge.points);
+                updateUserStats(user.uid, 50);
             }
 
             return newCount;
@@ -186,6 +203,12 @@ function CounterPageContent() {
                 className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer"
                 onClick={!completed ? handleClick : undefined}
             >
+                {levelUpModalVisible && (
+                    <LevelUpModal
+                        newLevel={newLevel}
+                        onClose={() => setLevelUpModalVisible(false)}
+                    />
+                )}
                 {completed && typeof window !== "undefined" && (
                     <Confetti
                         width={windowWidth}

@@ -68,6 +68,11 @@ body {
   font-size: 4rem;
   color: var(--primary);
 }
+.levelTitle {
+  font-family: "Titan One", serif;
+  font-size: 5rem;
+  color: #d0c694;
+}
 .progressNumber {
   font-family: "Titan One", serif;
   font-size: 1.8rem;
@@ -107,7 +112,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;  /* Ensure it's on top */
+  z-index: 1000;
 }
 
 .modal-content {

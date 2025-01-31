@@ -99,9 +99,19 @@ export const userService = {
                 let pointsToNextLevel = userData.pointsToNextLevel || 5;
 
                 const growthFactor = 1.5;
+                let hasLevelChanged = false;
+                let newLevel = level;
+
+                // Level up logic
                 while (totalPoints >= pointsToNextLevel) {
-                    level += 1;
-                    pointsToNextLevel = Math.round(5 * Math.pow(level, growthFactor));
+                    newLevel += 1;
+                    pointsToNextLevel = Math.round(5 * Math.pow(newLevel, growthFactor));
+                    hasLevelChanged = true; // Level has changed
+                }
+
+                // If the level changed, update the level in Firestore
+                if (hasLevelChanged) {
+                    level = newLevel;
                 }
 
                 await setDoc(
@@ -115,6 +125,8 @@ export const userService = {
                     { merge: true } // Use merge to prevent overwriting other fields.
                 );
 
+                // Return an object containing level change status and the new level
+                return { hasLevelChanged, newLevel };
             }
         } catch (error) {
             console.error("Error updating user stats:", error);

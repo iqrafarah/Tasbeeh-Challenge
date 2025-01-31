@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useLevelUp } from "../lib/LevelUpContext";
 import { userService } from "../lib/services/userService";
 
 export default function LevelProgress({ data, userId }) {
     const { totalPoints, pointsToNextLevel } = data;
-    const { showLevelUpModal } = useLevelUp();
 
     const [progress, setProgress] = useState({
         totalPoints: Number(totalPoints),
@@ -26,7 +24,6 @@ export default function LevelProgress({ data, userId }) {
 
             try {
                 await userService.updateUserStats(userId, 0); // Reset points after level up
-                showLevelUpModal(newLevel); // Trigger level up modal
             } catch (error) {
                 console.error("Error updating progress:", error);
             }
