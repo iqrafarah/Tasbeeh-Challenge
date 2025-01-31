@@ -20,6 +20,7 @@ export const userService = {
                 totalDhikr: 0,
                 ChallengesCompleted: 0,
                 longestStreak: 0,
+                contributions: {},
                 settings: {
                     theme: "light", notifications: true, soundEnabled: true, vibrationEnabled: true,
                 },
@@ -60,7 +61,7 @@ export const userService = {
                         streak: newStreak,
                         longestStreak: newLongestStreak,
                         lastActive: serverTimestamp(),
-                    }, { merge: true });
+                    }, {merge: true});
                 }
             }
         } catch (error) {
@@ -115,6 +116,11 @@ export const userService = {
                     level = newLevel;
                 }
 
+                // Update contribution data
+                const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+                const contributions = userData.contributions || {};
+                contributions[today] = (contributions[today] || 0) + 1; // Increment today's contribution count
+
                 await setDoc(
                     userRef,
                     {
@@ -122,6 +128,7 @@ export const userService = {
                         level: level,
                         pointsToNextLevel: pointsToNextLevel,
                         ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
+                        contributions: contributions, // Update contributions
                     },
                     { merge: true }
                 );
@@ -141,8 +148,8 @@ export const userService = {
             const userRef = doc(db, "users", uid);
             await setDoc(
                 userRef,
-                { totalDhikr: increment(1) },
-                { merge: true }
+                {totalDhikr: increment(1)},
+                {merge: true}
             );
         } catch (error) {
             console.error("Error updating totalDhikr:", error);

@@ -9,7 +9,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import Image from "next/image";
 import Statistics from "../components/statistics";
 import LevelProgess from "../components/levelProgess";
-import ContributionGraph from "../components/contributionGraph";
+import HeatTracker from "../components/contributionGraph";
 
 export default function ProfileScreen() {
     const auth = getAuth(app);
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
 
                 <LevelProgess data={userData} userId={user.uid} />
                 <Statistics stats={userData} />
-                <ContributionGraph />
+                <HeatTracker uid={user.uid} />
 
             </div>
         </ProtectedRoute>
