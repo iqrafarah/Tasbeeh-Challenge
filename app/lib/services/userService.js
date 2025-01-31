@@ -115,7 +115,6 @@ export const userService = {
                     { merge: true } // Use merge to prevent overwriting other fields.
                 );
 
-                console.log("User stats updated successfully!");
             }
         } catch (error) {
             console.error("Error updating user stats:", error);

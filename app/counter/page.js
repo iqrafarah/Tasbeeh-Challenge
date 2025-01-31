@@ -10,12 +10,12 @@ import { userService } from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 import Confetti from "react-confetti";
 
-// Debounce function to limit the number of calls
+// Debounce function
 const debounce = (func, wait) => {
     let timeout;
-    return function () {
+    return function(...args) {
         clearTimeout(timeout);
-        timeout = setTimeout(func, wait);
+        timeout = setTimeout(() => func.apply(this, args), wait);
     };
 };
 
@@ -31,17 +31,17 @@ function CounterPageContent() {
     const [userData, setUserData] = useState([]);
     const router = useRouter();
     const [showTapInstruction, setShowTapInstruction] = useState(true);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
+    const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0);
 
     // Update window dimensions for Confetti
     useEffect(() => {
-        const handleResize = debounce(() => {
+        if (typeof window === "undefined") return; // Ensure this runs only in the browser
+
+        const handleResize = () => {
             setWindowWidth(window.innerWidth);
             setWindowHeight(window.innerHeight);
-        }, 200);
+        };
 
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
@@ -53,7 +53,6 @@ function CounterPageContent() {
             if (user) {
                 setUser(user);
                 loadUserData(user.uid);
-                console.log("User is authenticated", user.uid);
             } else {
                 setUser(null);
             }
@@ -76,7 +75,6 @@ function CounterPageContent() {
     useEffect(() => {
         const fetchChallenges = async () => {
             try {
-                setLoading(true);
                 const allChallenges = await challengeService.getChallenges();
                 setChallenges(allChallenges);
                 const selectedChallenge = allChallenges.find((ch) => ch.id === challengeId);
@@ -84,24 +82,13 @@ function CounterPageContent() {
                     setChallenge(selectedChallenge);
                     setCompleted(false);
                 } else {
-                    setError("Challenge not found.");
                     console.error("Challenge not found.");
                 }
-                setLoading(false);
             } catch (error) {
-                setError("Error fetching challenges.");
                 console.error("Error fetching challenges:", error);
-                setLoading(false);
             }
         };
 
-        if (user && challengeId) {
-            fetchChallenges();
-        }
-    }, [challengeId, user]);
-
-    // Fetch user challenge data
-    useEffect(() => {
         const fetchUserChallenge = async () => {
             try {
                 if (user && challengeId) {
@@ -118,6 +105,7 @@ function CounterPageContent() {
         };
 
         if (user && challengeId) {
+            fetchChallenges();
             fetchUserChallenge();
         }
     }, [challengeId, user]);
@@ -129,31 +117,26 @@ function CounterPageContent() {
         }
     }, [count, challenge, completed]);
 
+    // Debounced save challenge function
+    const debouncedSaveChallenge = debounce(async (userId, challengeId, count) => {
+        try {
+            const userData = {
+                userId: userId,
+                challengeId: challengeId,
+                count: count,
+            };
+            await challengeService.saveChallenge(userData);
+        } catch (error) {
+            console.error("Error saving challenge:", error);
+        }
+    }, 1000); // Adjust the delay as needed
+
     // Save challenge progress
     useEffect(() => {
-        const saveChallenge = async () => {
-            if (count % 5 === 0 && user) { // Save every 5 counts
-                const userData = { userId: user.uid, challengeId: challengeId, count };
-                try {
-                    await challengeService.saveChallenge(userData);
-                } catch (error) {
-                    console.error("Error saving challenge:", error);
-                }
-            }
-        };
-
-        if (count > 0) {
-            saveChallenge();
+        if (user && count !== 0) {
+            debouncedSaveChallenge(user.uid, challengeId, count);
         }
     }, [count, user, challengeId]);
-
-    const updateStats = async () => {
-        if (count >= challenge.requiredCount) {
-            await userService.updateUserStats(user.uid, challenge.points);
-            console.log("Challenge completed!");
-        }
-        await userService.updateTotalDhikr(user.uid);
-    };
 
     const handleClick = async () => {
         if (completed) return;
@@ -165,13 +148,14 @@ function CounterPageContent() {
         setCount((prevCount) => {
             const newCount = prevCount + 1;
             if (newCount >= challenge.requiredCount) {
-                setCompleted(true); // Mark the challenge as completed
+                userService.updateUserStats(user.uid, challenge.points);
             }
+
             return newCount;
         });
 
-        // Update stats and total Dhikr only after the count is updated
-        updateStats();
+        // Update totalDhikr for every count
+        userService.updateTotalDhikr(user.uid);
     };
 
     const handleRetry = () => {
@@ -190,9 +174,6 @@ function CounterPageContent() {
         router.push(`/counter?id=${nextChallengeId}`);
     };
 
-    if (loading) return <LoadingScreen />;
-    if (error) return <div>{error}</div>;
-
     if (!challenge) {
         return <LoadingScreen />;
     }
@@ -205,14 +186,13 @@ function CounterPageContent() {
                 className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer"
                 onClick={!completed ? handleClick : undefined}
             >
-                {completed && (
+                {completed && typeof window !== "undefined" && (
                     <Confetti
                         width={windowWidth}
                         height={windowHeight}
                         recycle={false}
                         numberOfPieces={500}
                         colors={['#f6f2c0', '#c4e3f2', '#c4f8c3', '#f2c4c4', '#e8c4f2', '#f2d4c4']}
-                        style={{ position: 'absolute', top: 0, left: 0 }}
                     />
                 )}
 
