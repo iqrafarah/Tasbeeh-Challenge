@@ -10,7 +10,7 @@ export default function LoadingScreen() {
         height={100}
         className="w-[60px] h-[60px] object-cover rounded-lg"
       />
-      <h1 className="title mb-[50px]">Tasbeeh Challenge</h1>
+      <h1 className="title mb-[80px]">Tasbeeh Challenge</h1>
     </div>
   );
 }

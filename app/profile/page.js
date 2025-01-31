@@ -64,7 +64,7 @@ export default function ProfileScreen() {
                         width={100}
                         height={100}
                         alt="profile pic"
-                        className="rounded-full"
+                        className="rounded-full object-cover w-[70px] h-[70px]"
                     />
                     <h1 className="text-xl font-bold">{userData.displayName}</h1>
                 </div>
