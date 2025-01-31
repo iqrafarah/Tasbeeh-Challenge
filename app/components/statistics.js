@@ -43,7 +43,7 @@ export default function Statistics(stats) {
                         <i className="fas fa-coins text-lg"></i>
                     </div>
                     <div className="flex flex-col">
-                        <span className="title">{userData.levelPoints}</span>
+                        <span className="title">{userData.totalPoints}</span>
                         <span className="text-xs">Total Points</span>
                     </div>
                 </div>

@@ -20,8 +20,8 @@ export const userService = {
                 photoURL: userData.photoURL,
                 streak: 0,
                 level: 1,
-                levelPoints: 0,
-                pointsToNextLevel: 100,
+                totalPoints: 0,
+                pointsToNextLevel: 5,
                 totalDhikr: 0,
                 ChallengesCompleted: 0,
                 longestStreak: 0,
@@ -85,7 +85,7 @@ export const userService = {
                             longestStreak: newLongestStreak, // Update longest streak
                             lastActive: serverTimestamp(), // Update the last active timestamp
                         },
-                        { merge: true }
+                        {merge: true}
                     );
                 } else {
                     // If lastActive doesn't exist, set the lastActive to today
@@ -94,7 +94,7 @@ export const userService = {
                         {
                             lastActive: serverTimestamp(),
                         },
-                        { merge: true }
+                        {merge: true}
                     );
                 }
             }
@@ -120,7 +120,7 @@ export const userService = {
         }
     },
 
-    updateUserStats: async (uid, points) => {
+    updateUserStats: async (uid, earnedPoints) => {
         const db = getFirestore(app);
 
         try {
@@ -129,29 +129,32 @@ export const userService = {
 
             if (userDoc.exists()) {
                 const userData = userDoc.data();
-                const numericLevelPoints = Number(userData.levelPoints) || 0; // Ensure levelPoints is a number
-                const numericPoints = Number(points); // Ensure points is a number
+                const numericPoints = Number(earnedPoints);
 
-                const newLevelPoints = numericLevelPoints + numericPoints;
-                let newLevel = Number(userData.level) || 1;
-                let newPointsToNextLevel = Number(userData.pointsToNextLevel) || 100;
+                // Accumulate total points correctly
+                let totalPoints = (userData.totalPoints || 0) + numericPoints;
+                let level = userData.level || 1;
+                let pointsToNextLevel = userData.pointsToNextLevel || 100;
 
-                console.log('data', newPointsToNextLevel, newLevelPoints);
-                if (newLevelPoints >= newPointsToNextLevel) {
-                    newLevel += 1;
-                    newPointsToNextLevel = Math.round(newPointsToNextLevel * 1.05); // increase by 5%
+                const growthFactor = 1.5;
+
+                while (totalPoints >= pointsToNextLevel) {
+                    level += 1;
+                    pointsToNextLevel = Math.round(5 * Math.pow(level, growthFactor));
                 }
 
                 await setDoc(
                     userRef,
                     {
+                        totalPoints: totalPoints,
+                        level: level, // Update level
+                        pointsToNextLevel: pointsToNextLevel,
                         ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
-                        levelPoints: newLevelPoints >= newPointsToNextLevel ? 0 : newLevelPoints,
-                        level: newLevel,
-                        pointsToNextLevel: newPointsToNextLevel,
                     },
-                    {merge: true}
+                    { merge: true }
                 );
+
+                console.log("User stats updated successfully!");
             }
         } catch (error) {
             console.error("Error updating user stats:", error);

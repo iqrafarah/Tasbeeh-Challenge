@@ -1,41 +1,43 @@
-import {useState, useEffect} from "react";
-import {userService} from "../lib/services/userService";
+import { useState, useEffect } from "react";
+import { userService } from "../lib/services/userService";
 
-export default function LevelProgress({data, userId}) {
-    const {levelPoints, pointsToNextLevel} = data;
+export default function LevelProgress({ data, userId }) {
+    const { totalPoints, pointsToNextLevel } = data;
 
     const [progress, setProgress] = useState({
-        levelPoints: Number(levelPoints), pointsToNextLevel: Number(pointsToNextLevel),
+        totalPoints: Number(totalPoints),
+        pointsToNextLevel: Number(pointsToNextLevel),
     });
 
-    const progressPercentage = ((progress.levelPoints / progress.pointsToNextLevel) * 100).toFixed(0);
-
-    const remainingPoints = progress.pointsToNextLevel - progress.levelPoints;
+    const progressPercentage = ((progress.totalPoints / progress.pointsToNextLevel) * 100).toFixed(0);
+    const remainingPoints = progress.pointsToNextLevel - progress.totalPoints;
 
     const handleLevelProgression = async () => {
-        if (progress.levelPoints >= progress.pointsToNextLevel) {
-            const newPointsToNextLevel = Math.round(progress.pointsToNextLevel * progress.pointsToNextLevel * 1.05);
+        if (progress.totalPoints >= progress.pointsToNextLevel) {
+            const newPointsToNextLevel = Math.round(5 * Math.pow(progress.totalPoints / 5, 1.5)); // Use the adjusted formula for level progression
 
-            const updateProgress = {
-                levelPoints: 0, pointsToNextLevel: newPointsToNextLevel,
-            }
-
-            setProgress(updateProgress);
+            setProgress((prev) => ({
+                ...prev,
+                pointsToNextLevel: newPointsToNextLevel,
+            }));
 
             try {
-                await userService.updateUserStats(userId, updateProgress);
-                console.log('progress', progress);
+                console.log(newPointsToNextLevel, totalPoints);
+                // No need to reset totalPoints, only update progress and pointsToNextLevel
+                await userService.updateUserStats(userId, 0); // No reset for totalPoints
+                console.log("Progress updated", progress);
             } catch (error) {
-                console.log('error', error);
+                console.log("Error updating progress:", error);
             }
         }
-    }
+    };
 
     useEffect(() => {
         handleLevelProgression();
-    }, [progress, levelPoints]);
+    }, [progress.totalPoints]); // Listen to totalPoints changes
 
-    return (<div className="mt-8 flex gap-4 w-full">
+    return (
+        <div className="mt-8 flex gap-4 w-full">
             <div className="w-full flex flex-col justify-center min-h-[100px] p-4 rounded-xl bg-lightgray">
                 <div className="flex justify-between">
                     <div>
@@ -53,9 +55,10 @@ export default function LevelProgress({data, userId}) {
                 <div className="w-full h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                     <div
                         className="h-full bg-black rounded-full"
-                        style={{width: `${progressPercentage}%`}}
+                        style={{ width: `${progressPercentage}%` }}
                     ></div>
                 </div>
             </div>
-        </div>);
+        </div>
+    );
 }

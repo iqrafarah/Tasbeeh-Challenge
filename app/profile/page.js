@@ -89,7 +89,7 @@ export default function ProfileScreen() {
                     </div>
 
                     <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
-                        <span className="title">{userData?.levelPoints}</span>
+                        <span className="title">{userData?.totalPoints}</span>
                         <span>points</span>
                     </div>
                 </div>
