@@ -165,7 +165,7 @@ function CounterPageContent() {
         setCount((prevCount) => {
             const newCount = prevCount + 1;
             if (newCount >= challenge.requiredCount) {
-                updateUserStats(user.uid, 50);
+                updateUserStats(user.uid, challenge.points); // Use challenge.points instead of a fixed value
             }
 
             return newCount;

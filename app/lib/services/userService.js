@@ -57,8 +57,10 @@ export const userService = {
                     const newLongestStreak = newStreak > longestStreak ? newStreak : longestStreak;
 
                     await setDoc(userRef, {
-                        streak: newStreak, longestStreak: newLongestStreak, lastActive: serverTimestamp(),
-                    }, {merge: true});
+                        streak: newStreak,
+                        longestStreak: newLongestStreak,
+                        lastActive: serverTimestamp(),
+                    }, { merge: true });
                 }
             }
         } catch (error) {
@@ -66,7 +68,6 @@ export const userService = {
             throw error;
         }
     },
-
     // Get user data
     getUser: async (uid) => {
         if (!uid) return null;
@@ -122,7 +123,7 @@ export const userService = {
                         pointsToNextLevel: pointsToNextLevel,
                         ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
                     },
-                    { merge: true } // Use merge to prevent overwriting other fields.
+                    { merge: true }
                 );
 
                 // Return an object containing level change status and the new level
