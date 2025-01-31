@@ -1,12 +1,12 @@
 'use client';
-import React, { useState, useEffect, Suspense } from "react";
+import React, {useState, useEffect, Suspense} from "react";
 import CircleProgressBar from "../components/circleProgressBar";
-import { challengeService } from "../lib/services/challengeService";
-import { useSearchParams, useRouter } from "next/navigation";
+import {challengeService} from "../lib/services/challengeService";
+import {useSearchParams, useRouter} from "next/navigation";
 import LoadingScreen from "../components/loadingScreen";
 import app from "../lib/firebase.config";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { userService } from "../lib/services/userService";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {userService} from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 import Confetti from "react-confetti";
 import LevelUpModal from "../components/newLevelModal";
@@ -14,7 +14,7 @@ import LevelUpModal from "../components/newLevelModal";
 // Debounce function
 const debounce = (func, wait) => {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
@@ -192,7 +192,7 @@ function CounterPageContent() {
     };
 
     if (!challenge) {
-        return <LoadingScreen />;
+        return <LoadingScreen/>;
     }
 
     const percentage = (count / challenge.requiredCount) * 100;
@@ -266,8 +266,8 @@ function CounterPageContent() {
 
 export default function CounterPage() {
     return (
-        <Suspense fallback={<LoadingScreen />}>
-            <CounterPageContent />
+        <Suspense fallback={<LoadingScreen/>}>
+            <CounterPageContent/>
         </Suspense>
     );
 }

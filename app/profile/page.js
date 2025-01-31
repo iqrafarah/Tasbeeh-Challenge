@@ -9,6 +9,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import Image from "next/image";
 import Statistics from "../components/statistics";
 import LevelProgess from "../components/levelProgess";
+import ContributionGraph from "../components/contributionGraph";
 
 export default function ProfileScreen() {
     const auth = getAuth(app);
@@ -57,7 +58,7 @@ export default function ProfileScreen() {
 
     return (
         <ProtectedRoute>
-            <div className="profile-container">
+            <div className="overflow-y-auto h-[calc(100vh-110px)] profile-container">
                 <div className="profile-header text-center flex flex-col gap-4 justify-center items-center">
                     <Image
                         src={userData.photoURL}
@@ -88,6 +89,8 @@ export default function ProfileScreen() {
 
                 <LevelProgess data={userData} userId={user.uid} />
                 <Statistics stats={userData} />
+                <ContributionGraph />
+
             </div>
         </ProtectedRoute>
     );

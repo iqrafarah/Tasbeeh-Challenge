@@ -17,7 +17,8 @@
     "react": "^19.0.0",
     "react-confetti": "^6.2.2",
     "react-dom": "^19.0.0",
-    "react-progressbar": "^15.4.1"
+    "react-progressbar": "^15.4.1",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
