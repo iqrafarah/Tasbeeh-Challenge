@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useLevelUp } from "../lib/LevelUpContext";
 import { userService } from "../lib/services/userService";
 
 export default function LevelProgress({ data, userId }) {
     const { totalPoints, pointsToNextLevel } = data;
+    const { showLevelUpModal } = useLevelUp();
 
     const [progress, setProgress] = useState({
         totalPoints: Number(totalPoints),
@@ -14,7 +16,8 @@ export default function LevelProgress({ data, userId }) {
 
     const handleLevelProgression = async () => {
         if (progress.totalPoints >= progress.pointsToNextLevel) {
-            const newPointsToNextLevel = Math.round(5 * Math.pow(progress.totalPoints / 5, 1.5)); // Use the adjusted formula for level progression
+            const newPointsToNextLevel = Math.round(5 * Math.pow(progress.totalPoints / 5, 1.5));
+            const newLevel = Math.floor(progress.totalPoints / progress.pointsToNextLevel) + 1;
 
             setProgress((prev) => ({
                 ...prev,
@@ -22,19 +25,17 @@ export default function LevelProgress({ data, userId }) {
             }));
 
             try {
-                console.log(newPointsToNextLevel, totalPoints);
-                // No need to reset totalPoints, only update progress and pointsToNextLevel
-                await userService.updateUserStats(userId, 0); // No reset for totalPoints
-                console.log("Progress updated", progress);
+                await userService.updateUserStats(userId, 0); // Reset points after level up
+                showLevelUpModal(newLevel); // Trigger level up modal
             } catch (error) {
-                console.log("Error updating progress:", error);
+                console.error("Error updating progress:", error);
             }
         }
     };
 
     useEffect(() => {
-        handleLevelProgression();
-    }, [progress.totalPoints]); // Listen to totalPoints changes
+        handleLevelProgression(); // Check if level up is needed when totalPoints change
+    }, [progress.totalPoints]);
 
     return (
         <div className="mt-8 flex gap-4 w-full">
