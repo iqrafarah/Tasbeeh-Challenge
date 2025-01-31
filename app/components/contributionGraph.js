@@ -1,65 +1,96 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Rectangle } from 'recharts';
 
-// Sample data for the contribution graph
+// Sample data for 4 months (16 weeks)
 const commitsData = [
-    { date: '2023-10-01', day: 'Sun', count: 2 },
-    { date: '2023-10-02', day: 'Mon', count: 5 },
-    { date: '2023-10-03', day: 'Tue', count: 0 },
-    { date: '2023-10-04', day: 'Wed', count: 3 },
-    { date: '2023-10-05', day: 'Thu', count: 1 },
-    { date: '2023-10-06', day: 'Fri', count: 4 },
-    { date: '2023-10-07', day: 'Sat', count: 2 },
-    // Add more data points as needed
+    { date: '2024-01-01', count: 2 }, // Jan
+    { date: '2024-01-02', count: 5 },
+    { date: '2024-01-03', count: 0 },
+    { date: '2024-01-04', count: 3 },
+    { date: '2024-01-05', count: 1 },
+    { date: '2024-01-06', count: 4 },
+    { date: '2024-01-07', count: 2 },
+    { date: '2024-02-01', count: 3 }, // Feb
+    { date: '2024-02-02', count: 1 },
+    { date: '2024-02-03', count: 0 },
+    { date: '2024-02-04', count: 4 },
+    { date: '2024-02-05', count: 2 },
+    { date: '2024-02-06', count: 5 },
+    { date: '2024-02-07', count: 1 },
+    { date: '2024-03-01', count: 0 }, // Mar
+    { date: '2024-03-02', count: 2 },
+    { date: '2024-03-03', count: 3 },
+    { date: '2024-03-04', count: 1 },
+    { date: '2024-03-05', count: 4 },
+    { date: '2024-03-06', count: 2 },
+    { date: '2024-03-07', count: 0 },
+    { date: '2024-04-01', count: 1 }, // Apr
+    { date: '2024-04-02', count: 3 },
+    { date: '2024-04-03', count: 2 },
+    { date: '2024-04-04', count: 0 },
+    { date: '2024-04-05', count: 4 },
+    { date: '2024-04-06', count: 1 },
+    { date: '2024-04-07', count: 2 },
+    // Add more data points for 4 months
 ];
 
-// Custom heatmap cell
-const CustomCell = ({ x, y, width, height, value, index }) => {
-    const color = value > 0 ? `rgba(44, 190, 78, ${Math.min(1, value / 5)})` : '#ebedf0'; // Green for contributions, gray for no contributions
-    return (
-        <Rectangle
-            key={`cell-${index}`}
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            fill={color}
-            stroke="#fff"
-            strokeWidth={1}
-        />
-    );
+// Generate a grid of 16 weeks (4 months) x 7 days
+const generateHeatmapData = (data) => {
+    const weeks = 16; // 4 months
+    const daysInWeek = 7;
+    const heatmapData = Array.from({ length: daysInWeek }, () => Array(weeks).fill(0)); // Transposed grid
+
+    data.forEach((entry) => {
+        const date = new Date(entry.date);
+        const week = Math.floor((date - new Date('2024-01-01')) / (7 * 24 * 60 * 60 * 1000)); // Calculate week number
+        const day = date.getDay(); // 0 (Sunday) to 6 (Saturday)
+
+        if (week >= 0 && week < weeks) {
+            heatmapData[day][week] = entry.count;
+        }
+    });
+
+    return heatmapData;
 };
 
-// Custom tooltip for the chart
-const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="custom-tooltip" style={{ backgroundColor: '#fff', padding: '5px', border: '1px solid #ccc' }}>
-                <p>{`Date: ${payload[0].payload.date}`}</p>
-                <p>{`Contributions: ${payload[0].value}`}</p>
-            </div>
-        );
-    }
-    return null;
-};
+// HeatTracker component
+const HeatTracker = () => {
+    const heatmapData = generateHeatmapData(commitsData);
 
-// ContributionHeatmap component
-const ContributionHeatmap = () => {
     return (
-        <ResponsiveContainer width="100%" height={200}>
-            <BarChart
-                data={commitsData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                barCategoryGap={1}
-                barGap={1}
+        <div style={{marginTop: '2em', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(16, 20px)', // 16 weeks (4 months)
+                    gridTemplateRows: 'repeat(7, 20px)', // 7 days in a week
+                    gap: '4px',
+                }}
             >
-                <XAxis dataKey="day" />
-                <YAxis hide />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" shape={<CustomCell />} />
-            </BarChart>
-        </ResponsiveContainer>
+                {heatmapData.map((week, dayIndex) =>
+                    week.map((count, weekIndex) => (
+                        <div
+                            key={`${dayIndex}-${weekIndex}`}
+                            style={{
+                                width: '20px',
+                                height: '20px',
+                                backgroundColor: count > 0 ? `rgba(44, 190, 78, ${Math.min(1, count / 5)})` : '#ebedf0',
+                                borderRadius: '3px',
+                            }}
+                            title={`Date: ${new Date(
+                                new Date('2024-01-01').getTime() + (weekIndex * 7 + dayIndex) * 24 * 60 * 60 * 1000
+                            ).toLocaleDateString()}, Contributions: ${count}`}
+                        />
+                    ))
+                )}
+            </div>
+            <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+            </div>
+        </div>
     );
 };
 
-export default ContributionHeatmap;
+export default HeatTracker;
