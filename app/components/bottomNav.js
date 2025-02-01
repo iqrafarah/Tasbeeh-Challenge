@@ -10,7 +10,7 @@ export default function BottomNav() {
   }
 
   return (
-    <div className="fixed bottom-[2%] left-1/2 -translate-x-1/2 w-[140px] p-2 rounded-full bg-black">
+    <div className="fixed bottom-[5%] left-1/2 -translate-x-1/2 w-[140px] p-2 rounded-full bg-black">
       <div className="flex justify-between items-center">
         <Link
           href="/challenges"

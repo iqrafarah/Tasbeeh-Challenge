@@ -38,7 +38,21 @@ export default function SettingsPage() {
                     <div className="mt-3 border flex items-center justify-between px-4 py-3 rounded-xl">
                         <div className="flex gap-3">
                             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                                <i className="fa-solid fa-crown text-2xl text-gray-500"></i>
+                                <i className="fa-solid fa-crown text-2xl text-gray-600"></i>
+                            </div>
+                            <div className="flex gap-1 flex-col">
+                                <h3 className="text-[15px] font-semibold capitalize">Join Discord</h3>
+                                <p className="text-xs text-gray-500">Connect with the team!</p>
+                            </div>
+                        </div>
+                        <div>
+                            <i className="fa-solid fa-chevron-right text-sm"></i>
+                        </div>
+                    </div>
+                    <div className="mt-3 border flex items-center justify-between px-4 py-3 rounded-xl">
+                        <div className="flex gap-3">
+                            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                                <i className="fa-solid fa-crown text-2xl text-gray-600"></i>
                             </div>
                             <div className="flex gap-1 flex-col">
                                 <h3 className="text-[15px] font-semibold capitalize">Join Discord</h3>
