@@ -5,44 +5,35 @@ import app from "../lib/firebase.config";
 
 const db = getFirestore(app);
 
+// Adjust the start date to the first day of the month
 const adjustStartDate = (date) => {
     const newDate = new Date(date);
-    newDate.setDate(newDate.getDate() - newDate.getDay());
+    newDate.setDate(1); // Set to the first day of the month
     return newDate;
 };
 
+// Generate heatmap data for the current month
 const generateHeatmapData = (contributions, startDate) => {
-    const weeks = 16;
-    const daysInWeek = 7;
-    const heatmapData = Array.from({ length: weeks }, () => Array(daysInWeek).fill(0));
-
-    Object.entries(contributions).forEach(([dateStr, count]) => {
-        const [year, month, day] = dateStr.split('-').map(Number);
-        const contributionDate = new Date(year, month - 1, day);
-        const startTime = startDate.getTime();
-        const contributionTime = contributionDate.getTime();
-
-        const diffTime = contributionTime - startTime;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays >= 0 && diffDays < weeks * 7) {
-            const weekIndex = Math.floor(diffDays / 7);
-            const dayIndex = contributionDate.getDay();
-
-            if (weekIndex < weeks) {
-                heatmapData[weekIndex][dayIndex] = count;
-            }
-        }
+    const daysInMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
+    const heatmapData = Array.from({ length: daysInMonth }, (_, index) => {
+        const dateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`;
+        return contributions[dateStr] || 0;
     });
-
     return heatmapData;
+};
+
+// Calculate the day of the week for the first day of the month (0=Sunday, 1=Monday, etc.)
+const getStartDayOfWeek = (date) => {
+    const newDate = new Date(date);
+    return newDate.getDay(); // Returns a number from 0 (Sunday) to 6 (Saturday)
 };
 
 const HeatTracker = ({ uid }) => {
     const [heatmapData, setHeatmapData] = useState([]);
-    const [startDate, setStartDate] = useState(() => adjustStartDate(new Date('2025-01-01')));
-    const [currentPeriod, setCurrentPeriod] = useState(0);
+    const [startDate, setStartDate] = useState(adjustStartDate(new Date())); // Default to current month
+    const [startDay, setStartDay] = useState(0);
 
+    // Fetch contributions from the database and generate heatmap data
     const fetchContributions = async (startDate) => {
         try {
             const userDoc = await getDoc(doc(db, "users", uid));
@@ -58,96 +49,86 @@ const HeatTracker = ({ uid }) => {
     };
 
     useEffect(() => {
+        setStartDay(getStartDayOfWeek(startDate)); // Set the start day for the month
         fetchContributions(startDate);
     }, [startDate, uid]);
 
+    // Handle swipe actions to navigate between months
     const handleSwipe = (direction) => {
-        const newPeriod = direction === 'left' ? currentPeriod + 1 : currentPeriod - 1;
-        if (newPeriod >= 0 && newPeriod <= 2) {
-            setCurrentPeriod(newPeriod);
-            const newStartDate = new Date(2025, newPeriod * 4, 1);
-            setStartDate(adjustStartDate(newStartDate));
+        const newStartDate = new Date(startDate);
+
+        if (direction === 'right') {
+            newStartDate.setMonth(newStartDate.getMonth() - 1); // Go to previous month
+        } else if (direction === 'left') {
+            newStartDate.setMonth(newStartDate.getMonth() + 1); // Go to next month
         }
+
+        // Adjust start date to the first day of the new month
+        setStartDate(adjustStartDate(newStartDate));
     };
 
     const handlers = useSwipeable({
-        onSwipedLeft: () => handleSwipe('left'),
-        onSwipedRight: () => handleSwipe('right'),
+        onSwipedLeft: () => handleSwipe('left'),  // Swipe left -> next month
+        onSwipedRight: () => handleSwipe('right'), // Swipe right -> previous month
         preventDefaultTouchmoveEvent: true,
-        trackMouse: true
+        trackMouse: true,
     });
 
-    const dayLabels = [
-        { key: 'sun', label: 'S' },
-        { key: 'mon', label: 'M' },
-        { key: 'tue', label: 'T' },
-        { key: 'wed', label: 'W' },
-        { key: 'thu', label: 'T' },
-        { key: 'fri', label: 'F' },
-        { key: 'sat', label: 'S' }
-    ];
+    // Day labels (Sunday to Saturday)
+    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    const formatDate = (date) => {
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    };
+    const totalDaysInMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
+    const daysArray = Array.from({ length: totalDaysInMonth }, (_, index) => index + 1); // [1, 2, 3, ..., days in month]
 
     return (
-        <div {...handlers} className="mt-8">
-            <h3 className="small_title">Analytics</h3>
-            <div className="flex justify-between mt-2" style={{ maxWidth: 'calc(16 * 24px)' }}>
-                {getMonthRange(currentPeriod).map((month, index) => (
-                    <span key={index} className="text-xs">{month}</span>
+        <div {...handlers} className="bg-lightgray rounded-xl pb-4 mt-5 w-full p-4 flex flex-col items-center justify-center">
+
+            <h1 className="small_title text-left w-full capitalize mb-3">{startDate.toLocaleString('default', { month: 'long' })} {startDate.getFullYear()}</h1>
+
+            {/* Display current month */}
+            {/*<div className="text-xs mb-4 text-left w-full">*/}
+            {/*    <span>{startDate.toLocaleString('default', { month: 'long' })} {startDate.getFullYear()}</span>*/}
+            {/*</div>*/}
+
+            {/* Day labels row (Sunday-Saturday) */}
+            {/*<div className="w-full grid grid-cols-7 gap-2 mb-2">*/}
+            {/*    {dayLabels.map((day, index) => (*/}
+            {/*        <div key={index} className="text-center text-xs mt-3">{day}</div>*/}
+            {/*    ))}*/}
+            {/*</div>*/}
+
+            {/* Heatmap grid for current month */}
+            <div className="w-full grid grid-cols-7 gap-2">
+                {/* Empty cells for the days before the first day of the month */}
+                {Array.from({ length: startDay }).map((_, index) => (
+                    <div key={`empty-${index}`} className="h-8 flex justify-center items-center"></div>
                 ))}
-            </div>
-            <div className="flex mt-3">
-                <div className="flex flex-col justify-between mr-2">
-                    {dayLabels.map(({ key, label }) => (
-                        <div key={key} className="h-5 text-xs py-1">{label}</div>
-                    ))}
-                </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(16, 20px)',
-                    gridTemplateRows: 'repeat(7, 20px)',
-                    gap: '4px',
-                }}>
-                    {dayLabels.map((day, dayIndex) =>
-                        Array.from({ length: 16 }).map((_, weekIndex) => {
-                            const cellDate = new Date(startDate);
-                            cellDate.setDate(cellDate.getDate() + (weekIndex * 7));
-                            const count = heatmapData[weekIndex]?.[dayIndex] || 0;
+                {/* Render the actual days of the month */}
+                {daysArray.map((day, index) => {
+                    const count = heatmapData[day - 1] || 0;
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(day); // Set to the correct day
 
-                            return (
-                                <div
-                                    key={`${day.key}-${weekIndex}`}
-                                    style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        backgroundColor: count > 0
-                                            ? `rgba(44, 190, 78, ${Math.min(1, count / 5)})`
-                                            : '#ebedf0',
-                                        borderRadius: '3px',
-                                    }}
-                                    title={`${formatDate(cellDate)}: ${count} contributions`}
-                                />
-                            );
-                        })
-                    )}
-                </div>
+                    return (
+                        <div
+                            key={day}
+                            className="h-8 flex justify-center items-center"
+                            style={{
+                                backgroundColor: count > 0
+                                    ? `rgba(44, 190, 78, ${Math.min(1, count / 5)})`
+                                    : '#ebedf0',
+                                borderRadius: '3px',
+                                cursor: 'pointer',
+                            }}
+                            title={`Date: ${currentDate.toLocaleDateString()}, Contributions: ${count}`}
+                        />
+                    );
+                })}
             </div>
+
         </div>
     );
-};
-
-const getMonthRange = (period) => {
-    const monthNames = [
-        'January', 'February', 'March', 'April',
-        'May', 'June', 'July', 'August',
-        'September', 'October', 'November', 'December'
-    ];
-    const startMonth = period * 4;
-    return monthNames.slice(startMonth, startMonth + 4);
 };
 
 export default HeatTracker;
