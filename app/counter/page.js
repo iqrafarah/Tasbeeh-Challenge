@@ -155,6 +155,8 @@ function CounterPageContent() {
         }
     }, [count, user, challengeId]);
 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
     const handleClick = async () => {
         if (completed) return;
 
@@ -164,12 +166,14 @@ function CounterPageContent() {
 
         // Trigger vibration if supported
         if (navigator.vibrate) {
-            // Try a simpler vibration pattern
-            navigator.vibrate(200); // Vibrate for 200ms
+            if (isIOS) {
+                navigator.vibrate(200); // Simpler pattern for iOS
+            } else {
+                navigator.vibrate([30, 50, 30]); // More complex pattern for other devices
+            }
         } else {
-            // Fallback for devices that don't support vibration
             console.log("Vibration not supported");
-            // You can add a visual or auditory cue here
+            // Fallback for devices that don't support vibration
         }
 
         setCount((prevCount) => {
@@ -184,7 +188,6 @@ function CounterPageContent() {
         // Update totalDhikr for every count
         userService.updateTotalDhikr(user.uid);
     };
-
     const handleRetry = () => {
         setCount(0);
         setCompleted(false);
