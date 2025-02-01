@@ -10,7 +10,7 @@ import Image from "next/image";
 import Statistics from "../components/statistics";
 import LevelProgess from "../components/levelProgess";
 import HeatTracker from "../components/contributionGraph";
-
+import Settings from "../components/settings";
 export default function ProfileScreen() {
     const auth = getAuth(app);
     const router = useRouter();
@@ -59,6 +59,7 @@ export default function ProfileScreen() {
     return (
         <ProtectedRoute>
             <div className="overflow-y-auto h-[calc(100vh-110px)] profile-container">
+                <Settings />
                 <div className="profile-header text-center flex flex-col gap-4 justify-center items-center">
                     <Image
                         src={userData.photoURL}
