@@ -162,10 +162,9 @@ function CounterPageContent() {
             setShowTapInstruction(false); // Hide the instruction after the first tap
         }
 
-        // Trigger haptic feedback (vibration)
+        // Trigger vibration if supported
         if (navigator.vibrate) {
-            // Short vibration duration, just like a "click" feel
-            navigator.vibrate(50); // 50ms vibration for a click effect
+            navigator.vibrate([30, 50, 30]); // Vibrate: 30ms, pause 50ms, then 30ms (click-like effect)
         }
 
         setCount((prevCount) => {
