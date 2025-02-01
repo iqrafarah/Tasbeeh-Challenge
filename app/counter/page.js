@@ -162,6 +162,12 @@ function CounterPageContent() {
             setShowTapInstruction(false); // Hide the instruction after the first tap
         }
 
+        // Trigger haptic feedback (vibration)
+        if (navigator.vibrate) {
+            // Short vibration duration, just like a "click" feel
+            navigator.vibrate(50); // 50ms vibration for a click effect
+        }
+
         setCount((prevCount) => {
             const newCount = prevCount + 1;
             if (newCount >= challenge.requiredCount) {
