@@ -164,7 +164,12 @@ function CounterPageContent() {
 
         // Trigger vibration if supported
         if (navigator.vibrate) {
-            navigator.vibrate([30, 50, 30]); // Vibrate: 30ms, pause 50ms, then 30ms (click-like effect)
+            // Try a simpler vibration pattern
+            navigator.vibrate(200); // Vibrate for 200ms
+        } else {
+            // Fallback for devices that don't support vibration
+            console.log("Vibration not supported");
+            // You can add a visual or auditory cue here
         }
 
         setCount((prevCount) => {
