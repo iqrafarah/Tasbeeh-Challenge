@@ -59,7 +59,7 @@ export default function ProfileScreen() {
 
     return (
         <ProtectedRoute>
-            <div className="h-screen flex flex-col  overflow-y-auto pb-[110px]">
+            <div className="h-screen flex flex-col  overflow-y-auto pb-[130px]">
                     {/* Gear Icon to Open Settings */}
                     <div className="text-right w-full pr-2">
                         <Link href="/settings">
@@ -81,7 +81,7 @@ export default function ProfileScreen() {
                             <h1 className="text-xl font-bold">{userData.displayName}</h1>
                         </div>
 
-                        <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px] mx-4">
+                        <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px]">
                             <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
                                 <span className="title">{userData.streak}</span>
                                 <span>Streak</span>
