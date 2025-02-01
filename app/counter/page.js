@@ -155,39 +155,26 @@ function CounterPageContent() {
         }
     }, [count, user, challengeId]);
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
     const handleClick = async () => {
         if (completed) return;
 
         if (showTapInstruction) {
             setShowTapInstruction(false); // Hide the instruction after the first tap
         }
-
-        // Trigger vibration if supported
-        if (navigator.vibrate) {
-            if (isIOS) {
-                navigator.vibrate(200); // Simpler pattern for iOS
-            } else {
-                navigator.vibrate([30, 50, 30]); // More complex pattern for other devices
-            }
-        } else {
-            console.log("Vibration not supported");
-            // Fallback for devices that don't support vibration
-        }
+        const audio = new Audio('/tapSound2.mp4');
+        audio.play();
 
         setCount((prevCount) => {
             const newCount = prevCount + 1;
             if (newCount >= challenge.requiredCount) {
-                updateUserStats(user.uid, challenge.points); // Use challenge.points instead of a fixed value
+                updateUserStats(user.uid, challenge.points);
             }
-
             return newCount;
         });
 
-        // Update totalDhikr for every count
         userService.updateTotalDhikr(user.uid);
     };
+
     const handleRetry = () => {
         setCount(0);
         setCompleted(false);
