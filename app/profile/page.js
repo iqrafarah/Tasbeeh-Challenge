@@ -10,7 +10,8 @@ import Image from "next/image";
 import Statistics from "../components/statistics";
 import LevelProgess from "../components/levelProgess";
 import HeatTracker from "../components/contributionGraph";
-import Settings from "../components/settings";
+import Link from "next/link";
+
 export default function ProfileScreen() {
     const auth = getAuth(app);
     const router = useRouter();
@@ -58,40 +59,48 @@ export default function ProfileScreen() {
 
     return (
         <ProtectedRoute>
-            <div className="overflow-y-auto h-[calc(100vh-110px)] profile-container">
-                <Settings />
-                <div className="profile-header text-center flex flex-col gap-4 justify-center items-center">
-                    <Image
-                        src={userData.photoURL}
-                        width={100}
-                        height={100}
-                        alt="profile pic"
-                        className="rounded-full object-cover w-[70px] h-[70px]"
-                    />
-                    <h1 className="text-xl font-bold">{userData.displayName}</h1>
+            <div className="h-screen flex flex-col">
+                {/* Gear Icon to Open Settings */}
+                <div className="text-right w-full pr-2">
+                    <Link href="/settings">
+                        <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
+                    </Link>
                 </div>
 
-                <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px]">
-                    <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
-                        <span className="title">{userData.streak}</span>
-                        <span>Streak</span>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto">
+                    <div className="profile-header text-center flex flex-col gap-4 justify-center items-center pt-4">
+                        <Image
+                            src={userData.photoURL}
+                            width={100}
+                            height={100}
+                            alt="profile pic"
+                            className="rounded-full object-cover w-[70px] h-[70px]"
+                        />
+                        <h1 className="text-xl font-bold">{userData.displayName}</h1>
                     </div>
 
-                    <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
-                        <span className="title">{userData.level}</span>
-                        <span>Level</span>
+                    <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px] mx-4">
+                        <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
+                            <span className="title">{userData.streak}</span>
+                            <span>Streak</span>
+                        </div>
+
+                        <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
+                            <span className="title">{userData.level}</span>
+                            <span>Level</span>
+                        </div>
+
+                        <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
+                            <span className="title">{userData.totalPoints}</span>
+                            <span>Points</span>
+                        </div>
                     </div>
 
-                    <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
-                        <span className="title">{userData.totalPoints}</span>
-                        <span>Points</span>
-                    </div>
+                    <LevelProgess data={userData} userId={user.uid} />
+                    <Statistics stats={userData} />
+                    <HeatTracker uid={user.uid} />
                 </div>
-
-                <LevelProgess data={userData} userId={user.uid} />
-                <Statistics stats={userData} />
-                <HeatTracker uid={user.uid} />
-
             </div>
         </ProtectedRoute>
     );
