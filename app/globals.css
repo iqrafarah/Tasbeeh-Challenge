@@ -33,7 +33,7 @@ body {
   background-color: var(--white) !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 
 @media (min-width: 768px) {
