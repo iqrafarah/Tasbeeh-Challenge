@@ -234,6 +234,8 @@ const HeatTracker = ({ uid }) => {
                     gridTemplateRows: 'repeat(7, 20px)', // 7 days in a week
                     gap: '4px',
                     marginTop: '0.75rem',
+                    width: '100%',
+                    overflow: 'hidden'
                 }}
             >
                 {heatmapData.map((week, dayIndex) =>
