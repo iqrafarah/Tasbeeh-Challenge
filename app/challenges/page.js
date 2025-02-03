@@ -100,7 +100,7 @@ export default function ChallengesPage() {
                 <h1 className="title sticky top-0  pb-4">Challenges</h1>
                 <div className="min-h-screen overflow-y-auto">
                     <div className="h-[calc(100vh-160px)]">
-                    <div className="mt-4 flex flex-col gap-4 pb-4 pb-[170px]">
+                    <div className="mt-4 flex flex-col gap-4 pb-4 pb-[200px]">
                         {challenges.map((challenge, index) => {
                             const count = userProgress[challenge.id] || 0;
                             const requiredCount = challenge.requiredCount || 1; // Prevent division by zero
