@@ -61,10 +61,15 @@ export default function ProfileScreen() {
         <ProtectedRoute>
             <div className="h-screen flex flex-col  overflow-y-auto pb-[130px]">
                     {/* Gear Icon to Open Settings */}
+                    
+                    <div className="flex justify-between items-center">
+                    <h1 className="title">Profile</h1>
+
                     <div className="text-right w-full pr-2">
                         <Link href="/settings">
                             <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
                         </Link>
+                    </div>
                     </div>
 
                     {/* Scrollable Content */}

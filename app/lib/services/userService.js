@@ -1,5 +1,6 @@
 import {
     getFirestore, doc, getDoc, setDoc, serverTimestamp, increment
+    
 } from "firebase/firestore";
 import app from "../firebase.config";
 
@@ -156,4 +157,30 @@ export const userService = {
             throw error;
         }
     },
+
+    addFriend: async (userUid, friendUid) => {
+        const db = getFirestore(app);
+        try {
+            // Add friend to the user's 'friends' subcollection (requester adds receiver)
+            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
+            await setDoc(userFriendRef, {
+                friendId: friendUid,
+                addedAt: serverTimestamp(),
+                status: "accepted",
+            });
+    
+            // Add user to the friend's 'friends' subcollection (receiver adds requester)
+            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
+            await setDoc(friendUserRef, {
+                friendId: userUid,
+                addedAt: serverTimestamp(),
+                status: "accepted",
+            });
+    
+            alert("Friend added successfully!");
+        } catch (error) {
+            console.error("Error adding friend to Firestore:", error);
+            throw error;
+        }
+    }
 };
