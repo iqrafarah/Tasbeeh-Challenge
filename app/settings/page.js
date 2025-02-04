@@ -1,8 +1,23 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import app from "../lib/firebase.config";
 
 export default function SettingsPage() {
+    const auth = getAuth(app);
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            router.push("/"); // Redirect to home after logout
+        } catch (error) {
+            console.error("Error signing out", error.message);
+        }
+    };
+
     return (
         <div className="overflow-y-auto pb-[130px]">
             {/* Close Button */}
@@ -123,11 +138,10 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-
-                {/* logout & delete account*/}
+                {/* logout & delete account */}
                 <div className="mt-6">
                     <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
-                    <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+                    <div onClick={handleLogout} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
                         <div className="flex gap-3">
                             <div
                                 className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
@@ -139,10 +153,9 @@ export default function SettingsPage() {
                             </div>
                         </div>
                         <div>
-                            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+                            <i className="fa-solid fa-chevron-right text-sm text-gray-500 cursor-pointer"></i>
                         </div>
                     </div>
-
 
                     <button
                         className="text-sm mt-3 text-red-500 font-semibold"
@@ -150,8 +163,6 @@ export default function SettingsPage() {
                     >
                         Delete Account
                     </button>
-
-
                 </div>
             </div>
         </div>

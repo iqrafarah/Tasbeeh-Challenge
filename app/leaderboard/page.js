@@ -1,18 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, doc, getDoc, updateDoc, where } from "firebase/firestore";
+import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
 import FriendModal from "../components/friendModal"; // Import the modal component
+import ProfileModal from "../components/profileModal"; // New component for showing user profile details
 
 export default function Leaderboard() {
     const [users, setUsers] = useState([]);
     const [tab, setTab] = useState('community'); // 'community' or 'friends'
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+    const [isModalOpen, setIsModalOpen] = useState(false); // State to manage friend modal visibility
     const [friendLink, setFriendLink] = useState(""); // State to manage friend link
+    const [selectedUser, setSelectedUser] = useState(null); // State to hold the clicked user's data
 
     const auth = getAuth();
     const [user, setUser] = useState(null);
@@ -94,7 +96,18 @@ export default function Leaderboard() {
         }
         return "";
     };
-    
+
+    const handleUserClick = async (userId) => {
+        // Fetch the clicked user's profile data
+        const db = getFirestore(app);
+        const userRef = doc(db, "users", userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            setSelectedUser(userDoc.data());
+        } else {
+            console.error("User data not found");
+        }
+    };
 
     if (loading) {
         return <p className="text-center text-gray-500">Loading leaderboard...</p>;
@@ -102,12 +115,14 @@ export default function Leaderboard() {
 
     return (
         <div className="">
-            <h1 className="title mb-5 text-left">Leaderboard</h1>
+            <div className="flex justify-between items-center">
+            <h1 className="title">Leaderboard</h1>
 
             {/* Add Friend Button */}
-            <button onClick={() => setIsModalOpen(true)} className="fixed bottom-5 right-5 bg-blue-500 text-white p-3 rounded-full">
-                <i className="fa-solid fa-plus"></i>
+            <button onClick={() => setIsModalOpen(true)} className="">
+                <i className="fa-solid fa-plus text-xl"></i>
             </button>
+            </div>
 
             {/* Friend Modal */}
             {isModalOpen && (
@@ -120,8 +135,13 @@ export default function Leaderboard() {
                 />
             )}
 
+            {/* Profile Modal - Display on user click */}
+            {selectedUser && (
+                <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+            )}
+
             {/* Leaderboard Section */}
-            <div className="bg-lightgray rounded-xl mt-5 w-full p-4 flex flex-col items-center">
+            <div className="bg-lightgray rounded-xl mt-10 w-full p-4 flex flex-col items-center">
                 <div className="space-y-4 w-full">
                     <div className="flex justify-between mb-5 space-x-4">
                         <button
@@ -141,7 +161,11 @@ export default function Leaderboard() {
                     <div className="grid grid-cols-1 gap-4 w-full">
                         {users.length > 0 ? (
                             users.map((user, index) => (
-                                <div key={user.id} className="flex items-center justify-between py-3 border-b last:border-b-0">
+                                <div 
+                                    key={user.id} 
+                                    className="flex items-center justify-between py-3 border-b last:border-b-0"
+                                    onClick={() => handleUserClick(user.id)} // Handle user click to show profile
+                                >
                                     {/* Rank & Icon */}
                                     <div className="flex w-full items-center gap-4 w-fit">
                                         {index === 0 ? (
@@ -151,7 +175,7 @@ export default function Leaderboard() {
                                         ) : index === 2 ? (
                                             <i className="fa-solid fa-medal text-[#cd7f32] text-xl"></i>
                                         ) : (
-                                            <span className="text-2xl font-bold">{index + 1}</span>
+                                            <span className="small_title ml-[5px] mr-1.5">{index + 1}</span>
                                         )}
                                         <div className="flex gap-2 items-center">
                                             {/* Profile Image */}
@@ -170,7 +194,7 @@ export default function Leaderboard() {
                                         </div>
                                     </div>
                                     {/* Points */}
-                                    <span className="text-sm font-semibold w-fit">{user.totalPoints} pts</span>
+                                    <span className="text-sm font-semibold w-1/2 text-right">{user.totalPoints} pts</span>
                                 </div>
                             ))
                         ) : (
