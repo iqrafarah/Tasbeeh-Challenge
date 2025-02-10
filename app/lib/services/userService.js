@@ -185,5 +185,22 @@ export const userService = {
             console.error("Error adding friend to Firestore:", error);
             throw error;
         }
+    },
+    
+    deleteFriend: async (userUid, friendUid) => {
+        const db = getFirestore(app);
+    
+        try {
+            // Remove friend from the user's 'friends' subcollection
+            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
+            await deleteDoc(userFriendRef);
+    
+            // Remove user from the friend's 'friends' subcollection
+            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
+            await deleteDoc(friendUserRef);
+        } catch (error) {
+            console.error("Error deleting friend from Firestore:", error);
+            throw error;
+        }
     }
 };

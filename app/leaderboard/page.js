@@ -77,25 +77,39 @@ export default function Leaderboard() {
 
     const handleAddFriend = async () => {
         if (!friendLink) return;
-
+    
         // Extract the UID from the friend link
         const friendUid = friendLink.split('/').pop();
         if (user.uid === friendUid) {
             setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections! ");
-            setModalType("Warning");
+            setModalType("warning");
             setModalOpen(true);
+            
+            setIsModalOpen(false); 
+            setFriendLink(""); 
             return;
         }
-
+    
         try {
             await userService.addFriend(user.uid, friendUid);
+            setIsModalOpen(false); 
+            setFriendLink(""); 
+    
             setModalMessage("Mashallah, new friend unlocked!");
-        setModalType("success");
+            setModalType("success");
+    
+            setTimeout(() => {
+                setModalOpen(true); 
+            }, 10);
         } catch (error) {
             console.error("Error adding friend:", error);
-        } finally {
-            setIsModalOpen(false);
-            setFriendLink("");
+    
+            setModalMessage(error.message || "Failed to add friend. Please try again.");
+            setModalType("warning");
+    
+            setTimeout(() => {
+                setModalOpen(true); 
+            }, 10); 
         }
     };
 
