@@ -159,8 +159,13 @@ export const userService = {
     },
 
     addFriend: async (userUid, friendUid) => {
+        if (userUid === friendUid) {
+          return 
+        }
+
         const db = getFirestore(app);
         try {
+           
             // Add friend to the user's 'friends' subcollection (requester adds receiver)
             const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
             await setDoc(userFriendRef, {
@@ -176,8 +181,6 @@ export const userService = {
                 addedAt: serverTimestamp(),
                 status: "accepted",
             });
-    
-            alert("Friend added successfully!");
         } catch (error) {
             console.error("Error adding friend to Firestore:", error);
             throw error;

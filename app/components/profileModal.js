@@ -8,7 +8,7 @@ import HeatTracker from '../components/contributionGraph';
 const ProfileModal = ({ user, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96 overflow-y-auto max-h-screen">
+            <div className="bg-white p-6 w-96 overflow-y-auto max-h-screen">
                 <i   onClick={onClose} className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
                 <div className="flex items-center justify-center mt-4">
                     <Image src={user.photoURL} alt="Profile picture" width={100} height={100} className="rounded-full object-cover w-[70px] h-[70px]" />

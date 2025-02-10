@@ -7,7 +7,7 @@ import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
 import FriendModal from "../components/friendModal"; // Import the modal component
 import ProfileModal from "../components/profileModal"; // New component for showing user profile details
-
+import Notification from "../components/notification";
 export default function Leaderboard() {
     const [users, setUsers] = useState([]);
     const [tab, setTab] = useState('community'); // 'community' or 'friends'
@@ -15,7 +15,9 @@ export default function Leaderboard() {
     const [isModalOpen, setIsModalOpen] = useState(false); // State to manage friend modal visibility
     const [friendLink, setFriendLink] = useState(""); // State to manage friend link
     const [selectedUser, setSelectedUser] = useState(null); // State to hold the clicked user's data
-
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
+    const [modalType, setModalType] = useState("success");
     const auth = getAuth();
     const [user, setUser] = useState(null);
 
@@ -78,10 +80,17 @@ export default function Leaderboard() {
 
         // Extract the UID from the friend link
         const friendUid = friendLink.split('/').pop();
+        if (user.uid === friendUid) {
+            setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections! ");
+            setModalType("Warning");
+            setModalOpen(true);
+            return;
+        }
 
         try {
             await userService.addFriend(user.uid, friendUid);
-            alert("Friend added successfully!");
+            setModalMessage("Mashallah, new friend unlocked!");
+        setModalType("success");
         } catch (error) {
             console.error("Error adding friend:", error);
         } finally {
@@ -115,6 +124,7 @@ export default function Leaderboard() {
 
     return (
         <div className="">
+            <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
             <div className="flex justify-between items-center">
             <h1 className="title">Leaderboard</h1>
 

@@ -119,3 +119,20 @@ body {
 canvas {
   margin: auto;
 }
+
+
+.slide-in {
+  transform: translateY(0) !important;
+}
+
+/* Optional: Add a fade-out animation when closing */
+.notification-exit {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.notification-exit-active {
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
