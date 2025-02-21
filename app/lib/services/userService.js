@@ -75,7 +75,12 @@ export const userService = {
                         streak: newStreak,
                         longestStreak: newLongestStreak,
                         lastActive: serverTimestamp(),
-                    }, {merge: true});
+                    }, { merge: true });
+
+                    // Notify if the streak is almost over
+                    if (daysDiff === 0 && newStreak > 0) {
+                        sendNotification("Streak Alert", { body: "Your streak is almost over! Keep it going!" });
+                    }
                 }
             }
         } catch (error) {
@@ -83,6 +88,7 @@ export const userService = {
             throw error;
         }
     },
+
     // Get user data
     getUser: async (uid) => {
         if (!uid) return null;
@@ -162,8 +168,8 @@ export const userService = {
             const userRef = doc(db, "users", uid);
             await setDoc(
                 userRef,
-                {totalDhikr: increment(1)},
-                {merge: true}
+                { totalDhikr: increment(1) },
+                { merge: true }
             );
         } catch (error) {
             console.error("Error updating totalDhikr:", error);
@@ -173,12 +179,12 @@ export const userService = {
 
     addFriend: async (userUid, friendUid) => {
         if (userUid === friendUid) {
-          return 
+            return
         }
 
         const db = getFirestore(app);
         try {
-           
+
             // Add friend to the user's 'friends' subcollection (requester adds receiver)
             const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
             await setDoc(userFriendRef, {
@@ -186,7 +192,7 @@ export const userService = {
                 addedAt: serverTimestamp(),
                 status: "accepted",
             });
-    
+
             // Add user to the friend's 'friends' subcollection (receiver adds requester)
             const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
             await setDoc(friendUserRef, {
@@ -199,15 +205,15 @@ export const userService = {
             throw error;
         }
     },
-    
+
     deleteFriend: async (userUid, friendUid) => {
         const db = getFirestore(app);
-    
+
         try {
             // Remove friend from the user's 'friends' subcollection
             const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
             await deleteDoc(userFriendRef);
-    
+
             // Remove user from the friend's 'friends' subcollection
             const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
             await deleteDoc(friendUserRef);

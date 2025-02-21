@@ -10,6 +10,7 @@ import ProfileModal from "../components/profileModal";
 import Notification from "../components/notification";
 import Loading from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
+import { sendNotification } from "../components/loadingScreen";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -39,20 +40,13 @@ export default function Leaderboard() {
       const usersRef = collection(db, "users");
 
       let q;
-
       if (tab === 'friends') {
-        // Fetch the user's friends list from the 'friends' subcollection
         const friendsRef = collection(db, "users", user.uid, "friends");
         const friendsSnapshot = await getDocs(friendsRef);
-
-        // Extract friend IDs from the 'friends' subcollection
         const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
-
-        // Include the current logged-in user in the friends list
         friends.push(user.uid);
 
         if (friends.length > 0) {
-          // Query Firestore to get the details of the friends
           q = query(usersRef, where("uid", "in", friends), orderBy("totalPoints", "desc"), limit(20));
         } else {
           setUsers([]);
@@ -60,7 +54,6 @@ export default function Leaderboard() {
           return;
         }
       } else {
-        // Fetch top 20 users for the community tab
         q = query(usersRef, orderBy("totalPoints", "desc"), limit(20));
       }
 
@@ -70,6 +63,17 @@ export default function Leaderboard() {
           id: doc.id,
           ...doc.data()
         }));
+
+        // Check if the user's place has changed
+        const userIndex = leaderboardData.findIndex(u => u.uid === user.uid);
+        if (userIndex !== -1 && userIndex >= 20) {
+          // Show notification with a link
+          sendNotification("New Friend", {
+            body: "You have added a new friend!",
+            url: `https://tasbeehchallenge.com/add-friend/${friendUid}`
+          });
+        }
+
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -84,10 +88,9 @@ export default function Leaderboard() {
   const handleAddFriend = async () => {
     if (!friendLink) return;
 
-    // Extract the UID from the friend link
     const friendUid = friendLink.split('/').pop();
     if (user.uid === friendUid) {
-      setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections! ");
+      setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
       setModalType("warning");
       setModalOpen(true);
 
@@ -98,24 +101,20 @@ export default function Leaderboard() {
 
     try {
       await userService.addFriend(user.uid, friendUid);
-      setIsModalOpen(false);
-      setFriendLink("");
-
       setModalMessage("Mashallah, new friend unlocked!");
       setModalType("success");
+      setModalOpen(true);
 
-      setTimeout(() => {
-        setModalOpen(true);
-      }, 10);
+      // Show notification
+      sendNotification("New Friend", { body: "You have added a new friend!" });
+
+      setIsModalOpen(false);
+      setFriendLink("");
     } catch (error) {
       console.error("Error adding friend:", error);
-
       setModalMessage(error.message || "Failed to add friend. Please try again.");
       setModalType("warning");
-
-      setTimeout(() => {
-        setModalOpen(true);
-      }, 10);
+      setModalOpen(true);
     }
   };
 

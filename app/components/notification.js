@@ -41,7 +41,7 @@ const NotificationModal = ({ isOpen, onClose, message, type }) => {
                         />             
                     <div className="flex flex-col flex-wrap">
                         <h2 className="text-md font-semibold">
-                            {type === "warning" ? "Oops!" : "Yay!"}
+                            {type === "warning" ? "Oops!" : "Alhamdulillah!"}
                         </h2>
                         <p className="text-xs">{message}</p>
                     </div>
