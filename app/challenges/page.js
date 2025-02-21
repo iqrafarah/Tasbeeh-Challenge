@@ -24,6 +24,19 @@ const baseColors = [
 // Function to get color based on index
 const getColorForIndex = (index) => baseColors[index % baseColors.length].hex;
 
+// Utility function to darken a hex color
+const darkenHexColor = (hex, amount) => {
+  let color = hex.slice(1);
+  let num = parseInt(color, 16);
+  let r = (num >> 16) - amount;
+  let g = ((num >> 8) & 0x00FF) - amount;
+  let b = (num & 0x0000FF) - amount;
+  r = r < 0 ? 0 : r;
+  g = g < 0 ? 0 : g;
+  b = b < 0 ? 0 : b;
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+};
+
 export default function ChallengesPage() {
   const router = useRouter();
   const [challenges, setChallenges] = useState([]);
@@ -110,15 +123,17 @@ export default function ChallengesPage() {
             <div className="mt-4 flex flex-col gap-4 pb-4 pb-[200px]">
               {challenges.map((challenge, index) => {
                 const count = userProgress[challenge.id] || 0;
-                const requiredCount = challenge.requiredCount || 1;
+                const requiredCount = challenge.requiredCount || 1; // Prevent division by zero
                 const percentage = ((count / requiredCount) * 100).toFixed(0);
                 const isStarted = count > 0;
+                const backgroundColor = getColorForIndex(index);
+                const darkenedColor = darkenHexColor(backgroundColor, 30);
 
                 return (
                   <div
                     key={challenge.id}
                     className="cursor-pointer flex flex-col justify-between gap-4 min-h-[180px] p-4 rounded-xl"
-                    style={{ backgroundColor: getColorForIndex(index) }}
+                    style={{ backgroundColor }}
                     onClick={() => handleChallengeClick(challenge)}
                   >
                     <div>
@@ -130,10 +145,12 @@ export default function ChallengesPage() {
                     </div>
                     <div className="flex justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="border-2 border-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full">
-                          <i className="fas fa-praying-hands"></i> {challenge.requiredCount} Taps
+                        <span className="border-2 text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
+                              style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}>
+                          <i className="fas fa-praying-hands"></i> {challenge.requiredCount} Times
                         </span>
-                        <span className="border-2 border-black bg-black text-white font-semibold px-3 text-xs py-1 h-fit rounded-full">
+                        <span className="border-2 bg-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
+                              style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}>
                           <i className="fas fa-coins"></i> {challenge.points} Points
                         </span>
                       </div>
