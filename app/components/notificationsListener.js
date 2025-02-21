@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import app from "../lib/services/userService";
-import { sendNotification } from "./loadingScreen";
+import { sendNotification } from "./notificationUtils";
 
 const NotificationListener = ({ userId }) => {
   useEffect(() => {

@@ -29,7 +29,7 @@ const NotificationModal = ({ isOpen, onClose, message, type }) => {
         <div className="fixed inset-0 flex items-start justify-center pointer-events-none z-[1000]">
             <div
                 ref={modalRef}
-                className="bg-white rounded-lg shadow-lg w-[325px] mx-4 mt-4 p-4 transform transition-transform duration-300 ease-out -translate-y-full"
+                className="bg-white rounded-lg shadow-lg w-[350px] mx-4 mt-4 p-4 transform transition-transform duration-300 ease-out -translate-y-full"
             >
                 <div className="flex items-center gap-2">
                         <Image

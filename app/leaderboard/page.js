@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -12,7 +12,6 @@ import Loading from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import { sendNotification } from "../components/loadingScreen";
 import NotificationListener from "../components/notificationsListener";
-
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -75,7 +74,6 @@ export default function Leaderboard() {
             url: `https://tasbeehchallenge.com/add-friend/${friendUid}`
           });
         }
-
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -87,47 +85,53 @@ export default function Leaderboard() {
     fetchLeaderboard();
   }, [tab, user]);
 
-const handleAddFriend = async () => {
-  if (!friendLink) return;
+  const handleAddFriend = async () => {
+    if (!friendLink) return;
 
-  const friendUid = friendLink.split('/').pop();
-  if (user.uid === friendUid) {
-    setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
-    setModalType("warning");
-    setModalOpen(true);
+    const friendUid = friendLink.split('/').pop();
+    if (user.uid === friendUid) {
+      setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
+      setModalType("warning");
+      setModalOpen(true);
 
-    setIsModalOpen(false);
-    setFriendLink("");
-    return;
-  }
+      setIsModalOpen(false);
+      setFriendLink("");
+      return;
+    }
 
-  try {
-    await userService.addFriend(user.uid, friendUid);
-    setModalMessage("Mashallah, new friend unlocked!");
-    setModalType("success");
-    setModalOpen(true);
+    try {
+      await userService.addFriend(user.uid, friendUid);
+      setModalMessage("Mashallah, new friend unlocked!");
+      setModalType("success");
+      setModalOpen(true);
 
-    // Send notification to the added friend
-    const db = getFirestore(app);
-    const friendRef = doc(db, "users", friendUid);
-    await setDoc(friendRef, {
-      notifications: arrayUnion({
+      // Send notification to the added friend
+      const db = getFirestore(app);
+      const friendRef = doc(db, "users", friendUid);
+      const notification = {
         title: "New Friend",
         body: `${user.displayName || "Someone"} has added you as a friend!`,
-        url: `https://tasbeehchallenge.com/add-friend/${user.uid}`,
-        timestamp: serverTimestamp()
-      })
-    }, { merge: true });
+        url: `https://tasbeehchallenge.com/add-friend/${user.uid}`
+      };
 
-    setIsModalOpen(false);
-    setFriendLink("");
-  } catch (error) {
-    console.error("Error adding friend:", error);
-    setModalMessage(error.message || "Failed to add friend. Please try again.");
-    setModalType("warning");
-    setModalOpen(true);
-  }
-};
+      await updateDoc(friendRef, {
+        notifications: arrayUnion(notification)
+      });
+
+      // Set the timestamp separately
+      await updateDoc(friendRef, {
+        "notifications.timestamp": serverTimestamp()
+      });
+
+      setIsModalOpen(false);
+      setFriendLink("");
+    } catch (error) {
+      console.error("Error adding friend:", error);
+      setModalMessage(error.message || "Failed to add friend. Please try again.");
+      setModalType("warning");
+      setModalOpen(true);
+    }
+  };
 
   const handleDeleteFriend = async (friendUid) => {
     try {
@@ -165,9 +169,9 @@ const handleAddFriend = async () => {
     }
   };
 
-
   return (
     <ProtectedRoute>
+      {user && <NotificationListener userId={user.uid} />}
       <div className="">
         <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
         <div className="flex justify-between items-center">
