@@ -71,7 +71,7 @@ export default function Leaderboard() {
           // Show notification with a link
           sendNotification("New Friend", {
             body: "You have a new friend!",
-            url: `https://tasbeehchallenge.com/add-friend/${friendUid}`
+            url: `https://tasbeehchallenge.com/leaderboard`
           });
         }
         setUsers(leaderboardData);
