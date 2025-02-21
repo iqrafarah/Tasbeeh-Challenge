@@ -177,7 +177,6 @@ canvas {
   transition: transform 300ms ease-out, opacity 300ms ease-out;
 }
 
-/* Disable text selection */
 ::selection {
   background: none;
 }
