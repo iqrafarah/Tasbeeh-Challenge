@@ -5,18 +5,19 @@ import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, g
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
-import FriendModal from "../components/friendModal"; 
-import ProfileModal from "../components/profileModal"; 
+import FriendModal from "../components/friendModal";
+import ProfileModal from "../components/profileModal";
 import Notification from "../components/notification";
 import Loading from "../components/loadingScreen";
+import ProtectedRoute from "../components/protectedRoute";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
-  const [tab, setTab] = useState('community'); 
+  const [tab, setTab] = useState('community');
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [friendLink, setFriendLink] = useState(""); 
-  const [selectedUser, setSelectedUser] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [friendLink, setFriendLink] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success");
@@ -142,95 +143,98 @@ export default function Leaderboard() {
   }
 
   return (
-    <div className="">
-      <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
-      <div className="flex justify-between items-center">
-        <h1 className="title">Leaderboard</h1>
+    <ProtectedRoute>
 
-        {/* Add Friend Button */}
-        <button onClick={() => setIsModalOpen(true)} className="">
-          <i className="fa-solid fa-plus text-xl"></i>
-        </button>
-      </div>
+      <div className="">
+        <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
+        <div className="flex justify-between items-center">
+          <h1 className="title">Leaderboard</h1>
 
-      {/* Friend Modal */}
-      {isModalOpen && (
-        <FriendModal
-          friendLink={friendLink}
-          setFriendLink={setFriendLink}
-          onClose={() => setIsModalOpen(false)}
-          onAddFriend={handleAddFriend}
-          onGenerateLink={handleGenerateLink}
-        />
-      )}
+          {/* Add Friend Button */}
+          <button onClick={() => setIsModalOpen(true)} className="">
+            <i className="fa-solid fa-plus text-xl"></i>
+          </button>
+        </div>
 
-      {/* Profile Modal - Display on user click */}
-      {selectedUser && (
-        <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} />
-      )}
+        {/* Friend Modal */}
+        {isModalOpen && (
+          <FriendModal
+            friendLink={friendLink}
+            setFriendLink={setFriendLink}
+            onClose={() => setIsModalOpen(false)}
+            onAddFriend={handleAddFriend}
+            onGenerateLink={handleGenerateLink}
+          />
+        )}
 
-      {/* Leaderboard Section */}
-      <div className="bg-lightgray rounded-xl mt-10 w-full p-4 flex flex-col items-center">
-        <div className="space-y-4 w-full">
-          <div className="flex justify-between mb-5 space-x-4">
-            <button
-              className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'community' ? 'bg-black text-white' : ''}`}
-              onClick={() => setTab('community')}
-            >
-              Community
-            </button>
-            <button
-              className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'friends' ? 'bg-black text-white' : ''}`}
-              onClick={() => setTab('friends')}
-            >
-              Friends
-            </button>
-          </div>
-          {/* Using Grid Layout */}
-          <div className="grid grid-cols-1 gap-4 w-full">
-            {users.length > 0 ? (
-              users.map((user, index) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between py-3 border-b last:border-b-0"
-                  onClick={() => handleUserClick(user.id)} // Handle user click to show profile
-                >
-                  {/* Rank & Icon */}
-                  <div className="flex w-full items-center gap-4 w-fit">
-                    {index === 0 ? (
-                      <i className="fa-solid fa-crown text-[#ffd700] text-xl"></i>
-                    ) : index === 1 ? (
-                      <i className="fa-solid fa-medal text-[#c0c0c0] text-xl"></i>
-                    ) : index === 2 ? (
-                      <i className="fa-solid fa-medal text-[#cd7f32] text-xl"></i>
-                    ) : (
-                      <span className="small_title ml-[5px] mr-1.5">{index + 1}</span>
-                    )}
-                    <div className="flex gap-2 items-center">
-                      {/* Profile Image */}
-                      <Image
-                        src={user.photoURL}
-                        alt={user.displayName}
-                        width={100}
-                        height={100}
-                        className="w-12 h-12 rounded-full"
-                      />
-                      <div>
-                        <h3 className="text-sm font-semibold">{user.uid === auth.currentUser.uid ? "You" : user.displayName || "Anonymous"}</h3>
-                        <p className="text-xs text-gray-500">Lvl {user.level}</p>
+        {/* Profile Modal - Display on user click */}
+        {selectedUser && (
+          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+        )}
+
+        {/* Leaderboard Section */}
+        <div className="bg-lightgray rounded-xl mt-10 w-full p-4 flex flex-col items-center">
+          <div className="space-y-4 w-full">
+            <div className="flex justify-between mb-5 space-x-4">
+              <button
+                className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'community' ? 'bg-black text-white' : ''}`}
+                onClick={() => setTab('community')}
+              >
+                Community
+              </button>
+              <button
+                className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'friends' ? 'bg-black text-white' : ''}`}
+                onClick={() => setTab('friends')}
+              >
+                Friends
+              </button>
+            </div>
+            {/* Using Grid Layout */}
+            <div className="grid grid-cols-1 gap-4 w-full">
+              {users.length > 0 ? (
+                users.map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between py-3 border-b last:border-b-0"
+                    onClick={() => handleUserClick(user.id)} // Handle user click to show profile
+                  >
+                    {/* Rank & Icon */}
+                    <div className="flex w-full items-center gap-4 w-fit">
+                      {index === 0 ? (
+                        <i className="fa-solid fa-crown text-[#ffd700] text-xl"></i>
+                      ) : index === 1 ? (
+                        <i className="fa-solid fa-medal text-[#c0c0c0] text-xl"></i>
+                      ) : index === 2 ? (
+                        <i className="fa-solid fa-medal text-[#cd7f32] text-xl"></i>
+                      ) : (
+                        <span className="small_title ml-[5px] mr-1.5">{index + 1}</span>
+                      )}
+                      <div className="flex gap-2 items-center">
+                        {/* Profile Image */}
+                        <Image
+                          src={user.photoURL}
+                          alt={user.displayName}
+                          width={100}
+                          height={100}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        <div>
+                          <h3 className="text-sm font-semibold">{user.uid === auth.currentUser.uid ? "You" : user.displayName || "Anonymous"}</h3>
+                          <p className="text-xs text-gray-500">Lvl {user.level}</p>
+                        </div>
                       </div>
                     </div>
+                    {/* Points */}
+                    <span className="text-sm font-semibold w-1/2 text-right">{user.totalPoints} pts</span>
                   </div>
-                  {/* Points */}
-                  <span className="text-sm font-semibold w-1/2 text-right">{user.totalPoints} pts</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500">No users found.</p>
-            )}
+                ))
+              ) : (
+                <p className="text-center text-gray-500">No users found.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

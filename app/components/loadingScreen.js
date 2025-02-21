@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-white z-50 text-center flex flex-col items-center justify-center h-screen gap-3">
+    <div className="container bg-white z-50 text-center flex flex-col items-center justify-center h-screen gap-3">
       <Image
         src="/icon.png"
         alt="icon"

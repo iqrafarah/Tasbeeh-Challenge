@@ -37,7 +37,7 @@ const NotificationModal = ({ isOpen, onClose, message, type }) => {
                             alt="icon"
                             width={100}
                             height={100}
-                            className="w-[60px] h-[50px] object-cover rounded-lg"
+                            className="w-[50px] h-[50px] object-cover rounded-lg"
                         />             
                     <div className="flex flex-col flex-wrap">
                         <h2 className="text-md font-semibold">

@@ -5,15 +5,20 @@ import Statistics from '../components/statistics';
 import LevelProgress from '../components/levelProgess';
 import HeatTracker from '../components/contributionGraph';
 import { getFirestore, doc, deleteDoc, getDoc } from "firebase/firestore";
-import app from '../lib/services/userService'; // Ensure this imports Firebase correctly
+import app from '../lib/services/userService';
+import ConfirmationModal from './confirmationModal';
 
 const ProfileModal = ({ user, onClose, currentUser }) => {
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isFriend, setIsFriend] = useState(false); // Track if the user is a friend
+    const [isFriend, setIsFriend] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     useEffect(() => {
         const checkIfFriend = async () => {
-            if (!currentUser || !user) return;
+            if (!currentUser || !user) {
+                console.log("No currentUser or user provided."); // Debug log
+                return;
+            }
 
             const db = getFirestore(app);
 
@@ -21,52 +26,71 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
             const userFriendRef = doc(db, "users", currentUser.uid, "friends", user.uid);
             const userFriendDoc = await getDoc(userFriendRef);
 
-            setIsFriend(userFriendDoc.exists()); // Set isFriend based on the existence of the document
+            setIsFriend(userFriendDoc.exists()); 
         };
 
         checkIfFriend();
     }, [currentUser, user]);
+
+
+    const deleteFriend = async (userUid, friendUid) => {
+        const db = getFirestore(app);
+    
+        try {
+            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
+            await deleteDoc(userFriendRef);
+    
+            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
+            await deleteDoc(friendUserRef);
+        } catch (error) {
+            console.error("Error deleting friend from Firestore:", error);
+            throw error;
+        }
+    };
+    
 
     const handleDeleteFriend = async () => {
         if (!currentUser || !user) return;
 
         setIsDeleting(true);
         try {
-            const db = getFirestore(app);
-
-            // Delete from current user's friend list
-            await deleteDoc(doc(db, "users", currentUser.uid, "friends", user.uid));
-
-            // Delete from friend's friend list too (bidirectional friendship)
-            await deleteDoc(doc(db, "users", user.uid, "friends", currentUser.uid));
-
-            alert(`${user.displayName} has been removed from your friends list.`);
-            onClose(); // Close modal after deleting
+            await deleteFriend(currentUser.uid, user.uid);
+            setIsFriend(false); // Update UI
+            onClose(); // Close modal
         } catch (error) {
             console.error("Error removing friend:", error);
-            alert("Failed to remove friend. Please try again.");
         } finally {
             setIsDeleting(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-            <div className="bg-white p-6 container overflow-y-auto max-h-screen relative">
+        <div className="fixed inset-0 flex w-full mx-auto justify-center items-center z-50">
+            <div className="bg-white p-6 overflow-y-auto max-h-screen relative">
                 {/* Close & Delete Buttons */}
                 <div className="flex justify-between items-center mb-4">
-                    <i onClick={onClose} className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
+                    <div className='flex items-center space-x-2'>
+                        <i onClick={onClose} className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
 
+                        <button
+                            onClick={onClose}
+                            className=""
+                        >
+                            Close
+                        </button>
+                    </div>
                     {/* Only show the Delete button if the user is a friend */}
                     {isFriend && (
                         <button
-                            onClick={handleDeleteFriend}
-                            className="text-red-500 text-sm font-semibold"
+                            onClick={() => setShowConfirmation(true)} // Open confirmation modal
+                            className="text-red-500 rounded-full hover:opacity-90"
                             disabled={isDeleting}
-                        >
-                            {isDeleting ? "Removing..." : "Delete Friend"}
-                        </button>
+                            dangerouslySetInnerHTML={{
+                                __html: isDeleting ? "Removing..." : '<i class="fa-solid fa-user-minus"></i>',
+                            }}
+                        />
                     )}
+
                 </div>
 
                 {/* Profile Info */}
@@ -102,6 +126,17 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
                 <Statistics stats={user} />
                 <HeatTracker uid={user.uid} />
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showConfirmation}
+                onClose={() => setShowConfirmation(false)}
+                onConfirm={handleDeleteFriend}
+                title="Delete Friend"
+                message="Are you sure you want to remove this friend?"
+                confirmText="Delete friend"
+                confirmColor="bg-red-500" 
+            />
         </div>
     );
 };
