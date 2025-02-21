@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -77,6 +77,13 @@ export default function Leaderboard() {
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
+        const errorMessage = error.code === 'permission-denied' 
+          ? "You don't have permission to view the leaderboard. Please sign in."
+          : "Unable to load leaderboard. Please check your connection.";
+        setModalMessage(errorMessage);
+        setModalType("error");
+        setModalOpen(true);
+        setUsers([]); 
       } finally {
         setLoading(false);
       }
@@ -138,8 +145,6 @@ export default function Leaderboard() {
     }
   };
   
-  
-
   const handleDeleteFriend = async (friendUid) => {
     try {
       await userService.deleteFriend(user.uid, friendUid);
@@ -225,7 +230,11 @@ export default function Leaderboard() {
             </div>
             {/* Using Grid Layout */}
             <div className="grid grid-cols-1 gap-4 w-full">
-              {users.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-4">
+                  <Loading />
+                </div>
+              ) : users.length > 0 ? (
                 users.map((user, index) => (
                   <div
                     key={user.id}
@@ -271,5 +280,4 @@ export default function Leaderboard() {
       </div>
     </ProtectedRoute>
   );
-
 }
