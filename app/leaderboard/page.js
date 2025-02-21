@@ -8,6 +8,8 @@ import Image from "next/image";
 import FriendModal from "../components/friendModal"; // Import the modal component
 import ProfileModal from "../components/profileModal"; // New component for showing user profile details
 import Notification from "../components/notification";
+import Loading from "../components/loadingScreen";
+
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
   const [tab, setTab] = useState('community'); // 'community' or 'friends'
@@ -44,9 +46,6 @@ export default function Leaderboard() {
 
         // Extract friend IDs from the 'friends' subcollection
         const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
-
-        // Include the current logged-in user in the friends list
-        friends.push(user.uid);
 
         if (friends.length > 0) {
           // Query Firestore to get the details of the friends
@@ -136,7 +135,7 @@ export default function Leaderboard() {
   };
 
   if (loading) {
-    return <p className="text-center text-gray-500">Loading leaderboard...</p>;
+    return <Loading />;
   }
 
   return (

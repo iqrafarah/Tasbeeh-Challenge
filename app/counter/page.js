@@ -36,6 +36,8 @@ function CounterPageContent() {
     const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0);
     const [levelUpModalVisible, setLevelUpModalVisible] = useState(false);
     const [newLevel, setNewLevel] = useState(null);
+    const [soundEnabled, setSoundEnabled] = useState(true); // State to manage sound toggle
+    const [visualFeedback, setVisualFeedback] = useState(false); // State to manage visual feedback
 
     const updateUserStats = async (uid, earnedPoints) => {
         try {
@@ -155,14 +157,23 @@ function CounterPageContent() {
         }
     }, [count, user, challengeId]);
 
-    const handleClick = async () => {
+    const handleClick = async (event) => {
+        // Prevent counting a tap when toggling the sound
+        if (event.target.closest('.sound-toggle')) return;
+
         if (completed) return;
 
         if (showTapInstruction) {
             setShowTapInstruction(false); // Hide the instruction after the first tap
         }
-        const audio = new Audio('/tapSound2.mp4');
-        audio.play();
+
+        if (soundEnabled) {
+            const audio = new Audio('/tapSound2.mp4');
+            audio.play();
+        }
+
+        setVisualFeedback(true); // Show visual feedback
+        setTimeout(() => setVisualFeedback(false), 200); // Hide visual feedback after 200ms
 
         setCount((prevCount) => {
             const newCount = prevCount + 1;
@@ -200,9 +211,22 @@ function CounterPageContent() {
     return (
         <ProtectedRoute>
             <div
-                className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer"
-                onClick={!completed ? handleClick : undefined}
+                className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer relative"
+                onClick={handleClick}
             >
+                {/* Sound Toggle */}
+                {!completed && (
+                    <div className="absolute top-4 right-4 sound-toggle">
+                        <button onClick={() => setSoundEnabled(!soundEnabled)}>
+                            {soundEnabled ? (
+                                <i className="fa-solid fa-volume-high text-xl"></i>
+                            ) : (
+                                <i className="fa-solid fa-volume-xmark text-xl"></i>
+                            )}
+                        </button>
+                    </div>
+                )}
+
                 {levelUpModalVisible && (
                     <LevelUpModal
                         newLevel={newLevel}
@@ -243,7 +267,7 @@ function CounterPageContent() {
 
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <div className="flex flex-col items-center justify-center">
-                            <span className="count">{count}</span>
+                            <span className={`count ${visualFeedback ? 'animate-pulse' : ''}`}>{count}</span>
                             <span className="text-lg ml-1 font-semibold">total {challenge.requiredCount}</span>
                         </div>
                     </div>

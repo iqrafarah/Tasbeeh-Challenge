@@ -143,3 +143,8 @@ canvas {
   opacity: 0;
   transition: transform 300ms ease-out, opacity 300ms ease-out;
 }
+
+
+::selection {
+  background: white;
+}
