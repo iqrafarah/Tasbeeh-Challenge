@@ -11,7 +11,7 @@ import Notification from "../components/notification";
 import Loading from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import { sendNotification } from "../components/loadingScreen";
-import NotificationListener from "../components/notificationListener";
+import NotificationListener from "../components/notificationsListener";
 
 
 export default function Leaderboard() {
