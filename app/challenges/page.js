@@ -117,19 +117,19 @@ export default function ChallengesPage() {
                                     <div>
                                         <h3 className="text-lg font-bold">{challenge.title}</h3>
                                         <p className="text-sm mb-1">{challenge.meaning}</p>
-                                        <p className="text-xs italic">{challenge.whenToUse}</p>
+                                        <p className="text-xs font-semibold">Reason: <span className="font-normal">{challenge.whenToUse}</span></p>
                                     </div>
                                     <div className="flex justify-between">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-black text-white px-3 text-xs py-1 h-fit rounded-full">
-                                                {challenge.points} points
+                                            <span className="border-2 border-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full">
+                                                {challenge.requiredCount} Times
                                             </span>
-                                            <span className="bg-black text-white px-3 text-xs py-1 h-fit rounded-full">
-                                                {challenge.requiredCount} times
+                                            <span className="border-2 border-black bg-black text-white font-semibold px-3 text-xs py-1 h-fit rounded-full">
+                                                {challenge.points} Points
                                             </span>
                                         </div>
                                         {isStarted ? (
-                                            <span className="title">{percentage}%</span>
+                                            <span className="text-2xl font-black">{percentage}%</span>
                                         ) : (
                                             <span className="title">Start</span>
                                         )}
