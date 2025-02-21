@@ -13,6 +13,21 @@
   --white: #fff;
 }
 
+html, body {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+  /* Disable double-tap to zoom */
+  touch-action: pan-x pan-y;
+}
+
 body {
   color: var(--primary);
   background: var(--border);
@@ -22,6 +37,24 @@ body {
   margin: 0;
   cursor: default;
   overflow: hidden;
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+  /* Disable double-tap to zoom */
+  touch-action: pan-x pan-y;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
 }
 
 .container {
@@ -144,7 +177,7 @@ canvas {
   transition: transform 300ms ease-out, opacity 300ms ease-out;
 }
 
-
+/* Disable text selection */
 ::selection {
-  background: white;
+  background: none;
 }
