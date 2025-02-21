@@ -45,6 +45,9 @@ export default function Leaderboard() {
         // Extract friend IDs from the 'friends' subcollection
         const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
 
+        // Include the current logged-in user in the friends list
+        friends.push(user.uid);
+
         if (friends.length > 0) {
           // Query Firestore to get the details of the friends
           q = query(usersRef, where("uid", "in", friends), orderBy("totalPoints", "desc"), limit(20));
