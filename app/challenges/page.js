@@ -115,7 +115,7 @@ export default function ChallengesPage() {
                                     onClick={() => handleChallengeClick(challenge)}
                                 >
                                     <div>
-                                        <h3 className="text-xl font-bold">{challenge.title}</h3>
+                                        <h3 className="text-lg font-bold">{challenge.title}</h3>
                                         <p className="text-sm mb-1">{challenge.meaning}</p>
                                         <p className="text-xs italic">{challenge.whenToUse}</p>
                                     </div>

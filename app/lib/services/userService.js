@@ -1,6 +1,5 @@
 import {
     getFirestore, doc, getDoc, setDoc, serverTimestamp, increment
-    
 } from "firebase/firestore";
 import app from "../firebase.config";
 
@@ -9,26 +8,40 @@ export const userService = {
     saveUser: async (userData) => {
         const db = getFirestore(app);
         try {
-            const userDoc = {
-                uid: userData.uid,
-                email: userData.email,
-                displayName: userData.displayName,
-                photoURL: userData.photoURL,
-                streak: 0,
-                level: 1,
-                totalPoints: 0,
-                pointsToNextLevel: 5,
-                totalDhikr: 0,
-                ChallengesCompleted: 0,
-                longestStreak: 0,
-                contributions: {},
-                settings: {
-                    theme: "light", notifications: true, soundEnabled: true, vibrationEnabled: true,
-                },
-                createdAt: serverTimestamp(),
-                lastActive: serverTimestamp(),
-            };
-            await setDoc(doc(db, "users", userData.uid), userDoc, {merge: true});
+            const userRef = doc(db, "users", userData.uid);
+            const userDoc = await getDoc(userRef);
+
+            if (userDoc.exists()) {
+                // User already exists, update only necessary fields
+                await setDoc(userRef, {
+                    email: userData.email,
+                    displayName: userData.displayName,
+                    photoURL: userData.photoURL,
+                    lastActive: serverTimestamp(),
+                }, { merge: true });
+            } else {
+                // User does not exist, create a new user document
+                const newUserDoc = {
+                    uid: userData.uid,
+                    email: userData.email,
+                    displayName: userData.displayName,
+                    photoURL: userData.photoURL,
+                    streak: 0,
+                    level: 1,
+                    totalPoints: 0,
+                    pointsToNextLevel: 5,
+                    totalDhikr: 0,
+                    ChallengesCompleted: 0,
+                    longestStreak: 0,
+                    contributions: {},
+                    settings: {
+                        theme: "light", notifications: true, soundEnabled: true, vibrationEnabled: true,
+                    },
+                    createdAt: serverTimestamp(),
+                    lastActive: serverTimestamp(),
+                };
+                await setDoc(userRef, newUserDoc, { merge: true });
+            }
         } catch (error) {
             console.error("Error saving user to Firestore:", error);
             throw error;

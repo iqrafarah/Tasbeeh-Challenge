@@ -51,6 +51,7 @@ body {
   .container {
     max-width: 375px;
   }
+
   .settingsContainer {
     max-width: 375px;
   }
@@ -63,39 +64,47 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .overflow-y-auto {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .title {
-  font-family: "Titan One", serif;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: var(--primary);
+  font-weight: 700;
 }
+
 .small_title {
-  font-family: "Titan One", serif;
   font-size: 1rem;
   color: var(--primary);
+  font-weight: 700;
 }
+
 .count {
-  font-family: "Titan One", serif;
   font-size: 4rem;
   color: var(--primary);
+  font-weight: 700;
 }
+
 .numbers {
-  font-family: "Titan One", serif;
   font-size: 0.8rem;
+  font-weight: 700;
 }
+
 .levelTitle {
-  font-family: "Titan One", serif;
   font-size: 5rem;
   color: #d0c694;
+  font-weight: 700;
 }
+
 .progressNumber {
-  font-family: "Titan One", serif;
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   color: var(--primary);
+  font-weight: 700;
 }
+
 .button {
   background-color: var(--primary);
   border: 1px solid var(--primary);
