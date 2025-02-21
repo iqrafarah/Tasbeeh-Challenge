@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, addDoc, where, addwhere, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, query, orderBy, limit, getDocs, addDoc, where, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -69,8 +69,8 @@ export default function Leaderboard() {
         const userIndex = leaderboardData.findIndex(u => u.uid === user.uid);
         if (userIndex !== -1 && userIndex >= 20) {
           // Show notification with a link
-          sendNotification("New Friend", {
-            body: "You have a new friend!",
+          sendNotification("Place Taken", {
+            body: "Your place on the leaderboard has been taken!",
             url: `https://tasbeehchallenge.com/leaderboard`
           });
         }
