@@ -7,6 +7,7 @@ import HeatTracker from '../components/contributionGraph';
 import { getFirestore, doc, deleteDoc, getDoc } from "firebase/firestore";
 import app from '../lib/services/userService';
 import ConfirmationModal from './confirmationModal';
+import { userService } from "../lib/services/userService";
 
 const ProfileModal = ({ user, onClose, currentUser }) => {
     const [isDeleting, setIsDeleting] = useState(false);
@@ -32,29 +33,12 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
         checkIfFriend();
     }, [currentUser, user]);
 
-
-    const deleteFriend = async (userUid, friendUid) => {
-        const db = getFirestore(app);
-    
-        try {
-            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
-            await deleteDoc(userFriendRef);
-    
-            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
-            await deleteDoc(friendUserRef);
-        } catch (error) {
-            console.error("Error deleting friend from Firestore:", error);
-            throw error;
-        }
-    };
-    
-
     const handleDeleteFriend = async () => {
         if (!currentUser || !user) return;
 
         setIsDeleting(true);
         try {
-            await deleteFriend(currentUser.uid, user.uid);
+            await userService.deleteFriend(currentUser.uid, user.uid);
             setIsFriend(false); // Update UI
             onClose(); // Close modal
         } catch (error) {

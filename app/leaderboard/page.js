@@ -119,6 +119,20 @@ export default function Leaderboard() {
     }
   };
 
+  const handleDeleteFriend = async (friendUid) => {
+    try {
+      await userService.deleteFriend(user.uid, friendUid);
+      setModalMessage("Friend removed successfully.");
+      setModalType("success");
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      setModalMessage("Failed to remove friend. Please try again.");
+      setModalType("warning");
+      setModalOpen(true);
+    }
+  };
+
   const handleGenerateLink = () => {
     if (typeof window !== "undefined") {
       return `${window.location.origin}/add-friend/${user.uid}`;
@@ -165,7 +179,7 @@ export default function Leaderboard() {
 
         {/* Profile Modal - Display on user click */}
         {selectedUser && (
-          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} />
         )}
 
         {/* Leaderboard Section */}
