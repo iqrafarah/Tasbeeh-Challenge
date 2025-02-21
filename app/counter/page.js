@@ -39,6 +39,14 @@ function CounterPageContent() {
     const [soundEnabled, setSoundEnabled] = useState(true); // State to manage sound toggle
     const [visualFeedback, setVisualFeedback] = useState(false); // State to manage visual feedback
 
+    // Load sound setting from localStorage
+    useEffect(() => {
+        const savedSoundSetting = localStorage.getItem('soundEnabled');
+        if (savedSoundSetting !== null) {
+            setSoundEnabled(JSON.parse(savedSoundSetting));
+        }
+    }, []);
+
     const updateUserStats = async (uid, earnedPoints) => {
         try {
             const result = await userService.updateUserStats(uid, earnedPoints);
@@ -202,6 +210,12 @@ function CounterPageContent() {
         router.push(`/counter?id=${nextChallengeId}`);
     };
 
+    const toggleSound = () => {
+        const newSoundEnabled = !soundEnabled;
+        setSoundEnabled(newSoundEnabled);
+        localStorage.setItem('soundEnabled', JSON.stringify(newSoundEnabled));
+    };
+
     if (!challenge) {
         return <LoadingScreen/>;
     }
@@ -217,7 +231,7 @@ function CounterPageContent() {
                 {/* Sound Toggle */}
                 {!completed && (
                     <div className="absolute top-4 right-4 sound-toggle">
-                        <button onClick={() => setSoundEnabled(!soundEnabled)}>
+                        <button onClick={toggleSound}>
                             {soundEnabled ? (
                                 <i className="fa-solid fa-volume-high text-xl"></i>
                             ) : (
