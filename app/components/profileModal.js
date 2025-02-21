@@ -9,7 +9,7 @@ import app from '../lib/services/userService';
 import ConfirmationModal from './confirmationModal';
 import { userService } from "../lib/services/userService";
 
-const ProfileModal = ({ user, onClose, currentUser }) => {
+const ProfileModal = ({ user, onClose, currentUser, onDeleteFriend }) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -38,7 +38,7 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
 
         setIsDeleting(true);
         try {
-            await userService.deleteFriend(currentUser.uid, user.uid);
+            await onDeleteFriend(user.uid);
             setIsFriend(false); // Update UI
             onClose(); // Close modal
         } catch (error) {

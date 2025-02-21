@@ -125,6 +125,9 @@ export default function Leaderboard() {
       setModalMessage("Friend removed successfully.");
       setModalType("success");
       setModalOpen(true);
+
+      // Remove the friend from the users state
+      setUsers((prevUsers) => prevUsers.filter((u) => u.uid !== friendUid));
     } catch (error) {
       console.error("Error removing friend:", error);
       setModalMessage("Failed to remove friend. Please try again.");
@@ -179,7 +182,7 @@ export default function Leaderboard() {
 
         {/* Profile Modal - Display on user click */}
         {selectedUser && (
-          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} />
+          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} onDeleteFriend={handleDeleteFriend} />
         )}
 
         {/* Leaderboard Section */}
