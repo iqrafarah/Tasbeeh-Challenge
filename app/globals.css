@@ -23,6 +23,7 @@ html, body {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overscroll-behavior: none;
   touch-action: pan-x pan-y;
 }
 
@@ -44,6 +45,7 @@ body {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overscroll-behavior: none;
   touch-action: pan-x pan-y;
 }
 
@@ -62,7 +64,8 @@ input, textarea {
   background-color: var(--white) !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto; 
+  overflow-x: hidden; 
 }
 
 .settingsContainer {
