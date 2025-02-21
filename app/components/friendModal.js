@@ -22,9 +22,11 @@ export default function FriendModal({ friendLink, setFriendLink, onClose, onAddF
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-                <h2 className="title text-center mb-4">Add a Friend</h2>
+                <h2 className="text-lg font-bold text-center mb-4">
+                    Add friend
+                </h2>
                 <div className="flex flex-col space-y-4">
-                    <button onClick={handleGenerateLink} className="bg-[#94D098] py-3 rounded-full px-4">{copyButtonText}</button>
+                 <button onClick={handleGenerateLink} className="bg-[#94D098] py-3 rounded-full px-4">{copyButtonText}</button>
                     {showLink && (
                         <div className="mt-2 p-3 border border-gray-300 bg-lightgray rounded-xl">
                             <p className="text-sm">Share this link with your friend:</p>

@@ -5,18 +5,18 @@ import { getFirestore, collection, query, orderBy, limit, getDocs, where, doc, g
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
-import FriendModal from "../components/friendModal"; // Import the modal component
-import ProfileModal from "../components/profileModal"; // New component for showing user profile details
+import FriendModal from "../components/friendModal"; 
+import ProfileModal from "../components/profileModal"; 
 import Notification from "../components/notification";
 import Loading from "../components/loadingScreen";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
-  const [tab, setTab] = useState('community'); // 'community' or 'friends'
+  const [tab, setTab] = useState('community'); 
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage friend modal visibility
-  const [friendLink, setFriendLink] = useState(""); // State to manage friend link
-  const [selectedUser, setSelectedUser] = useState(null); // State to hold the clicked user's data
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [friendLink, setFriendLink] = useState(""); 
+  const [selectedUser, setSelectedUser] = useState(null); 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success");
@@ -32,7 +32,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      if (!user) return; // If user is not authenticated, return
+      if (!user) return;
 
       const db = getFirestore(app);
       const usersRef = collection(db, "users");
@@ -46,6 +46,9 @@ export default function Leaderboard() {
 
         // Extract friend IDs from the 'friends' subcollection
         const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
+
+        // Include the current logged-in user in the friends list
+        friends.push(user.uid);
 
         if (friends.length > 0) {
           // Query Firestore to get the details of the friends

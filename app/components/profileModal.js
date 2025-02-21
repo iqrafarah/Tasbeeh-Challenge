@@ -51,8 +51,8 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 w-screen overflow-y-auto max-h-screen relative rounded-lg">
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+            <div className="bg-white p-6 container overflow-y-auto max-h-screen relative">
                 {/* Close & Delete Buttons */}
                 <div className="flex justify-between items-center mb-4">
                     <i onClick={onClose} className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
