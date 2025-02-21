@@ -85,53 +85,81 @@ export default function Leaderboard() {
     fetchLeaderboard();
   }, [tab, user]);
 
-  const handleAddFriend = async () => {
-    if (!friendLink) return;
+const handleAddFriend = async () => {
+  if (!friendLink) return;
 
-    const friendUid = friendLink.split('/').pop();
-    if (user.uid === friendUid) {
-      setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
-      setModalType("warning");
-      setModalOpen(true);
+  const friendUid = friendLink.split('/').pop();
+  if (user.uid === friendUid) {
+    setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
+    setModalType("warning");
+    setModalOpen(true);
 
-      setIsModalOpen(false);
-      setFriendLink("");
-      return;
-    }
+    setIsModalOpen(false);
+    setFriendLink("");
+    return;
+  }
 
-    try {
-      await userService.addFriend(user.uid, friendUid);
-      setModalMessage("Mashallah, new friend unlocked!");
-      setModalType("success");
-      setModalOpen(true);
+  try {
+    await userService.addFriend(user.uid, friendUid);
+    setModalMessage("Mashallah, new friend unlocked!");
+    setModalType("success");
+    setModalOpen(true);
 
-      // Send notification to the added friend
-      const db = getFirestore(app);
-      const friendRef = doc(db, "users", friendUid);
-      const notification = {
-        title: "New Friend",
-        body: `${user.displayName || "Someone"} has added you as a friend!`,
-        url: `https://tasbeehchallenge.com/add-friend/${user.uid}`
-      };
+    const db = getFirestore(app);
 
-      await updateDoc(friendRef, {
-        notifications: arrayUnion(notification)
-      });
+    // Send notification to the added friend
+    const friendRef = doc(db, "users", friendUid);
+    const friendNotification = {
+      title: "New Friend",
+      body: `${user.displayName || "Someone"} has added you as a friend!`,
+      url: `https://tasbeehchallenge.com/add-friend/${user.uid}`,
+      timestamp: serverTimestamp()
+    };
 
-      // Set the timestamp separately
-      await updateDoc(friendRef, {
-        "notifications.timestamp": serverTimestamp()
-      });
+    await updateDoc(friendRef, {
+      notifications: arrayUnion({
+        title: friendNotification.title,
+        body: friendNotification.body,
+        url: friendNotification.url
+      })
+    });
 
-      setIsModalOpen(false);
-      setFriendLink("");
-    } catch (error) {
-      console.error("Error adding friend:", error);
-      setModalMessage(error.message || "Failed to add friend. Please try again.");
-      setModalType("warning");
-      setModalOpen(true);
-    }
-  };
+    // Set the timestamp separately
+    await updateDoc(friendRef, {
+      "notifications.timestamp": serverTimestamp()
+    });
+
+    // Send notification to the user who added the friend
+    const userRef = doc(db, "users", user.uid);
+    const userNotification = {
+      title: "Friend Added",
+      body: `You have added ${friendUid} as a friend!`,
+      url: `https://tasbeehchallenge.com/friends`,
+      timestamp: serverTimestamp()
+    };
+
+    await updateDoc(userRef, {
+      notifications: arrayUnion({
+        title: userNotification.title,
+        body: userNotification.body,
+        url: userNotification.url
+      })
+    });
+
+    // Set the timestamp separately
+    await updateDoc(userRef, {
+      "notifications.timestamp": serverTimestamp()
+    });
+
+    setIsModalOpen(false);
+    setFriendLink("");
+  } catch (error) {
+    console.error("Error adding friend:", error);
+    setModalMessage(error.message || "Failed to add friend. Please try again.");
+    setModalType("warning");
+    setModalOpen(true);
+  }
+};
 
   const handleDeleteFriend = async (friendUid) => {
     try {
