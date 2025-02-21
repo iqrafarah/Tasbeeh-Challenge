@@ -79,7 +79,7 @@ export const userService = {
 
                     // Notify if the streak is almost over
                     if (daysDiff === 0 && newStreak > 0) {
-                        sendNotification("Streak Alert", { body: "Your streak is almost over! Keep it going!" });
+                        sendNotification("Streak Alert", { body: "Your streak is almost over! Kee    it going!" });
                     }
                 }
             }
