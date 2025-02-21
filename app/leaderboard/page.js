@@ -100,7 +100,6 @@ export default function Leaderboard() {
       setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
       setModalType("warning");
       setModalOpen(true);
-  
       setIsModalOpen(false);
       setFriendLink("");
       return;
@@ -114,25 +113,14 @@ export default function Leaderboard() {
   
       const db = getFirestore(app);
   
-      // Fetch the friend's user document to get their displayName
-      const friendRef = doc(db, "users", friendUid);
-      const friendDoc = await getDoc(friendRef);
-      const friendData = friendDoc.data();
-  
-      const friendNotification = {
+      // Create notification in friend's notifications subcollection
+      const notificationsRef = collection(db, "users", friendUid, "notifications");
+      await addDoc(notificationsRef, {
         title: "New Friend",
         body: `${user.displayName || "Someone"} has added you as a friend!`,
-        url: `https://tasbeehchallenge.com/friends`
-      };
-  
-      // Step 1: Update notifications array for the friend
-      await updateDoc(friendRef, {
-        notifications: arrayUnion(friendNotification)
-      });
-  
-      // Step 2: Update timestamp separately for the friend
-      await updateDoc(friendRef, {
-        "notificationsTimestamp": serverTimestamp()
+        url: `https://tasbeehchallenge.com/friends`,
+        timestamp: serverTimestamp(),
+        read: false
       });
   
       setIsModalOpen(false);
@@ -142,8 +130,7 @@ export default function Leaderboard() {
       setModalMessage(error.message || "Failed to add friend. Please try again.");
       setModalType("warning");
       setModalOpen(true);
-    }
-  };
+    }};
   
   const handleDeleteFriend = async (friendUid) => {
     try {
