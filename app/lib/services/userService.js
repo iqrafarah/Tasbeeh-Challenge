@@ -1,5 +1,5 @@
 import {
-    getFirestore, doc, getDoc, setDoc, serverTimestamp, increment
+    getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, deleteDoc, serverTimestamp, increment
 } from "firebase/firestore";
 import app from "../firebase.config";
 
@@ -215,5 +215,26 @@ export const userService = {
             console.error("Error deleting friend from Firestore:", error);
             throw error;
         }
-    }
+    },
+
+    handleDeleteAccount: async (uid) => {
+        const db = getFirestore(app);
+        try {
+            // Delete user document
+            const userRef = doc(db, "users", uid);
+            await deleteDoc(userRef);
+
+            // Optionally, delete other related documents or collections
+            // For example, delete user's friends subcollection
+            const friendsSnapshot = await getDocs(collection(db, "users", uid, "friends"));
+            const batch = writeBatch(db);
+            friendsSnapshot.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+        } catch (error) {
+            console.error("Error deleting user account:", error);
+            throw error;
+        }
+    },
 };

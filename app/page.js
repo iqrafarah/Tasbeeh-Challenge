@@ -62,7 +62,7 @@ export default function Home() {
             />
             <h1 className="title">Tasbeeh Challenge</h1>
           </div>
-          <div className="h-[40vh] flex flex-col justify-between">
+          <div className="h-[45vh] flex flex-col justify-between">
             <div className="flex flex-col gap-3">
               <p className="text-sm">Choose how to continue</p>
               <button

@@ -138,13 +138,9 @@ export default function Leaderboard() {
     }
   };
 
-  if (loading) {
-    return <Loading />;
-  }
 
   return (
     <ProtectedRoute>
-
       <div className="">
         <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
         <div className="flex justify-between items-center">

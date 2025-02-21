@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutConfirmation(true);
@@ -34,9 +35,25 @@ export default function SettingsPage() {
   const confirmDeleteAccount = async () => {
     const user = auth.currentUser;
     if (user) {
-      await userService.handleDeleteAccount(user.uid);
+      try {
+        await userService.handleDeleteAccount(user.uid);
+        await user.delete(); // Ensure Firebase account is fully deleted
+
+        setShowSuccessModal(true);
+
+        // Sign out explicitly to remove any cached session
+        await signOut(auth);
+
+      } catch (error) {
+        console.error("Error deleting account", error.message);
+      }
       setShowDeleteConfirmation(false);
     }
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    router.replace("/"); // After closing the success modal, redirect to home
   };
 
   return (
@@ -197,6 +214,16 @@ export default function SettingsPage() {
         message="Are you sure you want to delete this account?"
         confirmText="Delete"
         confirmColor="bg-red-500"
+      />
+
+      <ConfirmationModal
+        isOpen={showSuccessModal}
+        onClose={closeSuccessModal}
+        onConfirm={closeSuccessModal}
+        title="Account Deleted"
+        message="Your account has been deleted successfully."
+        confirmText="OK"
+        confirmColor="bg-green-500"
       />
     </div>
   );
