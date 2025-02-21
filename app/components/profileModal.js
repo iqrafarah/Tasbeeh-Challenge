@@ -50,7 +50,7 @@ const ProfileModal = ({ user, onClose, currentUser }) => {
 
     return (
         <div className="fixed inset-0 flex w-full mx-auto justify-center items-center z-50">
-            <div className="bg-white p-6 overflow-y-auto max-h-screen relative">
+            <div className="container max-h-screen relative">
                 {/* Close & Delete Buttons */}
                 <div className="flex justify-between items-center mb-4">
                     <div className='flex items-center space-x-2'>
