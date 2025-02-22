@@ -13,6 +13,7 @@ import ProtectedRoute from "../components/protectedRoute";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
+  const [previousUsers, setPreviousUsers] = useState([]);
   const [tab, setTab] = useState('community');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +66,19 @@ export default function Leaderboard() {
           id: doc.id,
           ...doc.data()
         }));
+
+        // Compare previous leaderboard with current leaderboard
+        if (previousUsers.length > 0) {
+          leaderboardData.forEach((user, index) => {
+            if (previousUsers[index] && previousUsers[index].id !== user.id) {
+              setModalMessage(`${user.displayName || "Someone"} took your place`);
+              setModalType("info");
+              setModalOpen(true);
+            }
+          });
+        }
+
+        setPreviousUsers(leaderboardData);
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -127,6 +141,14 @@ export default function Leaderboard() {
       return;
     }
 
+    // if already friends
+    if (users.find(u => u.uid === friendUid)) {
+      setModalMessage("You are already friends with this user.");
+      setModalType("error");
+      setModalOpen(true);
+      return;
+    }
+
     try {
       await userService.addFriend(user.uid, friendUid);
 
@@ -150,6 +172,7 @@ export default function Leaderboard() {
       setModalType("success");
       setModalOpen(true);
       setIsModalOpen(false);
+      setFriendLink(""); // Clear the friend link input
     } catch (error) {
       console.error("Error adding friend:", error);
       setModalMessage("Failed to add friend. Please try again.");

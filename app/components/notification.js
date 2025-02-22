@@ -40,16 +40,18 @@ export default function NotificationIcon() {
             setIsOpen(true);
             setUnreadCount(0);
 
-            // Mark notifications as read in Firestore
-            const db = getFirestore(app);
-            const batchUpdates = notifications.map(n => {
-                if (!n.read) {
-                    return updateDoc(doc(db, "users", user.uid, "notifications", n.id), { read: true });
-                }
-                return null;
-            }).filter(Boolean);
+            // Wait for 5 seconds before marking notifications as read
+            setTimeout(async () => {
+                const db = getFirestore(app);
+                const batchUpdates = notifications.map(n => {
+                    if (!n.read) {
+                        return updateDoc(doc(db, "users", user.uid, "notifications", n.id), { read: true });
+                    }
+                    return null;
+                }).filter(Boolean);
 
-            await Promise.all(batchUpdates);
+                await Promise.all(batchUpdates);
+            }, 5000);
         } else {
             setIsOpen(false);
         }
@@ -84,7 +86,7 @@ export default function NotificationIcon() {
                         </div>
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
-                                <div key={notification.id} className="border-b last:border-b-0 py-2 flex items-center gap-3">
+                                <div key={notification.id} className={`border-b border-gray-100 last:border-b-0 px-3 py-3 flex items-center gap-3 ${!notification.read ? 'bg-lightgray rounded-lg' : ''}`}>
                                     <Image src={notification.photoURL} alt={notification.body} width={32} height={32} className="w-[50px] h-[50px] rounded-full border border-borderColor" />
                                     <div className="flex flex-col">
                                         <p className="text-sm">{notification.body}</p>
