@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, docs, querySanapshot, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, query, docs, querySnapshot, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -85,7 +85,7 @@ export default function Leaderboard() {
       const q = query(notificationsRef, orderBy("timestamp", "desc"));
 
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const fetchedNotifications = querySanapshot.docs.map(doc => ({
+        const fetchedNotifications = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
@@ -199,27 +199,7 @@ export default function Leaderboard() {
 
         {/* Notification Dropdown */}
         {showNotifications && (
-          <div className="absolute right-4 mt-2 w-64 bg-white shadow-lg rounded-lg p-4">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div key={notification.id} className="border-b last:border-b-0 py-2 flex items-center gap-2">
-                  <Image 
-                    src={notification.photoURL || "/default-avatar.png"} 
-                    alt={notification.title} 
-                    width={32} 
-                    height={32} 
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <div>
-                    <p className="text-sm font-medium">{notification.title}</p>
-                    <p className="text-xs text-gray-500">{notification.body}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-gray-500">No notifications</p>
-            )}
-          </div>
+           <Notification notifications={notifications} onClose={handleOpenNotifications} /> 
         )}
 
         {/* Friend Modal */}

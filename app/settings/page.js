@@ -58,14 +58,16 @@ export default function SettingsPage() {
 
   return (
     <div className="overflow-y-auto pb-[130px]">
-      {/* Close Button */}
-      <div className="pb-3">
-        <Link href="/profile">
-          <i className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
-        </Link>
-      </div>
+      <div className="flex gap-3 items-center mb-5">
+        {/* Close Button */}
+        <div className="">
+          <Link href="/profile">
+            <i className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
+          </Link>
+        </div>
 
-      <h1 className="title">Settings</h1>
+        <h1 className="title w-[80%] text-center">settings</h1>
+      </div>
 
       <div className="mt-5">
         {/* Upgrade to Pro Section */}

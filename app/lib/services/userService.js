@@ -249,7 +249,6 @@ export const userService = {
         const db = getFirestore(app);
         try {
             await addDoc(collection(db, "users", userId, "notifications"), {
-                title: "New Friend",
                 body: `${senderName} has added you as a friend!`,
                 url: "https://tasbeehchallenge.com/friends",
                 timestamp: serverTimestamp(),
