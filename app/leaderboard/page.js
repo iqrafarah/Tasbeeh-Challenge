@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, docs, querySnapshot, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, query, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -137,6 +137,14 @@ export default function Leaderboard() {
 
       // Send notification to the friend
       await userService.sendNotification(friendUid, senderName, senderPhotoURL);
+
+      // Fetch the friend's data and add to the users state
+      const db = getFirestore(app);
+      const friendRef = doc(db, "users", friendUid);
+      const friendDoc = await getDoc(friendRef);
+      if (friendDoc.exists()) {
+        setUsers((prevUsers) => [...prevUsers, { id: friendDoc.id, ...friendDoc.data() }]);
+      }
 
       setModalMessage("Friend added successfully.");
       setModalType("success");

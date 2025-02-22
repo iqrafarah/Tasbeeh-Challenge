@@ -20,7 +20,7 @@ export default function FriendModal({ friendLink, setFriendLink, onClose, onAddF
     };
 
     const handleClose = () => {
-        setFriendLink(""); // Clear the input field
+        setFriendLink("");
         onClose();
     };
 

@@ -85,7 +85,7 @@ export default function NotificationIcon() {
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
                                 <div key={notification.id} className="border-b last:border-b-0 py-2 flex items-center gap-3">
-                                    <Image src={notification.photoURL} alt={notification.title} width={32} height={32} className="w-[50px] h-[50px] rounded-full border border-borderColor" />
+                                    <Image src={notification.photoURL} alt={notification.body} width={32} height={32} className="w-[50px] h-[50px] rounded-full border border-borderColor" />
                                     <div className="flex flex-col">
                                         <p className="text-sm">{notification.body}</p>
                                     </div>
