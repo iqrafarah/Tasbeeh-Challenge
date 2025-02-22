@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, addDoc, where, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, query, docs, querySanapshot, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -10,8 +10,6 @@ import ProfileModal from "../components/profileModal";
 import Notification from "../components/notification";
 import Loading from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
-import { sendNotification } from "../components/loadingScreen";
-import NotificationListener from "../components/notificationsListener";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
@@ -23,6 +21,9 @@ export default function Leaderboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success");
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
   const auth = getAuth();
   const [user, setUser] = useState(null);
 
@@ -39,8 +40,8 @@ export default function Leaderboard() {
 
       const db = getFirestore(app);
       const usersRef = collection(db, "users");
-
       let q;
+
       if (tab === 'friends') {
         const friendsRef = collection(db, "users", user.uid, "friends");
         const friendsSnapshot = await getDocs(friendsRef);
@@ -64,26 +65,9 @@ export default function Leaderboard() {
           id: doc.id,
           ...doc.data()
         }));
-
-        // Check if the user's place has changed
-        const userIndex = leaderboardData.findIndex(u => u.uid === user.uid);
-        if (userIndex !== -1 && userIndex >= 20) {
-          // Show notification with a link
-          sendNotification("Place Taken", {
-            body: "Your place on the leaderboard has been taken!",
-            url: `https://tasbeehchallenge.com/leaderboard`
-          });
-        }
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
-        const errorMessage = error.code === 'permission-denied' 
-          ? "You don't have permission to view the leaderboard. Please sign in."
-          : "Unable to load leaderboard. Please check your connection.";
-        setModalMessage(errorMessage);
-        setModalType("error");
-        setModalOpen(true);
-        setUsers([]); 
       } finally {
         setLoading(false);
       }
@@ -92,59 +76,76 @@ export default function Leaderboard() {
     fetchLeaderboard();
   }, [tab, user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNotifications = async () => {
+      const db = getFirestore(app);
+      const notificationsRef = collection(db, "users", user.uid, "notifications");
+      const q = query(notificationsRef, orderBy("timestamp", "desc"));
+
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const fetchedNotifications = querySanapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setNotifications(fetchedNotifications);
+        setUnreadCount(fetchedNotifications.filter(n => !n.read).length);
+      });
+
+      return () => unsubscribe();
+    };
+
+    fetchNotifications();
+  }, [user]);
+
+  const handleOpenNotifications = async () => {
+    setShowNotifications(!showNotifications);
+    setUnreadCount(0);
+
+    const db = getFirestore(app);
+    const batch = writeBatch(db);
+
+    notifications.forEach((n) => {
+      if (!n.read) {
+        const notificationRef = doc(db, "users", user.uid, "notifications", n.id);
+        batch.update(notificationRef, { read: true });
+      }
+    });
+
+    await batch.commit();
+  };
+
   const handleAddFriend = async () => {
     if (!friendLink) return;
-  
+
     const friendUid = friendLink.split('/').pop();
     if (user.uid === friendUid) {
-      setModalMessage("Self-add? Astaghfirullah, habibi—focus on real connections!");
-      setModalType("warning");
+      setModalMessage("You cannot add yourself as a friend.");
+      setModalType("error");
       setModalOpen(true);
-      setIsModalOpen(false);
-      setFriendLink("");
       return;
     }
-  
+
     try {
       await userService.addFriend(user.uid, friendUid);
-      setModalMessage("Mashallah, new friend unlocked!");
+
+      // Get the current user's information
+      const currentUser = auth.currentUser;
+      const senderName = currentUser.displayName || "Someone";
+      const senderPhotoURL = currentUser.photoURL || "/default-avatar.png";
+
+      // Send notification to the friend
+      await userService.sendNotification(friendUid, senderName, senderPhotoURL);
+
+      setModalMessage("Friend added successfully.");
       setModalType("success");
       setModalOpen(true);
-  
-      const db = getFirestore(app);
-  
-      // Create notification in friend's notifications subcollection
-      const notificationsRef = collection(db, "users", friendUid, "notifications");
-      await addDoc(notificationsRef, {
-        title: "New Friend",
-        body: `${user.displayName || "Someone"} has added you as a friend!`,
-        url: `https://tasbeehchallenge.com/friends`,
-        timestamp: serverTimestamp(),
-        read: false
-      });
-  
       setIsModalOpen(false);
-      setFriendLink("");
     } catch (error) {
       console.error("Error adding friend:", error);
-      setModalMessage(error.message || "Failed to add friend. Please try again.");
-      setModalType("warning");
-      setModalOpen(true);
-    }};
-  
-  const handleDeleteFriend = async (friendUid) => {
-    try {
-      await userService.deleteFriend(user.uid, friendUid);
-      setModalMessage("Friend removed successfully.");
-      setModalType("success");
-      setModalOpen(true);
-
-      // Remove the friend from the users state
-      setUsers((prevUsers) => prevUsers.filter((u) => u.uid !== friendUid));
-    } catch (error) {
-      console.error("Error removing friend:", error);
-      setModalMessage("Failed to remove friend. Please try again.");
-      setModalType("warning");
+      setModalMessage("Failed to add friend. Please try again.");
+      setModalType("error");
       setModalOpen(true);
     }
   };
@@ -156,8 +157,18 @@ export default function Leaderboard() {
     return "";
   };
 
+  const handleDeleteFriend = async (friendUid) => {
+    try {
+      await userService.deleteFriend(user.uid, friendUid);
+
+      // Remove the friend from the users state
+      setUsers((prevUsers) => prevUsers.filter((u) => u.uid !== friendUid));
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    }
+  };
+
   const handleUserClick = async (userId) => {
-    // Fetch the clicked user's profile data
     const db = getFirestore(app);
     const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
@@ -170,17 +181,46 @@ export default function Leaderboard() {
 
   return (
     <ProtectedRoute>
-      {user && <NotificationListener userId={user.uid} />}
-      <div className="">
-        <Notification isOpen={modalOpen} onClose={() => setModalOpen(false)} message={modalMessage} type={modalType} />
-        <div className="flex justify-between items-center">
-          <h1 className="title">Leaderboard</h1>
+      <div className="relative">
+        {/* Leaderboard Header */}
+        <div className="flex justify-between items-center px-4 py-2">
+          <h1 className="text-2xl font-bold">Leaderboard</h1>
 
-          {/* Add Friend Button */}
-          <button onClick={() => setIsModalOpen(true)} className="">
-            <i className="fa-solid fa-plus text-xl"></i>
-          </button>
+          <div className="flex gap-6">
+            {/* Notification Icon */}
+            <Notification />
+
+            {/* Add Friend Icon */}
+            <button onClick={() => setIsModalOpen(true)} className="relative">
+              <i className="fa-solid fa-plus text-xl"></i>
+            </button>
+          </div>
         </div>
+
+        {/* Notification Dropdown */}
+        {showNotifications && (
+          <div className="absolute right-4 mt-2 w-64 bg-white shadow-lg rounded-lg p-4">
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <div key={notification.id} className="border-b last:border-b-0 py-2 flex items-center gap-2">
+                  <Image 
+                    src={notification.photoURL || "/default-avatar.png"} 
+                    alt={notification.title} 
+                    width={32} 
+                    height={32} 
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{notification.title}</p>
+                    <p className="text-xs text-gray-500">{notification.body}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">No notifications</p>
+            )}
+          </div>
+        )}
 
         {/* Friend Modal */}
         {isModalOpen && (
@@ -193,43 +233,34 @@ export default function Leaderboard() {
           />
         )}
 
-        {/* Profile Modal - Display on user click */}
-        {selectedUser && (
-          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} onDeleteFriend={handleDeleteFriend} />
-        )}
-
         {/* Leaderboard Section */}
-        <div className="bg-lightgray rounded-xl mt-10 w-full p-4 flex flex-col items-center">
+        <div className="bg-lightgray rounded-xl mt-6 w-full p-4 flex flex-col items-center">
           <div className="space-y-4 w-full">
             <div className="flex justify-between mb-5 space-x-4">
               <button
-                className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'community' ? 'bg-black text-white' : ''}`}
+                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${tab === 'community' ? 'bg-black text-white' : ''}`}
                 onClick={() => setTab('community')}
               >
                 Community
               </button>
               <button
-                className={`px-6 text-sm font-semibold py-3 h-fit w-1/2 rounded-xl ${tab === 'friends' ? 'bg-black text-white' : ''}`}
+                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${tab === 'friends' ? 'bg-black text-white' : ''}`}
                 onClick={() => setTab('friends')}
               >
                 Friends
               </button>
             </div>
-            {/* Using Grid Layout */}
+
+            {/* Leaderboard List */}
             <div className="grid grid-cols-1 gap-4 w-full">
-              {loading ? (
-                <div className="text-center py-4">
-                  <Loading />
-                </div>
-              ) : users.length > 0 ? (
+              {users.length > 0 ? (
                 users.map((user, index) => (
                   <div
                     key={user.id}
-                    className="flex items-center cursor-pointer justify-between py-3 border-b last:border-b-0"
-                    onClick={() => handleUserClick(user.id)} // Handle user click to show profile
+                    className="flex items-center justify-between py-3 border-b last:border-b-0 cursor-pointer"
+                    onClick={() => handleUserClick(user.id)}
                   >
-                    {/* Rank & Icon */}
-                    <div className="flex w-full items-center gap-4 w-fit">
+                    <div className="flex w-full items-center gap-4">
                       {index === 0 ? (
                         <i className="fa-solid fa-crown text-[#ffd700] text-xl"></i>
                       ) : index === 1 ? (
@@ -240,30 +271,27 @@ export default function Leaderboard() {
                         <span className="small_title ml-[5px] mr-1.5">{index + 1}</span>
                       )}
                       <div className="flex gap-2 items-center">
-                        {/* Profile Image */}
-                        <Image
-                          src={user.photoURL}
-                          alt={user.displayName}
-                          width={100}
-                          height={100}
-                          className="w-12 h-12 rounded-full"
-                        />
+                        <Image src={user.photoURL} alt={user.displayName} width={100} height={100} className="w-12 h-12 rounded-full" />
                         <div>
                           <h3 className="text-sm font-semibold">{user.uid === auth.currentUser.uid ? "You" : user.displayName || "Anonymous"}</h3>
                           <p className="text-xs text-gray-500">Lvl {user.level}</p>
                         </div>
                       </div>
                     </div>
-                    {/* Points */}
                     <span className="text-sm font-semibold w-1/2 text-right">{user.totalPoints} pts</span>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500">No users found.</p>
+                <p className="text-center text-gray-500"></p>
               )}
             </div>
           </div>
         </div>
+
+        {/* Profile Modal */}
+        {selectedUser && (
+          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} onDeleteFriend={handleDeleteFriend} />
+        )}
       </div>
     </ProtectedRoute>
   );

@@ -222,25 +222,43 @@ export const userService = {
             throw error;
         }
     },
-
+    
     handleDeleteAccount: async (uid) => {
         const db = getFirestore(app);
         try {
-            // Delete user document
             const userRef = doc(db, "users", uid);
             await deleteDoc(userRef);
-
-            // Optionally, delete other related documents or collections
-            // For example, delete user's friends subcollection
+    
+            // Delete all related subcollections like friends and notifications
             const friendsSnapshot = await getDocs(collection(db, "users", uid, "friends"));
+            const notificationsSnapshot = await getDocs(collection(db, "users", uid, "notifications"));
+    
             const batch = writeBatch(db);
-            friendsSnapshot.forEach((doc) => {
-                batch.delete(doc.ref);
-            });
+            friendsSnapshot.forEach((doc) => batch.delete(doc.ref));
+            notificationsSnapshot.forEach((doc) => batch.delete(doc.ref));
+    
             await batch.commit();
         } catch (error) {
             console.error("Error deleting user account:", error);
             throw error;
+        }
+    },
+    
+    sendNotification: async (userId, senderName, senderPhotoURL) => {
+        console.log("Sending notification to:", userId, "from:", sender, "photoURL:", senderPhotoURL);
+        const db = getFirestore(app);
+        try {
+            await addDoc(collection(db, "users", userId, "notifications"), {
+                title: "New Friend",
+                body: `${senderName} has added you as a friend!`,
+                url: "https://tasbeehchallenge.com/friends",
+                timestamp: serverTimestamp(),
+                read: false,
+                photoURL: senderPhotoURL
+            });
+            console.log("Notification added successfully!");
+        } catch (error) {
+            console.error("Error adding notification:", error);
         }
     },
 };

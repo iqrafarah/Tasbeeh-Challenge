@@ -157,7 +157,7 @@ export default function ChallengesPage() {
                       {isStarted ? (
                         <span className="text-2xl font-black">{percentage}%</span>
                       ) : (
-                        <span className="title">Start</span>
+                        <span className="text-2xl font-black">Start</span>
                       )}
                     </div>
                   </div>
