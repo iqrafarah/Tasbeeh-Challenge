@@ -13,7 +13,6 @@ import ProtectedRoute from "../components/protectedRoute";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
-  const [previousUsers, setPreviousUsers] = useState([]);
   const [tab, setTab] = useState('community');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,17 +37,17 @@ export default function Leaderboard() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       if (!user) return;
-  
+
       const db = getFirestore(app);
       const usersRef = collection(db, "users");
       let q;
-  
+
       if (tab === 'friends') {
         const friendsRef = collection(db, "users", user.uid, "friends");
         const friendsSnapshot = await getDocs(friendsRef);
         const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
         friends.push(user.uid);
-  
+
         if (friends.length > 0) {
           q = query(usersRef, where("uid", "in", friends), orderBy("totalPoints", "desc"), limit(20));
         } else {
@@ -59,30 +58,13 @@ export default function Leaderboard() {
       } else {
         q = query(usersRef, orderBy("totalPoints", "desc"), limit(20));
       }
-  
+
       try {
         const querySnapshot = await getDocs(q);
         const leaderboardData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-  
-        // Compare previous leaderboard with current leaderboard
-        if (previousUsers.length > 0) {
-          leaderboardData.forEach((user, index) => {
-            if (previousUsers[index] && previousUsers[index].id !== user.id) {
-              // Notify the previous user that their place was taken
-              const previousUser = previousUsers[index];
-              if (previousUser) {
-                const senderName = user.displayName || "Someone";
-                const senderPhotoURL = user.photoURL || "/default-avatar.png";
-                userService.sendLeaderboardNotification(previousUser.id, senderName, senderPhotoURL);
-              }
-            }
-          });
-        }
-  
-        setPreviousUsers(leaderboardData);
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -90,10 +72,9 @@ export default function Leaderboard() {
         setLoading(false);
       }
     };
-  
+
     fetchLeaderboard();
   }, [tab, user]);
-  
 
   useEffect(() => {
     if (!user) return;
@@ -146,14 +127,6 @@ export default function Leaderboard() {
       return;
     }
 
-    // if already friends
-    if (users.find(u => u.uid === friendUid)) {
-      setModalMessage("You are already friends with this user.");
-      setModalType("error");
-      setModalOpen(true);
-      return;
-    }
-
     try {
       await userService.addFriend(user.uid, friendUid);
 
@@ -177,7 +150,6 @@ export default function Leaderboard() {
       setModalType("success");
       setModalOpen(true);
       setIsModalOpen(false);
-      setFriendLink(""); // Clear the friend link input
     } catch (error) {
       console.error("Error adding friend:", error);
       setModalMessage("Failed to add friend. Please try again.");
