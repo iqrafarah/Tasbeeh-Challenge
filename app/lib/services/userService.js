@@ -77,10 +77,6 @@ export const userService = {
                         lastActive: serverTimestamp(),
                     }, { merge: true });
 
-                    // Notify if the streak is almost over
-                    if (daysDiff === 0 && newStreak > 0) {
-                        sendNotification("Streak Alert", { body: "Your streak is almost over! Kee    it going!" });
-                    }
                 }
             }
         } catch (error) {
@@ -222,28 +218,28 @@ export const userService = {
             throw error;
         }
     },
-    
+
     handleDeleteAccount: async (uid) => {
         const db = getFirestore(app);
         try {
             const userRef = doc(db, "users", uid);
             await deleteDoc(userRef);
-    
+
             // Delete all related subcollections like friends and notifications
             const friendsSnapshot = await getDocs(collection(db, "users", uid, "friends"));
             const notificationsSnapshot = await getDocs(collection(db, "users", uid, "notifications"));
-    
+
             const batch = writeBatch(db);
             friendsSnapshot.forEach((doc) => batch.delete(doc.ref));
             notificationsSnapshot.forEach((doc) => batch.delete(doc.ref));
-    
+
             await batch.commit();
         } catch (error) {
             console.error("Error deleting user account:", error);
             throw error;
         }
     },
-    
+
     sendNotification: async (userId, senderName, senderPhotoURL) => {
         console.log("Sending notification to:", userId, "from:", senderName, "photoURL:", senderPhotoURL);
         const db = getFirestore(app);
@@ -258,6 +254,23 @@ export const userService = {
             console.log("Notification added successfully!");
         } catch (error) {
             console.error("Error adding notification:", error);
+        }
+    },
+   
+    sendLeaderboardNotification: async (userId, senderName, senderPhotoURL, previousRank, newRank) => {
+        const db = getFirestore(app);
+        try {
+           const body = `${senderName} took your place on the leaderboard!`;	
+            await addDoc(collection(db, "users", userId, "notifications"), {
+                body,
+                url: "https://tasbeehchallenge.com/leaderboard",
+                timestamp: serverTimestamp(),
+                read: false,
+                photoURL: senderPhotoURL
+            });
+            console.log("Leaderboard notification added successfully!");
+        } catch (error) {
+            console.error("Error adding leaderboard notification:", error);
         }
     },
 };
