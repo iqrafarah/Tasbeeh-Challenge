@@ -3,7 +3,6 @@ import { getFirestore, collection, query, orderBy, onSnapshot, updateDoc, doc } 
 import { getAuth } from "firebase/auth";
 import app from "../lib/services/userService";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function NotificationIcon() {
     const [notifications, setNotifications] = useState([]);
@@ -56,13 +55,17 @@ export default function NotificationIcon() {
         }
     };
 
+    const handleClose = () => {
+        setIsOpen(false);
+    };
+
     return (
         <div className="relative">
             <button onClick={handleOpen} className="relative">
                 <i className="fa-solid fa-bell text-xl"></i>
                 {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {unreadCount}
+                    <span className="absolute top-[-5px] right-[-15px] bg-red-500 text-white text-xs rounded-full py-[2px] px-[5px] flex items-center justify-center min-w-[20px] min-h-[20px] text-center">
+                        {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
             </button>
@@ -72,19 +75,17 @@ export default function NotificationIcon() {
                         <div className="flex gap-3 items-center mb-5">
                             {/* Close Button */}
                             <div className="">
-                                <Link href="/leaderboard">
+                                <button onClick={handleClose}>
                                     <i className="fa-solid fa-chevron-left text-lg cursor-pointer"></i>
-                                </Link>
+                                </button>
                             </div>
 
                             <h1 className="title w-[80%] text-center">Activity</h1>
-                            </div>
+                        </div>
                         {notifications.length > 0 ? (
                             notifications.map((notification) => (
                                 <div key={notification.id} className="border-b last:border-b-0 py-2 flex items-center gap-3">
-                                    <div className="w-[50px] h-[50px] flex items-center justify-center rounded-full bg-lightgray overflow-hidden">
-                                        {/* <Image src={notification.photoURL} alt={notification.title} width={32} height={32} className="rounded-full" /> */}
-                                    </div>
+                                    <Image src={notification.photoURL} alt={notification.title} width={32} height={32} className="w-[50px] h-[50px] rounded-full border border-borderColor" />
                                     <div className="flex flex-col">
                                         <p className="text-sm">{notification.body}</p>
                                     </div>

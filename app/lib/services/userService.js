@@ -1,5 +1,5 @@
 import {
-    getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, deleteDoc, serverTimestamp, increment
+    getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, addDoc, deleteDoc, serverTimestamp, increment
 } from "firebase/firestore";
 import app from "../firebase.config";
 
@@ -245,7 +245,7 @@ export const userService = {
     },
     
     sendNotification: async (userId, senderName, senderPhotoURL) => {
-        console.log("Sending notification to:", userId, "from:", sender, "photoURL:", senderPhotoURL);
+        console.log("Sending notification to:", userId, "from:", senderName, "photoURL:", senderPhotoURL);
         const db = getFirestore(app);
         try {
             await addDoc(collection(db, "users", userId, "notifications"), {

@@ -60,7 +60,6 @@ const ProfileModal = ({ user, onClose, currentUser, onDeleteFriend }) => {
                             onClick={onClose}
                             className=""
                         >
-                            Close
                         </button>
                     </div>
                     {/* Only show the Delete button if the user is a friend */}

@@ -186,7 +186,7 @@ export default function Leaderboard() {
         <div className="flex justify-between items-center px-4 py-2">
           <h1 className="text-2xl font-bold">Leaderboard</h1>
 
-          <div className="flex gap-6">
+          <div className="flex gap-10">
             {/* Notification Icon */}
             <Notification />
 
