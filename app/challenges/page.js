@@ -7,6 +7,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import app from "../lib/firebase.config";
+import TrialEndModal from "../components/trialEnded";
 
 const baseColors = [
   { hex: "#f6f2c0" },
@@ -43,7 +44,9 @@ export default function ChallengesPage() {
   const [userProgress, setUserProgress] = useState({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null); // Define userData state
   const auth = getAuth(app);
+  const [isTrialEnded, setIsTrialEnded] = useState(false);
 
   // Load challenges
   const loadChallenges = async () => {
@@ -79,25 +82,34 @@ export default function ChallengesPage() {
     }
   };
 
-  // Handle user authentication
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        userService.updateLastActive(user.uid);
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (!authUser) {
+        router.push("/"); // Redirect to home if not authenticated
+        return;
+      }
 
-        if (challenges.length === 0) {
-          await loadChallenges();
+      setUser(authUser);
+      try {
+        const data = await userService.getUser(authUser.uid);
+        setUserData(data);
+
+        // Check if trial has ended
+        if (data.subscription.status === "trial") {
+          const trialEndDate = data.subscription.trialEndDate.toDate();
+          if (new Date() > trialEndDate) {
+            setIsTrialEnded(true);
+          }
         }
-
-        fetchUserProgress(user.uid);
-      } else {
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
         setLoading(false);
       }
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, router]);
 
   // Fetch user progress when challenges are loaded
   useEffect(() => {
@@ -115,7 +127,7 @@ export default function ChallengesPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute showTrialEndModal={true}>
       <div className="">
         <h1 className="title sticky top-0 pb-4">Challenges</h1>
         <div className="min-h-screen overflow-y-auto">
@@ -167,6 +179,9 @@ export default function ChallengesPage() {
           </div>
         </div>
       </div>
+      {isTrialEnded && (
+        <TrialEndModal isOpen={isTrialEnded} onClose={() => setIsTrialEnded(false)} />
+      )}
     </ProtectedRoute>
   );
 }

@@ -1,18 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
 import ConfirmationModal from "../components/confirmationModal";
+import LoadingScreen from "../components/loadingScreen";
 
 export default function SettingsPage() {
   const auth = getAuth(app);
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      if (!authUser) {
+        router.push("/"); // Redirect to home if not authenticated
+        return;
+      }
+
+      setUser(authUser);
+      try {
+        const data = await userService.getUser(authUser.uid);
+        setUserData(data);
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth, router]);
 
   const handleLogout = () => {
     setShowLogoutConfirmation(true);
@@ -56,6 +81,31 @@ export default function SettingsPage() {
     router.replace("/"); // After closing the success modal, redirect to home
   };
 
+  // Function to get subscription info in a user-friendly format
+  const getSubscriptionInfo = () => {
+    if (!userData || !userData.subscription) return { status: "Free", daysLeft: 0 };
+    
+    const { status, trialEndDate } = userData.subscription;
+    
+    if (status === "trial") {
+      const endDate = trialEndDate instanceof Date ? trialEndDate : trialEndDate.toDate();
+      const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+      return { status: "Trial", daysLeft };
+    } else if (status === "monthly") {
+      return { status: "Premium Monthly" };
+    } else if (status === "lifetime") {
+      return { status: "Premium Lifetime" };
+    } else {
+      return { status: "Free" };
+    }
+  };
+
+  const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="overflow-y-auto pb-[130px]">
       <div className="flex gap-3 items-center mb-5">
@@ -66,136 +116,140 @@ export default function SettingsPage() {
           </Link>
         </div>
 
-        <h1 className="title w-[80%] text-center">settings</h1>
+        <h1 className="title w-[80%] text-center">Settings</h1>
       </div>
 
-      <div className="mt-5">
-        {/* Upgrade to Pro Section */}
-        <div className="border border-[#d8d8f2] flex items-center justify-between px-4 py-3 rounded-xl bg-[#d8d8f2]">
+      {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
+        <div className="mt-5">
+          {/* Upgrade to Pro Section */}
+          <Link href="/pricing">
+          <div className="border border-[#d8d8f2] flex items-center justify-between px-4 py-3 rounded-xl bg-[#d8d8f2]">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-[#949CD0] overflow-hidden">
+                <i className="fa-solid fa-crown text-2xl"></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">Upgrade to pro</h3>
+                <p className="text-xs text-gray-500">to use the app</p>
+              </div>
+            </div>
+            <div>
+                <i className="fa-solid fa-chevron-right text-sm cursor-pointer"></i>
+            </div>
+          </div>
+          </Link>
+        </div>
+      )}
+
+      {/* Feedback Section */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-600 text-sm font-medium">Feedback</h4>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
           <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-[#949CD0] overflow-hidden">
-              <i className="fa-solid fa-crown text-2xl"></i>
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-brands fa-discord text-xl "></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Upgrade to pro</h3>
-              <p className="text-xs text-gray-500">to use the app</p>
+              <h3 className="text-[15px] font-semibold capitalize">Join Discord</h3>
+              <p className="text-xs text-gray-500">Connect with the team!</p>
             </div>
           </div>
           <div>
-            <i className="fa-solid fa-chevron-right text-sm"></i>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-envelope text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Contact support</h3>
+              <p className="text-xs text-gray-500">Leave feedback, report issues</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+      </div>
+
+      {/* Legal Section */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-600 text-sm font-medium">Legal</h4>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-file-contract text-xl "></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Terms of service</h3>
+              <p className="text-xs text-gray-500">Read our terms</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-shield text-xl "></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Privacy Policy</h3>
+              <p className="text-xs text-gray-500">View our privacy Policy</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Section */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-500 text-sm font-medium">Info</h4>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-circle-info text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Version</h3>
+              <p className="text-xs text-gray-500">1.0.0</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+      </div>
+
+      {/* logout & delete account */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
+        <div onClick={handleLogout} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-sign-out-alt text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Logout</h3>
+              <p className="text-xs text-gray-500">Logout current account</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
           </div>
         </div>
 
-        {/* Feedback Section */}
-        <div className="mt-6">
-          <h4 className="uppercase text-gray-600 text-sm font-medium">Feedback</h4>
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-brands fa-discord text-xl "></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Join Discord</h3>
-                <p className="text-xs text-gray-500">Connect with the team!</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-envelope text-xl"></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Contact support</h3>
-                <p className="text-xs text-gray-500">Leave feedback, report issues</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-        </div>
-
-        {/* Legal Section */}
-        <div className="mt-6">
-          <h4 className="uppercase text-gray-600 text-sm font-medium">Legal</h4>
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-file-contract text-xl "></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Terms of service</h3>
-                <p className="text-xs text-gray-500">Read our terms</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-shield text-xl "></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Privacy Policy</h3>
-                <p className="text-xs text-gray-500">View our privacy Policy</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-        </div>
-
-        {/* Info Section */}
-        <div className="mt-6">
-          <h4 className="uppercase text-gray-500 text-sm font-medium">Info</h4>
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-circle-info text-xl"></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Version</h3>
-                <p className="text-xs text-gray-500">1.0.0</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-        </div>
-
-        {/* logout & delete account */}
-        <div className="mt-6">
-          <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
-          <div onClick={handleLogout} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-sign-out-alt text-xl"></i>
-              </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Logout</h3>
-                <p className="text-xs text-gray-500">Logout current account</p>
-              </div>
-            </div>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-            </div>
-          </div>
-
-          <button
-            className="text-sm mt-3 text-red-500 font-semibold"
-            onClick={handleDeleteAccount}
-          >
-            Delete Account
-          </button>
-        </div>
+        <button
+          className="text-sm mt-3 text-red-500 font-semibold"
+          onClick={handleDeleteAccount}
+        >
+          Delete Account
+        </button>
       </div>
 
       <ConfirmationModal

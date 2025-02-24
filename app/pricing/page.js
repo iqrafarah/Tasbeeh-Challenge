@@ -226,7 +226,7 @@ export default function PricingPage() {
                             </button>
                             <iframe
                                 src={checkoutUrl}
-                                className="w-full h-[80vh] border-none"
+                                className="w-full h-[100vh] border-none"
                                 frameBorder="0"
                                 allow="payment"
                             ></iframe>
@@ -234,10 +234,7 @@ export default function PricingPage() {
                     </div>
                 )}
 
-                {isTrialEnded && (
-                    <TrialEndModal isOpen={isTrialEnded} onClose={() => setIsTrialEnded(false)} />
-                )}
-            </div>
+                </div>
         </ProtectedRoute>
     );
 }

@@ -1,9 +1,9 @@
 "use client";
-import React, {useState, useEffect} from "react";
-import {getAuth, signOut, onAuthStateChanged} from "firebase/auth";
-import {useRouter} from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import app from "../lib/firebase.config";
-import {userService} from "../lib/services/userService";
+import { userService } from "../lib/services/userService";
 import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import Image from "next/image";
@@ -71,7 +71,7 @@ export default function ProfileScreen() {
     const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
 
     if (loading) {
-        return <LoadingScreen/>;
+        return <LoadingScreen />;
     }
 
     if (!user || !userData) {
@@ -81,13 +81,13 @@ export default function ProfileScreen() {
     return (
         <ProtectedRoute>
             <div className="h-screen flex flex-col overflow-y-auto pb-[130px]">
-                 
-                    {/* Subscription Status */}
+                {/* Subscription Status */}
+                {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
                     <div className="mt-3 mb-4">
-                        <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
+                        <div className="bg-white rounded-lg p-4 border border-lightgray">
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h3 className="font-medium">
+                                    <h3 className="text-sm font-semibold">
                                         {subscriptionInfo.status} Plan
                                         {subscriptionInfo.daysLeft > 0 && 
                                             <span className="text-sm text-gray-500 ml-2">
@@ -95,74 +95,67 @@ export default function ProfileScreen() {
                                             </span>
                                         }
                                     </h3>
-                                    
                                     {subscriptionInfo.status === "Trial" && (
-                                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                                            <div 
-                                                className="bg-blue-600 h-2.5 rounded-full" 
-                                                style={{ width: `${100 - (subscriptionInfo.daysLeft / 7) * 100}%` }}
-                                            ></div>
-                                        </div>
+                                       <p className="text-sm text-gray-600 mt-1">
+                                       {subscriptionInfo.daysLeft > 0 
+                                           ? `Your trial ends in ${subscriptionInfo.daysLeft} days.` 
+                                           : "Your trial has expired."}
+                                   </p>
                                     )}
                                 </div>
-                                
-                                {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
-                                    <Link href="/pricing">
-                                        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-full text-sm">
-                                            Upgrade
-                                        </button>
-                                    </Link>
-                                )}
+                                <Link href="/pricing">
+                                    <button className="bg-black text-white py-2 px-4 rounded-lg text-sm">
+                                        Upgrade
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </div>
+                )}
 
-                       {/* Top Bar with Settings */}
-                    <div className="flex justify-between items-center">
-                        <h1 className="title">Profile</h1>
+                {/* Top Bar with Settings */}
+                <div className="flex justify-between items-center">
+                    <h1 className="title">Profile</h1>
+                    <div className="text-right w-full pr-2">
+                        <Link href="/settings">
+                            <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
+                        </Link>
+                    </div>
+                </div>
 
-                        <div className="text-right w-full pr-2">
-                            <Link href="/settings">
-                                <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
-                            </Link>
+                {/* Scrollable Content */}
+                <div className="flex-1">
+                    <div className="profile-header text-center flex flex-col gap-4 justify-center items-center pt-4">
+                        <Image
+                            src={userData.photoURL}
+                            width={100}
+                            height={100}
+                            alt="profile pic"
+                            className="rounded-full object-cover w-[70px] h-[70px]"
+                        />
+                        <h1 className="text-xl font-bold">{userData.displayName}</h1>
+                    </div>
+
+                    <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px]">
+                        <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
+                            <span className="title">{userData.streak}</span>
+                            <span>Streak</span>
+                        </div>
+
+                        <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
+                            <span className="title">{userData.level}</span>
+                            <span>Level</span>
+                        </div>
+
+                        <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
+                            <span className="title">{userData.totalPoints}</span>
+                            <span>Points</span>
                         </div>
                     </div>
 
-
-                    {/* Scrollable Content */}
-                    <div className="flex-1">
-                        <div
-                            className="profile-header text-center flex flex-col gap-4 justify-center items-center pt-4">
-                            <Image
-                                src={userData.photoURL}
-                                width={100}
-                                height={100}
-                                alt="profile pic"
-                                className="rounded-full object-cover w-[70px] h-[70px]"
-                            />
-                            <h1 className="text-xl font-bold">{userData.displayName}</h1>
-                        </div>
-
-                        <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px]">
-                            <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
-                                <span className="title">{userData.streak}</span>
-                                <span>Streak</span>
-                            </div>
-
-                            <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
-                                <span className="title">{userData.level}</span>
-                                <span>Level</span>
-                            </div>
-
-                            <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
-                                <span className="title">{userData.totalPoints}</span>
-                                <span>Points</span>
-                            </div>
-                        </div>
-
-                        <LevelProgess data={userData} userId={user.uid}/>
-                        <Statistics stats={userData}/>
-                        <HeatTracker uid={user.uid}/>
+                    <LevelProgess data={userData} userId={user.uid} />
+                    <Statistics stats={userData} />
+                    <HeatTracker uid={user.uid} />
                 </div>
             </div>
         </ProtectedRoute>
