@@ -49,6 +49,27 @@ export default function ProfileScreen() {
         }
     };
 
+    // Function to get subscription info in a user-friendly format
+    const getSubscriptionInfo = () => {
+        if (!userData || !userData.subscription) return { status: "Free", daysLeft: 0 };
+        
+        const { status, trialEndDate } = userData.subscription;
+        
+        if (status === "trial") {
+            const endDate = trialEndDate instanceof Date ? trialEndDate : trialEndDate.toDate();
+            const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+            return { status: "Trial", daysLeft };
+        } else if (status === "monthly") {
+            return { status: "Premium Monthly" };
+        } else if (status === "lifetime") {
+            return { status: "Premium Lifetime" };
+        } else {
+            return { status: "Free" };
+        }
+    };
+
+    const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
+
     if (loading) {
         return <LoadingScreen/>;
     }
@@ -59,18 +80,54 @@ export default function ProfileScreen() {
 
     return (
         <ProtectedRoute>
-            <div className="h-screen flex flex-col  overflow-y-auto pb-[130px]">
-                    {/* Gear Icon to Open Settings */}
-                    
-                    <div className="flex justify-between items-center">
-                    <h1 className="title">Profile</h1>
+            <div className="h-screen flex flex-col overflow-y-auto pb-[130px]">
+                 
+                    {/* Subscription Status */}
+                    <div className="mt-3 mb-4">
+                        <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="font-medium">
+                                        {subscriptionInfo.status} Plan
+                                        {subscriptionInfo.daysLeft > 0 && 
+                                            <span className="text-sm text-gray-500 ml-2">
+                                                ({subscriptionInfo.daysLeft} days left)
+                                            </span>
+                                        }
+                                    </h3>
+                                    
+                                    {subscriptionInfo.status === "Trial" && (
+                                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                            <div 
+                                                className="bg-blue-600 h-2.5 rounded-full" 
+                                                style={{ width: `${100 - (subscriptionInfo.daysLeft / 7) * 100}%` }}
+                                            ></div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
+                                    <Link href="/pricing">
+                                        <button className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded-full text-sm">
+                                            Upgrade
+                                        </button>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    </div>
 
-                    <div className="text-right w-full pr-2">
-                        <Link href="/settings">
-                            <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
-                        </Link>
+                       {/* Top Bar with Settings */}
+                    <div className="flex justify-between items-center">
+                        <h1 className="title">Profile</h1>
+
+                        <div className="text-right w-full pr-2">
+                            <Link href="/settings">
+                                <i className="fa-solid fa-gear text-2xl cursor-pointer"></i>
+                            </Link>
+                        </div>
                     </div>
-                    </div>
+
 
                     {/* Scrollable Content */}
                     <div className="flex-1">

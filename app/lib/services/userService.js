@@ -21,6 +21,9 @@ export const userService = {
                 }, { merge: true });
             } else {
                 // User does not exist, create a new user document
+                const trialStartDate = new Date();
+                const trialEndDate = new Date(trialStartDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from trialStartDate
+
                 const newUserDoc = {
                     uid: userData.uid,
                     email: userData.email,
@@ -36,6 +39,14 @@ export const userService = {
                     contributions: {},
                     settings: {
                         theme: "light", notifications: true, soundEnabled: true, vibrationEnabled: true,
+                    },
+                    subscription: {
+                        status: "trial", // "trial", "free", "monthly", "lifetime"
+                        trialStartDate: trialStartDate,
+                        trialEndDate: trialEndDate,
+                        subscriptionId: null,
+                        orderId: null,
+                        planType: null,
                     },
                     createdAt: serverTimestamp(),
                     lastActive: serverTimestamp(),
