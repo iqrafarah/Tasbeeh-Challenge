@@ -157,7 +157,14 @@ input, textarea {
   width: 100%;
   font-weight: 500;
 }
-
+.buttonOutline{
+  border: 2px solid var(--primary);
+  color: var(--text-primary);
+  padding: 12px;
+  border-radius: 50px;
+  width: 100%;
+  font-weight: 500;
+}
 .buttonSecondary {
   background-color: var(--lightgray);
   color: var(--primary);
