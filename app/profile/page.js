@@ -84,7 +84,8 @@ export default function ProfileScreen() {
                 {/* Subscription Status */}
                 {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
                     <div className="mt-3 mb-4">
-                        <div className="bg-white rounded-lg p-4 border border-lightgray">
+                        <div className="border border-[#d8d8f2] px-4 py-3 rounded-xl bg-[#d8d8f2]">
+
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h3 className="text-sm font-semibold">

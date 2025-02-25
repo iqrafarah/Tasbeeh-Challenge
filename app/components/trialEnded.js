@@ -11,8 +11,8 @@ export default function TrialEndModal({ isOpen, onClose }) {
                     <div className="bg-[#d8d8f2] text-[#949CD0] rounded-full p-3 inline-block mb-4">
                         <i className="fa-solid fa-hourglass-end text-2xl"></i>
                     </div>
-                    <h2 className="text-xl font-bold mb-2">Your free trial has ended</h2>
-                    <p className="text-gray-600">
+                    <h2 className="title mb-2">Your free trial has ended</h2>
+                    <p className="text-gray-600 text-sm">
                         Continue your spiritual journey by upgrading to a premium plan today.
                     </p>
                 </div>
