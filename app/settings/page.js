@@ -158,7 +158,20 @@ export default function SettingsPage() {
             <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
           </div>
         </div>
-        
+        {/* <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-envelope text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Contact support</h3>
+              <p className="text-xs text-gray-500">Leave feedback, report issues</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div> */}
       </div>
 
       {/* Legal Section */}
