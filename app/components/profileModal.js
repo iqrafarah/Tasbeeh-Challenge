@@ -17,7 +17,6 @@ const ProfileModal = ({ user, onClose, currentUser, onDeleteFriend }) => {
     useEffect(() => {
         const checkIfFriend = async () => {
             if (!currentUser || !user) {
-                console.log("No currentUser or user provided."); // Debug log
                 return;
             }
 

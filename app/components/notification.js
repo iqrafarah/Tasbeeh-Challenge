@@ -19,14 +19,12 @@ export default function NotificationIcon() {
         const q = query(notificationsRef, orderBy("timestamp", "desc"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            console.log("New notifications detected:", querySnapshot.docs.length);
 
             const fetchedNotifications = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
 
-            console.log("Fetched notifications:", fetchedNotifications);
 
             setNotifications(fetchedNotifications);
             setUnreadCount(fetchedNotifications.filter(n => !n.read).length);

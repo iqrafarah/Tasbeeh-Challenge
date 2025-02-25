@@ -116,7 +116,6 @@ export const subscriptionService = {
                     });
                     break;
                 default:
-                    console.log(`Unhandled event type: ${event}`);
             }
 
             res.status(200).send('Webhook handled successfully');

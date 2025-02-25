@@ -252,7 +252,6 @@ export const userService = {
     },
 
     sendNotification: async (userId, senderName, senderPhotoURL) => {
-        console.log("Sending notification to:", userId, "from:", senderName, "photoURL:", senderPhotoURL);
         const db = getFirestore(app);
         try {
             await addDoc(collection(db, "users", userId, "notifications"), {
@@ -262,7 +261,6 @@ export const userService = {
                 read: false,
                 photoURL: senderPhotoURL
             });
-            console.log("Notification added successfully!");
         } catch (error) {
             console.error("Error adding notification:", error);
         }
@@ -279,7 +277,6 @@ export const userService = {
                 read: false,
                 photoURL: senderPhotoURL
             });
-            console.log("Leaderboard notification added successfully!");
         } catch (error) {
             console.error("Error adding leaderboard notification:", error);
         }
