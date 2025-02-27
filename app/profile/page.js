@@ -91,15 +91,15 @@ export default function ProfileScreen() {
                                     <h3 className="text-sm font-semibold">
                                         {subscriptionInfo.status} Plan
                                         {subscriptionInfo.daysLeft > 0 && 
-                                            <span className="text-sm text-gray-500 ml-2">
-                                                ({subscriptionInfo.daysLeft} days left)
+                                            <span className="text-sm text-gray-900 ml-1">
+                                                {subscriptionInfo.daysLeft} days left
                                             </span>
                                         }
                                     </h3>
                                     {subscriptionInfo.status === "Trial" && (
-                                       <p className="text-sm text-gray-600 mt-1">
+                                       <p className="text-xs text-gray-700">
                                        {subscriptionInfo.daysLeft > 0 
-                                           ? `Your trial ends in ${subscriptionInfo.daysLeft} days.` 
+                                           ? `` 
                                            : "Your trial has expired."}
                                    </p>
                                     )}

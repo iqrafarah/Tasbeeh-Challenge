@@ -1,6 +1,7 @@
 import {
     getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, addDoc, deleteDoc, serverTimestamp, increment
 } from "firebase/firestore";
+import { getAuth, deleteUser } from "firebase/auth";
 import app from "../firebase.config";
 
 export const userService = {
@@ -48,6 +49,7 @@ export const userService = {
                         orderId: null,
                         planType: null,
                     },
+                    onBoarded: false,
                     createdAt: serverTimestamp(),
                     lastActive: serverTimestamp(),
                 };
@@ -231,20 +233,41 @@ export const userService = {
     },
 
     handleDeleteAccount: async (uid) => {
-        const db = getFirestore(app);
+        const db = getFirestore();
+        const auth = getAuth();
+
         try {
             const userRef = doc(db, "users", uid);
+            const userChallengesRef = collection(db, "userChallenges", uid, "challenges");
+
+            // Delete userChallenges subcollection
+            const userChallengesSnapshot = await getDocs(userChallengesRef);
+            const batch = writeBatch(db);
+
+            userChallengesSnapshot.forEach((doc) => batch.delete(doc.ref));
+            await batch.commit();
+
+            // Delete all related subcollections
+            const subcollections = ["friends", "notifications"];
+            for (const subcollection of subcollections) {
+                const subcollectionRef = collection(db, "users", uid, subcollection);
+                const subcollectionSnapshot = await getDocs(subcollectionRef);
+
+                const batch = writeBatch(db);
+                subcollectionSnapshot.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+            }
+
+            // Delete user document
             await deleteDoc(userRef);
 
-            // Delete all related subcollections like friends and notifications
-            const friendsSnapshot = await getDocs(collection(db, "users", uid, "friends"));
-            const notificationsSnapshot = await getDocs(collection(db, "users", uid, "notifications"));
+            // Delete authentication record
+            const user = auth.currentUser;
+            if (user && user.uid === uid) {
+                await deleteUser(user);
+            }
 
-            const batch = writeBatch(db);
-            friendsSnapshot.forEach((doc) => batch.delete(doc.ref));
-            notificationsSnapshot.forEach((doc) => batch.delete(doc.ref));
-
-            await batch.commit();
+            console.log("User account and associated data deleted successfully.");
         } catch (error) {
             console.error("Error deleting user account:", error);
             throw error;
@@ -265,11 +288,11 @@ export const userService = {
             console.error("Error adding notification:", error);
         }
     },
-   
+
     sendLeaderboardNotification: async (userId, senderName, senderPhotoURL, previousRank, newRank) => {
         const db = getFirestore(app);
         try {
-           const body = `${senderName} took your place on the leaderboard!`;	
+            const body = `${senderName} took your place on the leaderboard!`;
             await addDoc(collection(db, "users", userId, "notifications"), {
                 body,
                 url: "https://tasbeehchallenge.com/leaderboard",

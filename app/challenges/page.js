@@ -7,7 +7,7 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import app from "../lib/firebase.config";
-import TrialEndModal from "../components/trialEnded";
+import TrialEndModal from "../components/trialEnded"; 
 
 const baseColors = [
   { hex: "#f6f2c0" },
@@ -30,12 +30,12 @@ const darkenHexColor = (hex, amount) => {
   let color = hex.slice(1);
   let num = parseInt(color, 16);
   let r = (num >> 16) - amount;
-  let g = ((num >> 8) & 0x00FF) - amount;
-  let b = (num & 0x0000FF) - amount;
+  let g = ((num >> 8) & 0x00ff) - amount;
+  let b = (num & 0x0000ff) - amount;
   r = r < 0 ? 0 : r;
   g = g < 0 ? 0 : g;
   b = b < 0 ? 0 : b;
-  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`;
 };
 
 export default function ChallengesPage() {
@@ -44,9 +44,9 @@ export default function ChallengesPage() {
   const [userProgress, setUserProgress] = useState({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null); // Define userData state
+  const [userData, setUserData] = useState(null);
+  const [isTrialEnded, setIsTrialEnded] = useState(false); 
   const auth = getAuth(app);
-  const [isTrialEnded, setIsTrialEnded] = useState(false);
 
   // Load challenges
   const loadChallenges = async () => {
@@ -82,35 +82,49 @@ export default function ChallengesPage() {
     }
   };
 
+  // Handle user authentication and subscription status
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (!authUser) {
-        router.push("/"); // Redirect to home if not authenticated
+        router.push("/");
         return;
       }
-
+  
       setUser(authUser);
       try {
         const data = await userService.getUser(authUser.uid);
         setUserData(data);
-
-        // Check if trial has ended
-        if (data.subscription.status === "trial") {
-          const trialEndDate = data.subscription.trialEndDate.toDate();
-          if (new Date() > trialEndDate) {
-            setIsTrialEnded(true);
+  
+        if (data && data.subscription) {
+          if (data.subscription.status === "trial" || data.subscription.status === "free") {
+            const trialEndDate = data.subscription.trialEndDate.toDate();
+            if (new Date() > trialEndDate) {
+              setIsTrialEnded(true);
+            } else {
+              setIsTrialEnded(false);
+            }
+          } else {
+            setIsTrialEnded(false);
           }
+        } else {
+          setIsTrialEnded(false);
         }
+  
+        if (challenges.length === 0) {
+          await loadChallenges();
+        }
+  
+        fetchUserProgress(authUser.uid);
       } catch (error) {
         console.error("Error loading user data:", error);
       } finally {
         setLoading(false);
       }
     });
-
+  
     return () => unsubscribe();
   }, [auth, router]);
-
+  
   // Fetch user progress when challenges are loaded
   useEffect(() => {
     if (user && challenges.length > 0) {
@@ -157,12 +171,16 @@ export default function ChallengesPage() {
                     </div>
                     <div className="flex justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="border-2 text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
-                              style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}>
+                        <span
+                          className="border-2 text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
+                          style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}
+                        >
                           <i className="fas fa-praying-hands"></i> {challenge.requiredCount} Times
                         </span>
-                        <span className="border-2 bg-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
-                              style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}>
+                        <span
+                          className="border-2 bg-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
+                          style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}
+                        >
                           <i className="fas fa-coins"></i> {challenge.points} Points
                         </span>
                       </div>
@@ -179,9 +197,9 @@ export default function ChallengesPage() {
           </div>
         </div>
       </div>
-      {isTrialEnded && (
-        <TrialEndModal isOpen={isTrialEnded} onClose={() => setIsTrialEnded(false)} />
-      )}
+
+      {/* Trial Ended Modal */}
+      {isTrialEnded && <TrialEndModal isOpen={isTrialEnded} onClose={() => setIsTrialEnded(false)} />}
     </ProtectedRoute>
   );
 }

@@ -17,11 +17,15 @@ export default function SettingsPage() {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isAccountDeleted, setIsAccountDeleted] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (!authUser) {
-        router.push("/"); // Redirect to home if not authenticated
+
+        if (!isAccountDeleted) {
+          router.push("/");
+        }
         return;
       }
 
@@ -37,7 +41,7 @@ export default function SettingsPage() {
     });
 
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [auth, router, isAccountDeleted]);
 
   const handleLogout = () => {
     setShowLogoutConfirmation(true);
@@ -46,7 +50,7 @@ export default function SettingsPage() {
   const confirmLogout = async () => {
     try {
       await signOut(auth);
-      router.push("/");
+      router.push("/"); // Redirect to home after logout
     } catch (error) {
       console.error("Error signing out", error.message);
     }
@@ -60,33 +64,36 @@ export default function SettingsPage() {
   const confirmDeleteAccount = async () => {
     const user = auth.currentUser;
     if (user) {
+      console.log('Deleting account...');
       try {
         await userService.handleDeleteAccount(user.uid);
-        await user.delete(); // Ensure Firebase account is fully deleted
-
-        setShowSuccessModal(true);
-
-        // Sign out explicitly to remove any cached session
-        await signOut(auth);
-
+        console.log('Account deleted');
+        setShowSuccessModal(true); // Show success modal after deletion
       } catch (error) {
         console.error("Error deleting account", error.message);
       }
-      setShowDeleteConfirmation(false);
+      setShowDeleteConfirmation(false); // Close delete confirmation modal
     }
   };
-
+  
   const closeSuccessModal = () => {
-    setShowSuccessModal(false);
-    router.replace("/"); // After closing the success modal, redirect to home
+    console.log('Closing success modal...');
+    setShowSuccessModal(false); // Close the success modal first
+    setTimeout(() => {
+      console.log('Redirecting to home...');
+      setIsAccountDeleted(true); // Set account deleted state to true
+      router.push("/"); // Redirect to home after clicking OK
+    }, 300); // 300ms timeout
   };
+  
+  
 
   // Function to get subscription info in a user-friendly format
   const getSubscriptionInfo = () => {
     if (!userData || !userData.subscription) return { status: "Free", daysLeft: 0 };
-    
+
     const { status, trialEndDate } = userData.subscription;
-    
+
     if (status === "trial") {
       const endDate = trialEndDate instanceof Date ? trialEndDate : trialEndDate.toDate();
       const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
@@ -123,20 +130,20 @@ export default function SettingsPage() {
         <div className="mt-5">
           {/* Upgrade to Pro Section */}
           <Link href="/pricing">
-          <div className="border border-[#d8d8f2] flex items-center justify-between px-4 py-3 rounded-xl bg-[#d8d8f2]">
-            <div className="flex gap-3">
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-[#949CD0] overflow-hidden">
-                <i className="fa-solid fa-crown text-2xl"></i>
+            <div className="border border-[#d8d8f2] flex items-center justify-between px-4 py-3 rounded-xl bg-[#d8d8f2]">
+              <div className="flex gap-3">
+                <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-[#949CD0] overflow-hidden">
+                  <i className="fa-solid fa-crown text-2xl"></i>
+                </div>
+                <div className="flex gap-1 flex-col">
+                  <h3 className="text-[15px] font-semibold capitalize">Upgrade to pro</h3>
+                  <p className="text-xs text-gray-500">to use the app</p>
+                </div>
               </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize">Upgrade to pro</h3>
-                <p className="text-xs text-gray-500">to use the app</p>
-              </div>
-            </div>
-            <div>
+              <div>
                 <i className="fa-solid fa-chevron-right text-sm cursor-pointer"></i>
+              </div>
             </div>
-          </div>
           </Link>
         </div>
       )}
@@ -158,20 +165,6 @@ export default function SettingsPage() {
             <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
           </div>
         </div>
-        {/* <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-          <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-solid fa-envelope text-xl"></i>
-            </div>
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Contact support</h3>
-              <p className="text-xs text-gray-500">Leave feedback, report issues</p>
-            </div>
-          </div>
-          <div>
-            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-          </div>
-        </div> */}
       </div>
 
       {/* Legal Section */}
