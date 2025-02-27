@@ -7,7 +7,8 @@ import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import app from "../lib/firebase.config";
-import TrialEndModal from "../components/trialEnded"; 
+import TrialEndModal from "../components/trialEnded";
+import InstallAppModal from "../components/installApp"; // Import the InstallAppModal component
 
 const baseColors = [
   { hex: "#f6f2c0" },
@@ -45,7 +46,9 @@ export default function ChallengesPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [isTrialEnded, setIsTrialEnded] = useState(false); 
+  const [isTrialEnded, setIsTrialEnded] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null); // State to store the deferred prompt
+  const [showInstallModal, setShowInstallModal] = useState(false); // State to show/hide install modal
   const auth = getAuth(app);
 
   // Load challenges
@@ -89,12 +92,12 @@ export default function ChallengesPage() {
         router.push("/");
         return;
       }
-  
+
       setUser(authUser);
       try {
         const data = await userService.getUser(authUser.uid);
         setUserData(data);
-  
+
         if (data && data.subscription) {
           if (data.subscription.status === "trial" || data.subscription.status === "free") {
             const trialEndDate = data.subscription.trialEndDate.toDate();
@@ -109,28 +112,62 @@ export default function ChallengesPage() {
         } else {
           setIsTrialEnded(false);
         }
-  
+
         if (challenges.length === 0) {
           await loadChallenges();
         }
-  
+
         fetchUserProgress(authUser.uid);
+
+        // Show install modal if user is new
+        if (data && data.onBoarded === false) {
+          setShowInstallModal(true);
+          await userService.updateUser(authUser.uid, { onBoarded: true });
+        }
       } catch (error) {
         console.error("Error loading user data:", error);
       } finally {
         setLoading(false);
       }
     });
-  
+
     return () => unsubscribe();
   }, [auth, router]);
-  
+
   // Fetch user progress when challenges are loaded
   useEffect(() => {
     if (user && challenges.length > 0) {
       fetchUserProgress(user.uid);
     }
   }, [user, challenges]);
+
+  // Handle beforeinstallprompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        console.log("User accepted the install prompt");
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+      setDeferredPrompt(null);
+      setShowInstallModal(false);
+    }
+  };
 
   if (loading) {
     return <LoadingScreen />;
@@ -196,6 +233,11 @@ export default function ChallengesPage() {
             </div>
           </div>
         </div>
+        <InstallAppModal
+          isOpen={showInstallModal}
+          onClose={() => setShowInstallModal(false)}
+          onInstall={handleInstallClick}
+        />
       </div>
 
       {/* Trial Ended Modal */}

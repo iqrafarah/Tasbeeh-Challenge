@@ -98,6 +98,17 @@ export const userService = {
         }
     },
 
+    updateUser: async (uid, data) => {
+        const db = getFirestore(app);
+        
+        const userRef = doc(db, "users", uid);
+        try {
+          await setDoc(userRef, data, { merge: true });
+        } catch (error) {
+          console.error("Error updating user data:", error);
+        }
+      },
+
     // Get user data
     getUser: async (uid) => {
         if (!uid) return null;

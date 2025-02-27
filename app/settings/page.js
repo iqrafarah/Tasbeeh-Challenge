@@ -7,6 +7,7 @@ import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
 import ConfirmationModal from "../components/confirmationModal";
 import LoadingScreen from "../components/loadingScreen";
+import InstallAppModal from "../components/installApp"; // Import the InstallAppModal component
 
 export default function SettingsPage() {
   const auth = getAuth(app);
@@ -18,11 +19,12 @@ export default function SettingsPage() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isAccountDeleted, setIsAccountDeleted] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null); // State to store the deferred prompt
+  const [showInstallModal, setShowInstallModal] = useState(false); // State to show/hide install modal
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (!authUser) {
-
         if (!isAccountDeleted) {
           router.push("/");
         }
@@ -42,6 +44,33 @@ export default function SettingsPage() {
 
     return () => unsubscribe();
   }, [auth, router, isAccountDeleted]);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        console.log("User accepted the install prompt");
+      } else {
+        console.log("User dismissed the install prompt");
+      }
+      setDeferredPrompt(null);
+      setShowInstallModal(false);
+    }
+  };
 
   const handleLogout = () => {
     setShowLogoutConfirmation(true);
@@ -85,8 +114,6 @@ export default function SettingsPage() {
       router.push("/"); // Redirect to home after clicking OK
     }, 300); // 300ms timeout
   };
-  
-  
 
   // Function to get subscription info in a user-friendly format
   const getSubscriptionInfo = () => {
@@ -219,6 +246,25 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Install App Section */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-500 text-sm font-medium">App</h4>
+        <div onClick={() => setShowInstallModal(true)} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-download text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">Install App</h3>
+              <p className="text-xs text-gray-500">Install this app on your device</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+      </div>
+
       {/* logout & delete account */}
       <div className="mt-6">
         <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
@@ -273,6 +319,12 @@ export default function SettingsPage() {
         message="Your account has been deleted successfully."
         confirmText="OK"
         confirmColor="bg-green-500"
+      />
+
+      <InstallAppModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+        onInstall={handleInstallClick}
       />
     </div>
   );
