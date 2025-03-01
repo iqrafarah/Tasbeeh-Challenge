@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
 import { challengeService } from "../lib/services/challengeService";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -38,6 +38,8 @@ function CounterPageContent() {
     const [newLevel, setNewLevel] = useState(null);
     const [soundEnabled, setSoundEnabled] = useState(true); // State to manage sound toggle
     const [visualFeedback, setVisualFeedback] = useState(false); // State to manage visual feedback
+    const [showTooltip, setShowTooltip] = useState(false); // State for the tooltip visibility
+    const tooltipRef = useRef(null); // Ref for the tooltip
 
     // Load sound setting from localStorage
     useEffect(() => {
@@ -166,8 +168,8 @@ function CounterPageContent() {
     }, [count, user, challengeId]);
 
     const handleClick = async (event) => {
-        // Prevent counting a tap when toggling the sound
-        if (event.target.closest('.sound-toggle')) return;
+        // Prevent counting a tap when toggling the sound or clicking the tooltip
+        if (event.target.closest('.sound-toggle') || event.target.closest('.tooltip-toggle') || event.target.closest('.tooltip-content')) return;
 
         if (completed) return;
 
@@ -210,11 +212,36 @@ function CounterPageContent() {
         router.push(`/counter?id=${nextChallengeId}`);
     };
 
-    const toggleSound = () => {
+    const toggleSound = (e) => {
+        e.stopPropagation(); // Prevent event propagation
         const newSoundEnabled = !soundEnabled;
         setSoundEnabled(newSoundEnabled);
         localStorage.setItem('soundEnabled', JSON.stringify(newSoundEnabled));
     };
+
+    const toggleTooltip = (e) => {
+        e.stopPropagation(); // Prevent event propagation
+        setShowTooltip(!showTooltip);
+    };
+
+    // Close tooltip when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (tooltipRef.current && !tooltipRef.current.contains(event.target)) {
+                setShowTooltip(false);
+            }
+        };
+
+        if (showTooltip) {
+            document.addEventListener("click", handleClickOutside);
+        } else {
+            document.removeEventListener("click", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+    }, [showTooltip]);
 
     if (!challenge) {
         return <LoadingScreen />;
@@ -228,17 +255,40 @@ function CounterPageContent() {
                 className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer relative"
                 onClick={handleClick}
             >
-                {/* Sound Toggle */}
+                {/* Sound and Help Toggle */}
                 {!completed && (
-                    <div className="absolutetop-4 right-4 sound-toggle">
-                        <i className="fa-solid fa-lightbulb text-xl"></i>
-                        <button onClick={toggleSound}>
+                    <div className="absolute top-4 right-4 flex items-center gap-4 z-30">
+                        <div className="tooltip-toggle relative" onClick={toggleTooltip}>
+                            <i className="fa-solid fa-lightbulb text-xl cursor-pointer"></i>
+                        </div>
+                        
+                        <div className="sound-toggle" onClick={toggleSound}>
                             {soundEnabled ? (
-                                <i className="fa-solid fa-volume-high text-xl"></i>
+                                <i className="fa-solid fa-volume-high text-xl cursor-pointer"></i>
                             ) : (
-                                <i className="fa-solid fa-volume-xmark text-xl"></i>
+                                <i className="fa-solid fa-volume-xmark text-xl cursor-pointer"></i>
                             )}
-                        </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Centered Tooltip */}
+                {showTooltip && (
+                    <div 
+                        className="fixed top-16 flex items-center justify-center z-40"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowTooltip(false);
+                        }}
+                    >
+                        <div 
+                            className="border border-[#d8d8f2] rounded-lg  bg-[#d8d8f2] w-80 p-4 m-4"
+                            onClick={(e) => e.stopPropagation()}
+                            ref={tooltipRef}
+                        >
+                            <h1 className="small_title mb-1">When to use</h1>
+                            <p className="text-sm">{challenge.whenToUse}</p>
+                        </div>
                     </div>
                 )}
 
@@ -266,7 +316,6 @@ function CounterPageContent() {
                 ) : (
                     <>
                         <h3 className="text-xl font-bold w-full text-left">{challenge.title}</h3>
-                       
                     </>
                 )}
 
