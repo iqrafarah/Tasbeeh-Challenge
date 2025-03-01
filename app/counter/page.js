@@ -3,13 +3,13 @@ import React, { useState, useEffect, Suspense, useRef } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
 import { challengeService } from "../lib/services/challengeService";
 import { useSearchParams, useRouter } from "next/navigation";
-import LoadingScreen from "../components/loadingScreen";
 import app from "../lib/firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { userService } from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 import Confetti from "react-confetti";
 import LevelUpModal from "../components/newLevelModal";
+import Link from 'next/link'; // Import Link component
 
 // Debounce function
 const debounce = (func, wait) => {

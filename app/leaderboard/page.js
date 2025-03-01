@@ -8,13 +8,11 @@ import Image from "next/image";
 import FriendModal from "../components/friendModal";
 import ProfileModal from "../components/profileModal";
 import Notification from "../components/notification";
-import Loading from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
   const [tab, setTab] = useState('community');
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [friendLink, setFriendLink] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -52,7 +50,6 @@ export default function Leaderboard() {
           q = query(usersRef, where("uid", "in", friends), orderBy("totalPoints", "desc"), limit(20));
         } else {
           setUsers([]);
-          setLoading(false);
           return;
         }
       } else {
@@ -68,8 +65,6 @@ export default function Leaderboard() {
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -191,10 +186,10 @@ export default function Leaderboard() {
     <ProtectedRoute>
       <div className="relative">
         {/* Leaderboard Header */}
-        <div className="flex justify-between items-center py-2">
+        <div className="flex justify-between items-center px-4 py-2">
           <h1 className="text-2xl font-bold">Leaderboard</h1>
 
-          <div className="flex gap-6">
+          <div className="flex gap-10">
             {/* Notification Icon */}
             <Notification />
 

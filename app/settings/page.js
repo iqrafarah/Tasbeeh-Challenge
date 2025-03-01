@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
 import ConfirmationModal from "../components/confirmationModal";
-import LoadingScreen from "../components/loadingScreen";
 import InstallAppModal from "../components/installApp";
 import { toast } from "react-hot-toast";
 
@@ -15,7 +14,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -39,9 +37,7 @@ export default function SettingsPage() {
         setUserData(data);
       } catch (error) {
         console.error("Error loading user data:", error);
-      } finally {
-        setLoading(false);
-      }
+      } 
     });
 
     return () => unsubscribe();
@@ -64,11 +60,7 @@ export default function SettingsPage() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        console.log("User accepted the install prompt");
-      } else {
-        console.log("User dismissed the install prompt");
-      }
+      
       setDeferredPrompt(null);
       setShowInstallModal(false);
     }
@@ -168,10 +160,6 @@ export default function SettingsPage() {
   };
 
   const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <div className="overflow-y-auto pb-[130px]">

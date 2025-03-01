@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { challengeService } from "../lib/services/challengeService";
 import { userService } from "../lib/services/userService";
-import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -43,7 +42,6 @@ export default function ChallengesPage() {
   const router = useRouter();
   const [challenges, setChallenges] = useState([]);
   const [userProgress, setUserProgress] = useState({});
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [isTrialEnded, setIsTrialEnded] = useState(false);
@@ -64,9 +62,7 @@ export default function ChallengesPage() {
   // Fetch user progress
   const fetchUserProgress = async (uid) => {
     try {
-      setLoading(true);
       if (challenges.length === 0) {
-        setLoading(false);
         return;
       }
 
@@ -80,8 +76,6 @@ export default function ChallengesPage() {
       setUserProgress(progress.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
     } catch (error) {
       console.error("Error fetching user progress:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -126,8 +120,6 @@ export default function ChallengesPage() {
         }
       } catch (error) {
         console.error("Error loading user data:", error);
-      } finally {
-        setLoading(false);
       }
     });
 
@@ -168,10 +160,6 @@ export default function ChallengesPage() {
       setShowInstallModal(false);
     }
   };
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
 
   const handleChallengeClick = (challenge) => {
     router.push(`/counter?id=${challenge.id}`);
@@ -217,7 +205,7 @@ export default function ChallengesPage() {
                           className="border-2 bg-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
                           style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}
                         >
-                          <i className="fas fa-coins"></i> {challenge.points} Points
+                          <i className="fas fa-coins"></i> {challenge.points}
                         </span>
                       </div>
                       {isStarted ? (

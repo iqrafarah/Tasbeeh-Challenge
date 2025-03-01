@@ -5,7 +5,6 @@ import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import app from "../lib/firebase.config";
 import { userService } from "../lib/services/userService";
-import LoadingScreen from "../components/loadingScreen";
 import ProtectedRoute from "../components/protectedRoute";
 import Link from "next/link";
 import TrialEndModal from "../components/trialEnded";
@@ -16,7 +15,6 @@ export default function PricingPage() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [processingPayment, setProcessingPayment] = useState(false);
     const [checkoutUrl, setCheckoutUrl] = useState(null);
     const [isTrialEnded, setIsTrialEnded] = useState(false);
@@ -43,9 +41,7 @@ export default function PricingPage() {
                 }
             } catch (error) {
                 console.error("Error loading user data:", error);
-            } finally {
-                setLoading(false);
-            }
+            } 
         });
 
         return () => unsubscribe();
@@ -90,10 +86,6 @@ export default function PricingPage() {
 
     const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
 
-    if (loading) {
-        return <LoadingScreen />;
-    }
-
     return (
         <ProtectedRoute>
             <div className="h-screen flex flex-col overflow-y-auto pb-[130px]">
@@ -126,14 +118,14 @@ export default function PricingPage() {
                             <i className="fa-solid fa-star"></i>
                         </div>
 
-                        <div className="flex items-center justify-center mb-6">
+                        {/* <div className="flex items-center justify-center mb-6">
                             <div className="flex -space-x-2">
                                 <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
                                 <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
                                 <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
                                 <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
                             </div>
-                        </div>
+                        </div> */}
 
                         <p className="mb-4 text-xs">
                             <span className="font-bold">4.8/5</span> from 23,000+ achievers
