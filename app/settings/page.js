@@ -161,6 +161,11 @@ export default function SettingsPage() {
 
   const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
 
+
+  if (!user || !userData) {
+    return null; // If user or userData isn't available
+}
+
   return (
     <div className="overflow-y-auto pb-[130px]">
       <div className="flex gap-3 items-center mb-5">
