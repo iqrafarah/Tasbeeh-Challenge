@@ -100,7 +100,7 @@ export const userService = {
 
     updateUser: async (uid, data) => {
         const db = getFirestore(app);
-        
+
         const userRef = doc(db, "users", uid);
         try {
           await setDoc(userRef, data, { merge: true });
@@ -303,7 +303,7 @@ export const userService = {
     sendLeaderboardNotification: async (userId, senderName, senderPhotoURL, previousRank, newRank) => {
         const db = getFirestore(app);
         try {
-            const body = `${senderName} took your place on the leaderboard!`;
+            const body = `${senderName} took your leaderboard spot!`;
             await addDoc(collection(db, "users", userId, "notifications"), {
                 body,
                 url: "https://tasbeehchallenge.com/leaderboard",

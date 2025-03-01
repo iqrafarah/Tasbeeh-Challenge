@@ -1,12 +1,12 @@
 'use client';
-import React, {useState, useEffect, Suspense} from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
-import {challengeService} from "../lib/services/challengeService";
-import {useSearchParams, useRouter} from "next/navigation";
+import { challengeService } from "../lib/services/challengeService";
+import { useSearchParams, useRouter } from "next/navigation";
 import LoadingScreen from "../components/loadingScreen";
 import app from "../lib/firebase.config";
-import {getAuth, onAuthStateChanged} from "firebase/auth";
-import {userService} from "../lib/services/userService";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { userService } from "../lib/services/userService";
 import ProtectedRoute from "../components/protectedRoute";
 import Confetti from "react-confetti";
 import LevelUpModal from "../components/newLevelModal";
@@ -217,7 +217,7 @@ function CounterPageContent() {
     };
 
     if (!challenge) {
-        return <LoadingScreen/>;
+        return <LoadingScreen />;
     }
 
     const percentage = (count / challenge.requiredCount) * 100;
@@ -230,7 +230,8 @@ function CounterPageContent() {
             >
                 {/* Sound Toggle */}
                 {!completed && (
-                    <div className="absolute top-4 right-4 sound-toggle">
+                    <div className="absolutetop-4 right-4 sound-toggle">
+                        <i className="fa-solid fa-lightbulb text-xl"></i>
                         <button onClick={toggleSound}>
                             {soundEnabled ? (
                                 <i className="fa-solid fa-volume-high text-xl"></i>
@@ -264,9 +265,8 @@ function CounterPageContent() {
                     </>
                 ) : (
                     <>
-                        <h3 className="text-xl font-bold">{challenge.title}</h3>
-                        <p className="text-sm mb-1">{challenge.meaning}</p>
-                        <p className="text-xs italic text-center">{challenge.whenToUse}</p>
+                        <h3 className="text-xl font-bold w-full text-left">{challenge.title}</h3>
+                       
                     </>
                 )}
 
@@ -304,8 +304,8 @@ function CounterPageContent() {
 
 export default function CounterPage() {
     return (
-        <Suspense fallback={<LoadingScreen/>}>
-            <CounterPageContent/>
+        <Suspense fallback={<LoadingScreen />}>
+            <CounterPageContent />
         </Suspense>
     );
 }

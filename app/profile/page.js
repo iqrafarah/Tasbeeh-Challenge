@@ -126,7 +126,7 @@ export default function ProfileScreen() {
 
                 {/* Scrollable Content */}
                 <div className="flex-1">
-                    <div className="profile-header text-center flex flex-col gap-4 justify-center items-center pt-4">
+                    <div className="profile-header text-center flex flex-col gap-3 justify-center items-center pt-4">
                         <Image
                             src={userData.photoURL}
                             width={100}
@@ -134,23 +134,23 @@ export default function ProfileScreen() {
                             alt="profile pic"
                             className="rounded-full object-cover w-[70px] h-[70px]"
                         />
-                        <h1 className="text-xl font-bold">{userData.displayName}</h1>
-                    </div>
+                        <h1 className="text-[17px] font-semibold capitalize">{userData.displayName}</h1>
+                        </div>
 
                     <div className="flex justify-between border border-gray-100 rounded-lg mt-3 min-h-[75px]">
                         <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
                             <span className="title">{userData.streak}</span>
-                            <span>Streak</span>
+                            <span className="text-sm">Streak</span>
                         </div>
 
                         <div className="flex flex-col justify-center text-center border-r w-1/3 h-[90%] m-auto">
                             <span className="title">{userData.level}</span>
-                            <span>Level</span>
+                            <span className="text-sm">Level</span>
                         </div>
 
                         <div className="flex flex-col justify-center text-center w-1/3 h-[80%] m-auto">
                             <span className="title">{userData.totalPoints}</span>
-                            <span>Points</span>
+                            <span className="text-sm">Points</span>
                         </div>
                     </div>
 

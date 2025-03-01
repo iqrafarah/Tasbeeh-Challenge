@@ -195,7 +195,7 @@ export default function ChallengesPage() {
                 return (
                   <div
                     key={challenge.id}
-                    className="cursor-pointer flex flex-col justify-between gap-4 min-h-[180px] p-4 rounded-xl"
+                    className="cursor-pointer flex flex-col justify-between gap-4 min-h-[165px] p-4 rounded-xl"
                     style={{ backgroundColor }}
                     onClick={() => handleChallengeClick(challenge)}
                   >
@@ -203,7 +203,6 @@ export default function ChallengesPage() {
                       <h3 className="text-lg font-bold">{challenge.title}</h3>
                       <p className="text-sm mb-1">{challenge.meaning}</p>
                       <p className="text-xs font-semibold">
-                        Reason: <span className="font-normal">{challenge.whenToUse}</span>
                       </p>
                     </div>
                     <div className="flex justify-between">

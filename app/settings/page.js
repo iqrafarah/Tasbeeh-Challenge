@@ -93,10 +93,8 @@ export default function SettingsPage() {
   const confirmDeleteAccount = async () => {
     const user = auth.currentUser;
     if (user) {
-      console.log('Deleting account...');
       try {
         await userService.handleDeleteAccount(user.uid);
-        console.log('Account deleted');
         setShowSuccessModal(true); // Show success modal after deletion
       } catch (error) {
         console.error("Error deleting account", error.message);
@@ -106,13 +104,9 @@ export default function SettingsPage() {
   };
   
   const closeSuccessModal = () => {
-    console.log('Closing success modal...');
     setShowSuccessModal(false); // Close the success modal first
-    setTimeout(() => {
-      console.log('Redirecting to home...');
       setIsAccountDeleted(true); // Set account deleted state to true
       router.push("/"); // Redirect to home after clicking OK
-    }, 300); // 300ms timeout
   };
 
   // Function to get subscription info in a user-friendly format
@@ -203,7 +197,7 @@ export default function SettingsPage() {
               <i className="fa-solid fa-file-contract text-xl "></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Terms of service</h3>
+              <h3 className="text-[15px] font-semibold capitalize">Terms of Use</h3>
               <p className="text-xs text-gray-500">Read our terms</p>
             </div>
           </div>
@@ -217,7 +211,7 @@ export default function SettingsPage() {
               <i className="fa-solid fa-shield text-xl "></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Privacy Policy</h3>
+              <h3 className="text-[15px] font-semibold capitalize">Our Privacy Policy</h3>
               <p className="text-xs text-gray-500">View our privacy Policy</p>
             </div>
           </div>
@@ -236,7 +230,7 @@ export default function SettingsPage() {
               <i className="fa-solid fa-circle-info text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Version</h3>
+              <h3 className="text-[15px] font-semibold capitalize">App Version</h3>
               <p className="text-xs text-gray-500">1.0.0</p>
             </div>
           </div>
@@ -255,7 +249,7 @@ export default function SettingsPage() {
               <i className="fa-solid fa-download text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Install App</h3>
+              <h3 className="text-[15px] font-semibold capitalize">Install This App</h3>
               <p className="text-xs text-gray-500">Install this app on your device</p>
             </div>
           </div>
@@ -274,7 +268,7 @@ export default function SettingsPage() {
               <i className="fa-solid fa-sign-out-alt text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Logout</h3>
+              <h3 className="text-[15px] font-semibold capitalize">Log out</h3>
               <p className="text-xs text-gray-500">Logout current account</p>
             </div>
           </div>
@@ -287,7 +281,7 @@ export default function SettingsPage() {
           className="text-sm mt-3 text-red-500 font-semibold"
           onClick={handleDeleteAccount}
         >
-          Delete Account
+          Delete My Account
         </button>
       </div>
 
