@@ -223,6 +223,6 @@ canvas {
 .counter {
   height: 100vh;
   width: 100vw;
-  top: -100%;
+  top: -120%;
   position: absolute;
 }

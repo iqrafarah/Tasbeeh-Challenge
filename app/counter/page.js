@@ -282,7 +282,7 @@ function CounterPageContent() {
             >
                 {/* Sound and Help Toggle */}
                 {!completed && (
-                    <div className="absolute top-5 right-4 flex items-center gap-4 z-30">
+                    <div className="absolute top-5 right-4 flex items-center gap-6 z-30">
                         <div className="tooltip-toggle relative" onClick={toggleTooltip}>
                             <i className="fa-solid fa-lightbulb text-xl cursor-pointer"></i>
                         </div>
@@ -362,7 +362,7 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="fixed bottom-[25%] flex justify-center gap-6 w-full px-4 z-50">
+                <div className="fixed bottom-[30%] flex justify-center gap-6 w-full px-4 z-50">
                     {completed ? (
                         <>
                             <button
