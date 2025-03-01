@@ -200,7 +200,7 @@ function CounterPageContent() {
     const handleRetry = () => {
         setCount(0);
         setCompleted(false);
-        
+
         // Explicitly save the zero count to database when resetting
         if (user && challengeId) {
             challengeService.saveChallenge({
@@ -336,7 +336,7 @@ function CounterPageContent() {
                 <div className="flex-1 flex flex-col align-center justify-start w-full">
                     {completed ? (
                         <>
-                            <h3 className="title text-center">Congrats🎉</h3>
+                            <h3 className="title text-center">Masha'Allah 🎉</h3>
                             <p className="mt-3 text-sm text-center">You have completed this challenge!</p>
                         </>
                     ) : (
@@ -362,7 +362,7 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="fixed bottom-[30%] flex justify-center gap-6 w-full px-4 z-50">
+                <div className="fixed top-[34rem] flex justify-center gap-6 w-full px-4 z-50">
                     {completed ? (
                         <>
                             <button
