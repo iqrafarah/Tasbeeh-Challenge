@@ -64,7 +64,10 @@ export default function Home() {
           </div>
           <div className="h-[40vh] flex flex-col justify-between">
             <div className="flex flex-col gap-3">
-              <p className="text-sm">Choose how to continue</p>
+              <p className="text-xs">
+                Sign in to start your journey of completing daily tasbeeh
+                challenges.
+              </p>
               <button
                 onClick={handleSignIn}
                 className="flex items-center justify-center gap-3 button"

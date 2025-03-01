@@ -1,5 +1,6 @@
 import "./globals.css";
 import BottomNav from "./components/bottomNav";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
     title: "Tasbeeh Challenge",
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
             <body>
                 <main className="container">
                     {children}
+                    <Toaster position="top-center" />
                     <BottomNav />
                 </main>
             </body>

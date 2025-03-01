@@ -1,13 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
 import ConfirmationModal from "../components/confirmationModal";
 import LoadingScreen from "../components/loadingScreen";
-import InstallAppModal from "../components/installApp"; // Import the InstallAppModal component
+import InstallAppModal from "../components/installApp";
+import { toast } from "react-hot-toast";
 
 export default function SettingsPage() {
   const auth = getAuth(app);
@@ -19,8 +20,9 @@ export default function SettingsPage() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isAccountDeleted, setIsAccountDeleted] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState(null); // State to store the deferred prompt
-  const [showInstallModal, setShowInstallModal] = useState(false); // State to show/hide install modal
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -91,22 +93,59 @@ export default function SettingsPage() {
   };
 
   const confirmDeleteAccount = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        await userService.handleDeleteAccount(user.uid);
-        setShowSuccessModal(true); // Show success modal after deletion
-      } catch (error) {
-        console.error("Error deleting account", error.message);
-      }
-      setShowDeleteConfirmation(false); // Close delete confirmation modal
+    setShowDeleteConfirmation(false); // Close delete confirmation modal first
+    
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.error("You must be logged in to delete your account");
+      return;
+    }
+    
+    setIsDeleting(true);
+    
+    try {
+      // For Google auth, we need to reauthenticate with a popup
+      const provider = new GoogleAuthProvider();
+      
+      // Show a message to inform user about re-authentication
+      toast.loading("Please re-authenticate to confirm account deletion", { duration: 3000 });
+      
+      // Delay the popup slightly to ensure the toast is visible
+      setTimeout(async () => {
+        try {
+          // This will show the Google sign-in popup
+          await reauthenticateWithPopup(currentUser, provider);
+          
+          // After successful re-authentication, delete the account
+          await userService.handleDeleteAccount(currentUser.uid);
+          
+          setShowSuccessModal(true); // Show success modal after deletion
+          toast.success("Account deleted successfully");
+        } catch (error) {
+          console.error("Error during re-authentication or account deletion:", error);
+          
+          if (error.code === 'auth/popup-closed-by-user') {
+            toast.error("Authentication canceled. Please try again.");
+          } else if (error.code === 'auth/popup-blocked') {
+            toast.error("Popup was blocked. Please allow popups for this site and try again.");
+          } else {
+            toast.error("Failed to delete account: " + error.message);
+          }
+        } finally {
+          setIsDeleting(false);
+        }
+      }, 1500);
+    } catch (error) {
+      console.error("Error in deletion process:", error);
+      toast.error("An unexpected error occurred");
+      setIsDeleting(false);
     }
   };
   
   const closeSuccessModal = () => {
     setShowSuccessModal(false); // Close the success modal first
-      setIsAccountDeleted(true); // Set account deleted state to true
-      router.push("/"); // Redirect to home after clicking OK
+    setIsAccountDeleted(true); // Set account deleted state to true
+    router.push("/"); // Redirect to home after clicking OK
   };
 
   // Function to get subscription info in a user-friendly format
@@ -280,8 +319,9 @@ export default function SettingsPage() {
         <button
           className="text-sm mt-3 text-red-500 font-semibold"
           onClick={handleDeleteAccount}
+          disabled={isDeleting}
         >
-          Delete My Account
+          {isDeleting ? "Processing..." : "Delete My Account"}
         </button>
       </div>
 
@@ -300,19 +340,10 @@ export default function SettingsPage() {
         onClose={() => setShowDeleteConfirmation(false)}
         onConfirm={confirmDeleteAccount}
         title="Delete Account"
-        message="Are you sure you want to delete this account?"
-        confirmText="Delete"
+        message="Are you sure you want to delete this account? You'll need to re-authenticate with Google to confirm."
+        confirmText={isDeleting ? "Processing..." : "Delete"}
         confirmColor="bg-red-500"
-      />
-
-      <ConfirmationModal
-        isOpen={showSuccessModal}
-        onClose={closeSuccessModal}
-        onConfirm={closeSuccessModal}
-        title="Account Deleted"
-        message="Your account has been deleted successfully."
-        confirmText="OK"
-        confirmColor="bg-green-500"
+        disabled={isDeleting}
       />
 
       <InstallAppModal

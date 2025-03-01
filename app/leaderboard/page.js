@@ -191,7 +191,7 @@ export default function Leaderboard() {
     <ProtectedRoute>
       <div className="relative">
         {/* Leaderboard Header */}
-        <div className="flex justify-between items-center px-4 py-2">
+        <div className="flex justify-between items-center py-2">
           <h1 className="text-2xl font-bold">Leaderboard</h1>
 
           <div className="flex gap-10">

@@ -15,7 +15,7 @@ export default function LevelUpModal({newLevel, onClose}) {
     if (!newLevel) return null;
 
     return (
-        <div className="container fixed top-0 z-50">
+        <div className="container fixed top-0 z-[100]">
             {/* Confetti effect */}
             {showConfetti &&
                 <Confetti

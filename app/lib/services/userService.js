@@ -1,5 +1,5 @@
 import {
-    getFirestore, doc, getDoc, getDocs, collection, writeBatch, setDoc, addDoc, deleteDoc, serverTimestamp, increment
+    getFirestore, doc, getDoc, getDocs, collection, updateDoc, writeBatch, setDoc, addDoc, deleteDoc, serverTimestamp, increment
 } from "firebase/firestore";
 import { getAuth, deleteUser } from "firebase/auth";
 import app from "../firebase.config";
@@ -103,11 +103,11 @@ export const userService = {
 
         const userRef = doc(db, "users", uid);
         try {
-          await setDoc(userRef, data, { merge: true });
+            await setDoc(userRef, data, { merge: true });
         } catch (error) {
-          console.error("Error updating user data:", error);
+            console.error("Error updating user data:", error);
         }
-      },
+    },
 
     // Get user data
     getUser: async (uid) => {
@@ -182,15 +182,15 @@ export const userService = {
         }
     },
 
-    updateTotalDhikr: async (uid) => {
+    updateTotalDhikr: async (uid, change) => {
         const db = getFirestore(app);
         try {
             const userRef = doc(db, "users", uid);
-            await setDoc(
-                userRef,
-                { totalDhikr: increment(1) },
-                { merge: true }
-            );
+
+            // Use updateDoc to only modify the totalDhikr field
+            await updateDoc(userRef, {
+                totalDhikr: increment(change), // Increment or decrement totalDhikr
+            });
         } catch (error) {
             console.error("Error updating totalDhikr:", error);
             throw error;
@@ -244,43 +244,74 @@ export const userService = {
     },
 
     handleDeleteAccount: async (uid) => {
-        const db = getFirestore();
-        const auth = getAuth();
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const user = auth.currentUser;
 
         try {
+            // Make sure user is authenticated and UID matches (additional security check)
+            if (!user || user.uid !== uid) {
+                throw new Error("Authentication error: User not authenticated or UID mismatch");
+            }
+
+            // Get user document reference
             const userRef = doc(db, "users", uid);
-            const userChallengesRef = collection(db, "userChallenges", uid, "challenges");
 
-            // Delete userChallenges subcollection
-            const userChallengesSnapshot = await getDocs(userChallengesRef);
-            const batch = writeBatch(db);
+            // Delete user challenges
+            try {
+                const userChallengesRef = collection(db, "userChallenges", uid, "challenges");
+                const userChallengesSnapshot = await getDocs(userChallengesRef);
+                const batch = writeBatch(db);
+                
+                userChallengesSnapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                
+                if (userChallengesSnapshot.size > 0) {
+                    await batch.commit();
+                }
+            } catch (error) {
+                console.warn("Error deleting user challenges:", error);
+                // Continue with deletion even if this fails
+            }
 
-            userChallengesSnapshot.forEach((doc) => batch.delete(doc.ref));
-            await batch.commit();
-
-            // Delete all related subcollections
+            // Delete user subcollections (friends, notifications)
             const subcollections = ["friends", "notifications"];
             for (const subcollection of subcollections) {
-                const subcollectionRef = collection(db, "users", uid, subcollection);
-                const subcollectionSnapshot = await getDocs(subcollectionRef);
-
-                const batch = writeBatch(db);
-                subcollectionSnapshot.forEach((doc) => batch.delete(doc.ref));
-                await batch.commit();
+                try {
+                    const subcollectionRef = collection(db, "users", uid, subcollection);
+                    const subcollectionSnapshot = await getDocs(subcollectionRef);
+                    
+                    if (subcollectionSnapshot.size > 0) {
+                        const batch = writeBatch(db);
+                        subcollectionSnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+                    }
+                } catch (error) {
+                    console.warn(`Error deleting ${subcollection} subcollection:`, error);
+                    // Continue with deletion even if this fails
+                }
             }
 
-            // Delete user document
+            // Delete user document from Firestore
             await deleteDoc(userRef);
-
-            // Delete authentication record
-            const user = auth.currentUser;
-            if (user && user.uid === uid) {
-                await deleteUser(user);
-            }
-
-            console.log("User account and associated data deleted successfully.");
+            
+            // Delete auth user
+            await deleteUser(user);
+            
+            console.log("User account and associated data deleted successfully");
+            return { success: true };
+            
         } catch (error) {
             console.error("Error deleting user account:", error);
+            
+            // Check if this is a requires-recent-login error
+            if (error.code === 'auth/requires-recent-login') {
+                throw new Error("Please reauthenticate to delete your account.");
+            }
+            
             throw error;
         }
     },

@@ -162,7 +162,8 @@ function CounterPageContent() {
 
     // Save challenge progress
     useEffect(() => {
-        if (user && count !== 0) {
+        if (user && challengeId) {
+            // Always save the current count, even if it's zero
             debouncedSaveChallenge(user.uid, challengeId, count);
         }
     }, [count, user, challengeId]);
@@ -193,23 +194,46 @@ function CounterPageContent() {
             return newCount;
         });
 
-        userService.updateTotalDhikr(user.uid);
+        userService.updateTotalDhikr(user.uid, +1);
     };
 
     const handleRetry = () => {
         setCount(0);
         setCompleted(false);
+        
+        // Explicitly save the zero count to database when resetting
+        if (user && challengeId) {
+            challengeService.saveChallenge({
+                userId: user.uid,
+                challengeId: challengeId,
+                count: 0,
+            });
+        }
     };
 
-    const handleNext = () => {
-        if (!challenges.length) return;
+    const handleDecrease = async (e) => {
+        e.stopPropagation();
 
-        const currentIndex = challenges.findIndex((ch) => ch.id === challengeId);
-        const nextIndex = (currentIndex + 1) % challenges.length;
-        const nextChallengeId = challenges[nextIndex].id;
+        if (count > 0) {
+            const newCount = count - 1;
+            setCount(newCount);
 
-        // Navigate to the next challenge
-        router.push(`/counter?id=${nextChallengeId}`);
+            if (user) {
+                try {
+                    // Update the challenge progress in the database
+                    await challengeService.saveChallenge({
+                        userId: user.uid,
+                        challengeId: challengeId,
+                        count: newCount,
+                    });
+
+                    // Decrease total dhikr count in the database using the updateTotalDhikr function
+                    await userService.updateTotalDhikr(user.uid, -1); // Decrement by 1
+                } catch (error) {
+                    console.error("Error updating challenge or total dhikr count in database:", error);
+                }
+            }
+        }
     };
 
     const toggleSound = (e) => {
@@ -249,6 +273,7 @@ function CounterPageContent() {
 
     const percentage = (count / challenge.requiredCount) * 100;
 
+
     return (
         <ProtectedRoute>
             <div
@@ -261,7 +286,7 @@ function CounterPageContent() {
                         <div className="tooltip-toggle relative" onClick={toggleTooltip}>
                             <i className="fa-solid fa-lightbulb text-xl cursor-pointer"></i>
                         </div>
-                        
+
                         <div className="sound-toggle" onClick={toggleSound}>
                             {soundEnabled ? (
                                 <i className="fa-solid fa-volume-high text-xl cursor-pointer"></i>
@@ -274,14 +299,14 @@ function CounterPageContent() {
 
                 {/* Centered Tooltip */}
                 {showTooltip && (
-                    <div 
+                    <div
                         className="fixed top-16 flex items-center justify-center z-40"
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowTooltip(false);
                         }}
                     >
-                        <div 
+                        <div
                             className="border border-[#d8d8f2] rounded-lg  bg-[#d8d8f2] w-80 p-4 m-4"
                             onClick={(e) => e.stopPropagation()}
                             ref={tooltipRef}
@@ -308,18 +333,19 @@ function CounterPageContent() {
                     />
                 )}
 
-                {completed ? (
-                    <>
-                        <h3 className="title text-center">Congrats🎉</h3>
-                        <p className="mt-3 text-sm text-center">You have completed this challenge!</p>
-                    </>
-                ) : (
-                    <>
-                        <h3 className="text-xl font-bold w-full text-left">{challenge.title}</h3>
-                    </>
-                )}
-
-                <div className="w-72 h-72 flex items-center justify-center mt-32 relative">
+                <div className="flex-1 flex flex-col justify-start w-full">
+                    {completed ? (
+                        <>
+                            <h3 className="title text-center">Congrats🎉</h3>
+                            <p className="mt-3 text-sm text-center">You have completed this challenge!</p>
+                        </>
+                    ) : (
+                        <>
+                            <h3 className="text-xl font-bold w-full text-left">{challenge.title}</h3>
+                        </>
+                    )}
+                </div>
+                <div className="counter w-72 h-72 flex items-center justify-center mb-8 relative">
                     <CircleProgressBar
                         completed={percentage}
                         bgcolor="#000"
@@ -328,7 +354,7 @@ function CounterPageContent() {
                         strokeWidth={12}
                     />
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <div className="flex flex-col items-center justify-center">
                             <span className={`count ${visualFeedback ? 'animate-pulse' : ''}`}>{count}</span>
                             <span className="text-lg ml-1 font-semibold">total {challenge.requiredCount}</span>
@@ -336,16 +362,40 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                {completed && (
-                    <div className="mt-[60px] flex gap-4 w-full">
-                        <button onClick={handleRetry} className="buttonSecondary">
-                            Try again
-                        </button>
-                        <button onClick={handleNext} className="button">
-                            Next One
-                        </button>
-                    </div>
-                )}
+                <div className="fixed bottom-[10rem] flex justify-center gap-6 w-full px-4 z-50">
+                    {completed ? (
+                        <>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRetry();
+                                }}
+                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                            >
+                                <i className="fa-solid fa-arrows-rotate text-white"></i>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                onClick={handleDecrease}
+                                className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
+                            >
+                                <i className="fa-solid fa-rotate-left"></i>
+                            </button>
+
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRetry();
+                                }}
+                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                            >
+                                <i className="fa-solid fa-arrows-rotate text-white"></i>
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
         </ProtectedRoute>
     );
