@@ -362,7 +362,7 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="fixed bottom-[30%] flex justify-center gap-6 w-full px-4 z-50 sm:flex-col sm:bottom-20 sm:gap-4">
+                <div className="fixed bottom-[30%] flex justify-center gap-6 w-full px-4 z-50 sm:flex-col sm:bottom-25 sm:gap-4">
                 {completed ? (
                             <>
                                 <button
