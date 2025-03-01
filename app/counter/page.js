@@ -379,7 +379,7 @@ function CounterPageContent() {
                         <>
                             <button
                                 onClick={handleDecrease}
-                                className="bg-[lightgray] px-3 py-2 rounded-full h-fit pointer-events-auto"
+                                className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
                             >
                                 <i className="fa-solid fa-rotate-left"></i>
                             </button>
@@ -389,7 +389,7 @@ function CounterPageContent() {
                                     e.stopPropagation();
                                     handleRetry();
                                 }}
-                                className="bg-[lightgray] px-3 py-2 rounded-full h-fit pointer-events-auto"
+                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
                             >
                                 <i className="fa-solid fa-arrows-rotate text-white"></i>
                             </button>
