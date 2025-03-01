@@ -11,7 +11,6 @@ const InstallAppModal = ({ isOpen, onClose }) => {
 
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
-      console.log("beforeinstallprompt event captured");
       setDeferredPrompt(e);
     };
 
@@ -24,13 +23,10 @@ const InstallAppModal = ({ isOpen, onClose }) => {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      console.log("Prompting install");
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === "accepted") {
-        console.log("User accepted the install prompt");
       } else {
-        console.log("User dismissed the install prompt");
       }
       setDeferredPrompt(null);
     } else {

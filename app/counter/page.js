@@ -277,12 +277,12 @@ function CounterPageContent() {
     return (
         <ProtectedRoute>
             <div
-                className="flex flex-col items-center min-h-screen bg-white p-4 cursor-pointer relative"
+                className="flex flex-col items-center min-h-fit bg-white p-4 cursor-pointer relative"
                 onClick={handleClick}
             >
                 {/* Sound and Help Toggle */}
                 {!completed && (
-                    <div className="absolute top-4 right-4 flex items-center gap-4 z-30">
+                    <div className="absolute top-5 right-4 flex items-center gap-4 z-30">
                         <div className="tooltip-toggle relative" onClick={toggleTooltip}>
                             <i className="fa-solid fa-lightbulb text-xl cursor-pointer"></i>
                         </div>
@@ -307,7 +307,7 @@ function CounterPageContent() {
                         }}
                     >
                         <div
-                            className="border border-[#d8d8f2] rounded-lg  bg-[#d8d8f2] w-80 p-4 m-4"
+                            className="border border-[#d8d8f2] rounded-lg bg-[#d8d8f2] w-80 p-4 m-4"
                             onClick={(e) => e.stopPropagation()}
                             ref={tooltipRef}
                         >
@@ -333,7 +333,7 @@ function CounterPageContent() {
                     />
                 )}
 
-                <div className="flex-1 flex flex-col justify-start w-full">
+                <div className="flex-1 flex flex-col align-center justify-start w-full">
                     {completed ? (
                         <>
                             <h3 className="title text-center">Congrats🎉</h3>
