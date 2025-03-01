@@ -336,30 +336,29 @@ function CounterPageContent() {
                         </>
                     ) : (
                         <>
-                            <h3 className="text-xl font-bold w-full text-left">{challenge?.title}</h3>
-                        </>
+                            <h3 className="text-xl font-bold w-[80%] text-left">{challenge?.title}</h3>                        </>
                     )}
                 </div>
                 <div className="counter">
-                <div className="mx-auto w-72 h-72 flex items-center justify-center relative">
-                    <CircleProgressBar
-                        completed={percentage}
-                        bgcolor="#000"
-                        baseBgColor="#E5E5E5"
-                        size={250}
-                        strokeWidth={12}
-                    />
+                    <div className="mx-auto w-72 h-72 flex items-center justify-center relative">
+                        <CircleProgressBar
+                            completed={percentage}
+                            bgcolor="#000"
+                            baseBgColor="#E5E5E5"
+                            size={250}
+                            strokeWidth={12}
+                        />
 
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <div className="flex flex-col items-center justify-center">
-                            <span className={`count ${visualFeedback ? 'animate-pulse' : ''}`}>{count}</span>
-                            <span className="text-lg ml-1 font-semibold">total {challenge?.requiredCount}</span>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <div className="flex flex-col items-center justify-center">
+                                <span className={`count ${visualFeedback ? 'animate-pulse' : ''}`}>{count}</span>
+                                <span className="text-lg ml-1 font-semibold">total {challenge?.requiredCount}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-50">
-                {completed ? (
+                    <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-50">
+                        {completed ? (
                             <>
                                 <button
                                     onClick={(e) => {
@@ -391,8 +390,8 @@ function CounterPageContent() {
                             </>
                         )}
                     </div>
-                    </div>
                 </div>
+            </div>
         </ProtectedRoute>
     );
 }
