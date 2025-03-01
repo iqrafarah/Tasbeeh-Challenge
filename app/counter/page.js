@@ -306,7 +306,7 @@ function CounterPageContent() {
                             onClick={(e) => e.stopPropagation()}
                             ref={tooltipRef}
                         >
-                            <h1 className="small_title mb-1">When to use</h1>
+                            <h1 className="small_title mb-1">Benefits</h1>
                             <p className="text-sm">{challenge?.whenToUse}</p>
                         </div>
                     </div>

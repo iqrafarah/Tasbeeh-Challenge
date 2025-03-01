@@ -222,6 +222,7 @@ export default function SettingsPage() {
 
       {/* Legal Section */}
       <div className="mt-6">
+        <Link href="/TOS">
         <h4 className="uppercase text-gray-600 text-sm font-medium">Legal</h4>
         <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
           <div className="flex gap-3">
@@ -237,6 +238,8 @@ export default function SettingsPage() {
             <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
           </div>
         </div>
+        </Link>
+        <Link href="/privacy-policy">
         <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
           <div className="flex gap-3">
             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
@@ -251,6 +254,7 @@ export default function SettingsPage() {
             <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
           </div>
         </div>
+        </Link>
       </div>
 
       {/* Info Section */}
