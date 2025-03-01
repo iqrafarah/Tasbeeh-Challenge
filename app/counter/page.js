@@ -3,7 +3,6 @@ import React, { useState, useEffect, Suspense, useRef } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
 import { challengeService } from "../lib/services/challengeService";
 import { useSearchParams, useRouter } from "next/navigation";
-import LoadingScreen from "../components/loadingScreen";
 import app from "../lib/firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { userService } from "../lib/services/userService";
@@ -142,7 +141,7 @@ function CounterPageContent() {
 
     // Check completion status
     useEffect(() => {
-        if (count >= challenge?.requiredCount && !completed) {
+        if (challenge && count >= challenge.requiredCount && !completed) {
             setCompleted(true);
         }
     }, [count, challenge, completed]);
@@ -268,12 +267,7 @@ function CounterPageContent() {
         };
     }, [showTooltip]);
 
-    if (!challenge) {
-        return <LoadingScreen />;
-    }
-
-    const percentage = (count / challenge.requiredCount) * 100;
-
+    const percentage = challenge ? (count / challenge.requiredCount) * 100 : 0;
 
     return (
         <ProtectedRoute>
@@ -313,7 +307,7 @@ function CounterPageContent() {
                             ref={tooltipRef}
                         >
                             <h1 className="small_title mb-1">When to use</h1>
-                            <p className="text-sm">{challenge.whenToUse}</p>
+                            <p className="text-sm">{challenge?.whenToUse}</p>
                         </div>
                     </div>
                 )}
@@ -342,7 +336,7 @@ function CounterPageContent() {
                         </>
                     ) : (
                         <>
-                            <h3 className="text-xl font-bold w-full text-left">{challenge.title}</h3>
+                            <h3 className="text-xl font-bold w-full text-left">{challenge?.title}</h3>
                         </>
                     )}
                 </div>
@@ -359,7 +353,7 @@ function CounterPageContent() {
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <div className="flex flex-col items-center justify-center">
                             <span className={`count ${visualFeedback ? 'animate-pulse' : ''}`}>{count}</span>
-                            <span className="text-lg ml-1 font-semibold">total {challenge.requiredCount}</span>
+                            <span className="text-lg ml-1 font-semibold">total {challenge?.requiredCount}</span>
                         </div>
                     </div>
                 </div>
@@ -405,7 +399,7 @@ function CounterPageContent() {
 
 export default function CounterPage() {
     return (
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense>
             <CounterPageContent />
         </Suspense>
     );
