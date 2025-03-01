@@ -345,7 +345,8 @@ function CounterPageContent() {
                         </>
                     )}
                 </div>
-                <div className="counter w-72 h-72 flex items-center justify-center mb-8 relative">
+                <div className="counter">
+                <div className="mx-auto w-72 h-72 flex items-center justify-center relative">
                     <CircleProgressBar
                         completed={percentage}
                         bgcolor="#000"
@@ -362,7 +363,7 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="absolute top-[33rem] left-1/2 transform -translate-x-1/2 flex justify-center gap-6 w-full px-4 z-50">
+                <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-50">
                 {completed ? (
                             <>
                                 <button
@@ -370,7 +371,7 @@ function CounterPageContent() {
                                         e.stopPropagation();
                                         handleRetry();
                                     }}
-                                    className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                    className="bg-black px-5 py-4 rounded-full h-fit pointer-events-auto"
                                 >
                                     <i className="fa-solid fa-arrows-rotate text-white"></i>
                                 </button>
@@ -379,9 +380,8 @@ function CounterPageContent() {
                             <>
                                 <button
                                     onClick={handleDecrease}
-                                    className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
-                                >
-                                    <i className="fa-solid fa-rotate-left"></i>
+                                    className="bg-[lightgray] px-5 py-5 flex align-center rounded-full h-fit pointer-events-auto text-lg"                                >
+                                    <i className="fa-solid fa-rotate-left text-xl"></i>
                                 </button>
 
                                 <button
@@ -389,12 +389,13 @@ function CounterPageContent() {
                                         e.stopPropagation();
                                         handleRetry();
                                     }}
-                                    className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                    className="bg-black px-5 py-5 flex align-center rounded-full h-fit pointer-events-auto"
                                 >
-                                    <i className="fa-solid fa-arrows-rotate text-white"></i>
+                                    <i className="fa-solid fa-arrows-rotate text-xl text-white"></i>
                                 </button>
                             </>
                         )}
+                    </div>
                     </div>
                 </div>
         </ProtectedRoute>
