@@ -3,6 +3,7 @@ import React, { useState, useEffect, Suspense, useRef } from "react";
 import CircleProgressBar from "../components/circleProgressBar";
 import { challengeService } from "../lib/services/challengeService";
 import { useSearchParams, useRouter } from "next/navigation";
+import LoadingScreen from "../components/loadingScreen";
 import app from "../lib/firebase.config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { userService } from "../lib/services/userService";
