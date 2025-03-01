@@ -362,41 +362,41 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="fixed top-[34rem] flex justify-center gap-6 w-full px-4 z-50">
-                    {completed ? (
-                        <>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRetry();
-                                }}
-                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
-                            >
-                                <i className="fa-solid fa-arrows-rotate text-white"></i>
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                onClick={handleDecrease}
-                                className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
-                            >
-                                <i className="fa-solid fa-rotate-left"></i>
-                            </button>
+                <div className="fixed bottom-[30%] flex justify-center gap-6 w-full px-4 z-50 sm:flex-col sm:bottom-20 sm:gap-4">
+                {completed ? (
+                            <>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRetry();
+                                    }}
+                                    className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                >
+                                    <i className="fa-solid fa-arrows-rotate text-white"></i>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleDecrease}
+                                    className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                >
+                                    <i className="fa-solid fa-rotate-left"></i>
+                                </button>
 
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRetry();
-                                }}
-                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
-                            >
-                                <i className="fa-solid fa-arrows-rotate text-white"></i>
-                            </button>
-                        </>
-                    )}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRetry();
+                                    }}
+                                    className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                >
+                                    <i className="fa-solid fa-arrows-rotate text-white"></i>
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
         </ProtectedRoute>
     );
 }
