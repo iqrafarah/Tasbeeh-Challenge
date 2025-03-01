@@ -35,8 +35,8 @@ export default function LevelUpModal({newLevel, onClose}) {
                         <h1 className="levelTitle absolute">{newLevel}</h1>
 
                     </div>
-                    <h3 className="title">Masha Allah🎉</h3>
-                    <p className="mt-2 text-[#rgb(195 195 195)] text-sm">Alhamdulillah, you leveled up to Level</p>                </div>
+                    <h3 className="title">Ma Sha Allah 🎉</h3>
+                    <p className="mt-2 text-[#rgb(195 195 195)] text-sm">Alhamdulillah, you’ve ranked up to Level {newLevel}</p>                </div>
                 <button
                     onClick={onClose}
                     className="button"

@@ -83,7 +83,9 @@ const HeatTracker = ({ uid }) => {
     return (
         <div {...handlers} className="bg-lightgray rounded-xl pb-4 mt-5 w-full p-4 flex flex-col items-center justify-center">
 
-            <h1 className="small_title text-left w-full capitalize mb-3">{startDate.toLocaleString('default', { month: 'long' })} {startDate.getFullYear()}</h1>
+            <h1 className="small_title text-left w-full capitalize mb-3">
+                {startDate.toLocaleString('en-US', { month: 'long' })} {startDate.getFullYear()}
+            </h1>
 
             {/* Heatmap grid for current month */}
             <div className="w-full grid grid-cols-7 gap-2">
@@ -109,7 +111,7 @@ const HeatTracker = ({ uid }) => {
                                 borderRadius: '3px',
                                 cursor: 'pointer',
                             }}
-                            title={`Date: ${currentDate.toLocaleDateString()}, Contributions: ${count}`}
+                            title={`Date: ${currentDate.toLocaleDateString('en-US')}, Contributions: ${count}`}
                         >
                             {/* Display day number */}
                             <span className="numbers">{day}</span>

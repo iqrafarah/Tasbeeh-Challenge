@@ -13,7 +13,7 @@ export default function TrialEndModal({ isOpen, onClose }) {
                     </div>
                     <h2 className="title mb-2">Your free trial has ended</h2>
                     <p className="text-gray-600 text-sm">
-                        Continue your spiritual journey by upgrading to a premium plan today.
+                        Keep your Dhikr streak strong—upgrade to premium and level up your spiritual journey today✨
                     </p>
                 </div>
 

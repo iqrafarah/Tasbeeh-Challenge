@@ -331,7 +331,7 @@ function CounterPageContent() {
                 <div className="flex-1 flex flex-col align-center justify-start w-full">
                     {completed ? (
                         <>
-                            <h3 className="title text-center">Masha'Allah 🎉</h3>
+                            <h3 className="title text-center">Ma Sha Allah 🎉</h3>
                             <p className="mt-3 text-sm text-center">You have completed this challenge!</p>
                         </>
                     ) : (

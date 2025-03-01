@@ -100,15 +100,15 @@ export default function PricingPage() {
                             <i className="fa-solid fa-circle-check text-bklack mr-3 text-lg"></i>
                             <div className="text-sm">
                                 <p>Your free trial expires in <b>{subscriptionInfo.daysLeft} days</b></p>
-                                <p className="text-black font-medium text-xs">Upgrade now to commit to your goals</p>
+                                <p className="text-sm">keep your Dhikr streak going!</p>
                             </div>
                         </div>
                     )}
 
                     {/* Main message */}
                     <div className="text-center my-6">
-                        <h2 className="text-2xl font-bold mb-1">Beat procrastination.</h2>
-                        <h2 className="text-2xl font-bold mb-4">Achieve your goals.</h2>
+                        <h2 className="text-2xl font-bold mb-1">Upgrade now to stay consistent in</h2>
+                        <h2 className="text-2xl font-bold mb-4"> Dhikr and level up!</h2>
                         
                         <div className="flex justify-center text-yellow-400 mb-2">
                             <i className="fa-solid fa-star"></i>
@@ -128,11 +128,11 @@ export default function PricingPage() {
                         </div> */}
 
                         <p className="mb-4 text-xs">
-                            <span className="font-bold">4.8/5</span> from 23,000+ achievers
+                            <span className="font-bold">4.8/5</span> from 23,000+ dedicated muslims
                         </p>
                         
-                        <h3 className="text-xl font-bold mt-6 mb-1">Building lasting habits is hard</h3>
-                        <p className="text-gray-600 text-sm">80% of New Year's resolutions fail in 2 months...</p>
+                        <h3 className="text-xl font-bold mt-6 mb-1">Consistency in Dhikr is key</h3>
+                        <p className="text-gray-600 text-sm">Don't let your streak break—stay motivated!</p>
                     </div>
 
                     {/* Pricing Plans */}
@@ -194,7 +194,7 @@ export default function PricingPage() {
                             "Processing..."
                         ) : (
                             <>
-                                UPGRADE & GET ACCESS 
+                               UPGRADE & LEVEL UP YOUR DHIKR 🌙
                             </>
                         )}
                     </button>
