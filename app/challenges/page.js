@@ -195,7 +195,7 @@ export default function ChallengesPage() {
                 return (
                   <div
                     key={challenge.id}
-                    className="cursor-pointer flex flex-col justify-between gap-4 min-h-[165px] p-4 rounded-xl"
+                    className="cursor-pointer flex flex-col justify-between gap-4 min-h-[190px] p-4 rounded-xl"
                     style={{ backgroundColor }}
                     onClick={() => handleChallengeClick(challenge)}
                   >

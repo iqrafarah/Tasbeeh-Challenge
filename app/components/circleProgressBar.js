@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
 const CircleProgressBar = ({
@@ -16,29 +16,26 @@ const CircleProgressBar = ({
     <svg width={size} height={size}>
       {/* Background Circle */}
       <circle
-        stroke={baseBgColor}
-        fill="transparent"
-        strokeWidth={strokeWidth}
-        r={radius}
         cx={size / 2}
         cy={size / 2}
+        r={radius}
+        stroke={baseBgColor}
+        strokeWidth={strokeWidth}
+        fill="none"
       />
+      
       {/* Progress Circle */}
       <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
         stroke={bgcolor}
-        fill="transparent"
         strokeWidth={strokeWidth}
+        fill="none"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         strokeLinecap="round"
-        r={radius}
-        cx={size / 2}
-        cy={size / 2}
-        style={{
-          transition: "stroke-dashoffset 0.5s ease-in-out",
-          transform: "rotate(-90deg)",
-          transformOrigin: "50% 50%",
-        }}
+        style={{ transition: "stroke-dashoffset 0.2s ease-out", transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
       />
     </svg>
   );
@@ -53,4 +50,4 @@ CircleProgressBar.propTypes = {
   strokeWidth: PropTypes.number,
 };
 
-export default CircleProgressBar;
+export default React.memo(CircleProgressBar);
