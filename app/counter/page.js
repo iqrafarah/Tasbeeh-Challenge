@@ -362,7 +362,7 @@ function CounterPageContent() {
                     </div>
                 </div>
 
-                <div className="fixed bottom-[10rem] flex justify-center gap-6 w-full px-4 z-50">
+                <div className="fixed bottom-[25%] flex justify-center gap-6 w-full px-4 z-50">
                     {completed ? (
                         <>
                             <button
@@ -379,7 +379,7 @@ function CounterPageContent() {
                         <>
                             <button
                                 onClick={handleDecrease}
-                                className="bg-[lightgray] px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                className="bg-[lightgray] px-3 py-2 rounded-full h-fit pointer-events-auto"
                             >
                                 <i className="fa-solid fa-rotate-left"></i>
                             </button>
@@ -389,7 +389,7 @@ function CounterPageContent() {
                                     e.stopPropagation();
                                     handleRetry();
                                 }}
-                                className="bg-black px-4 py-3 rounded-full h-fit pointer-events-auto"
+                                className="bg-[lightgray] px-3 py-2 rounded-full h-fit pointer-events-auto"
                             >
                                 <i className="fa-solid fa-arrows-rotate text-white"></i>
                             </button>
