@@ -228,7 +228,7 @@ canvas {
 .counter {
   height: 100vh;
   width: 100vw;
-  top: -1rem;
+  top: -5rem;
   position: absolute;
   display: flex;
   justify-content: center;

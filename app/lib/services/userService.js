@@ -33,7 +33,7 @@ export const userService = {
                     streak: 0,
                     level: 1,
                     totalPoints: 0,
-                    pointsToNextLevel: 5,
+                    pointsToNextLevel: 100,
                     totalDhikr: 0,
                     ChallengesCompleted: 0,
                     longestStreak: 0,

@@ -336,7 +336,8 @@ function CounterPageContent() {
                         </>
                     ) : (
                         <>
-                            <h3 className="text-xl font-bold w-[80%] text-left">{challenge?.title}</h3>                        </>
+                            <h3 className="text-xl font-bold w-[80%] text-left">{challenge?.title}</h3>    
+                            <p>{challenge?.arabic}</p>                    </>
                     )}
                 </div>
                 <div className="counter">

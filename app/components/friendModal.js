@@ -12,7 +12,6 @@ export default function FriendModal({ friendLink, setFriendLink, onClose, onAddF
         navigator.clipboard.writeText(link)
             .then(() => {
                 setCopyButtonText("Copied!");
-                setTimeout(() => setCopyButtonText("Generate Link"), 2000);
             })
             .catch((error) => {
                 console.error("Error copying link to clipboard:", error);
