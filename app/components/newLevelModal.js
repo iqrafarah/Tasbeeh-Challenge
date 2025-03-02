@@ -15,7 +15,7 @@ export default function LevelUpModal({newLevel, onClose}) {
     if (!newLevel) return null;
 
     return (
-        <div className="container fixed top-[-1rem] inset-0 z-[100]">
+        <div className="container fixed top-0 z-50">
             {/* Confetti effect */}
             {showConfetti &&
                 <Confetti
@@ -35,8 +35,9 @@ export default function LevelUpModal({newLevel, onClose}) {
                         <h1 className="levelTitle absolute">{newLevel}</h1>
 
                     </div>
-                    <h3 className="title">Ma Sha Allah 🎉</h3>
-                    <p className="mt-2 text-[#rgb(195 195 195)] text-sm">Alhamdulillah, you’ve ranked up to Level {newLevel}</p>                </div>
+                    <h3 className="title">Congrats🎉</h3>
+                    <p className="mt-2 text-[#rgb(195 195 195)] text-sm">Masha Allah You leveled up to Level</p>
+                </div>
                 <button
                     onClick={onClose}
                     className="button"

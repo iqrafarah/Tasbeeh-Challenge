@@ -5,42 +5,38 @@ import app from "../lib/firebase.config";
 
 const db = getFirestore(app);
 
-// Adjust the start date to the first day of the month
 const adjustStartDate = (date) => {
     const newDate = new Date(date);
-    newDate.setDate(1); // Set to the first day of the month
+    newDate.setDate(1);
     return newDate;
 };
 
-// Generate heatmap data for the current month (keeping the same contribution logic)
-const generateHeatmapData = (contributions, startDate) => {
+const generateHeatmapData = (dailyStats, startDate) => {
     const daysInMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
     const heatmapData = Array.from({ length: daysInMonth }, (_, index) => {
         const dateStr = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(index + 1).padStart(2, '0')}`;
-        return contributions[dateStr] || 0; // Contributions or default 0
+        return dailyStats[dateStr] || { totalDhikr: 0, ChallengesCompleted: 0 };
     });
     return heatmapData;
 };
 
-// Calculate the day of the week for the first day of the month (0=Sunday, 1=Monday, etc.)
 const getStartDayOfWeek = (date) => {
-    const newDate = new Date(date);
-    return newDate.getDay(); // Returns a number from 0 (Sunday) to 6 (Saturday)
+    return new Date(date).getDay();
 };
 
 const HeatTracker = ({ uid }) => {
-    const [heatmapData, setHeatmapData] = useState([]); // To store contributions or other metric data
-    const [startDate, setStartDate] = useState(adjustStartDate(new Date())); // Default to current month
+    const [heatmapData, setHeatmapData] = useState([]);
+    const [startDate, setStartDate] = useState(adjustStartDate(new Date()));
     const [startDay, setStartDay] = useState(0);
+    const [activeDay, setActiveDay] = useState(null); // State to manage active day for tooltip
 
-    // Fetch contributions from the database and generate heatmap data
     const fetchContributions = async (startDate) => {
         try {
             const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
                 const userData = userDoc.data();
-                const contributions = userData.contributions || {};
-                const heatmap = generateHeatmapData(contributions, startDate);
+                const dailyStats = userData.dailyStats || {}; // Correctly extract dailyStats
+                const heatmap = generateHeatmapData(dailyStats, startDate);
                 setHeatmapData(heatmap);
             }
         } catch (error) {
@@ -49,77 +45,67 @@ const HeatTracker = ({ uid }) => {
     };
 
     useEffect(() => {
-        setStartDay(getStartDayOfWeek(startDate)); // Set the start day for the month
-        fetchContributions(startDate); // Fetch the contributions or metrics
+        setStartDay(getStartDayOfWeek(startDate));
+        fetchContributions(startDate);
     }, [startDate, uid]);
 
-    // Handle swipe actions to navigate between months
     const handleSwipe = (direction) => {
         const newStartDate = new Date(startDate);
-
-        if (direction === 'right') {
-            newStartDate.setMonth(newStartDate.getMonth() - 1); // Go to previous month
-        } else if (direction === 'left') {
-            newStartDate.setMonth(newStartDate.getMonth() + 1); // Go to next month
-        }
-
-        // Adjust start date to the first day of the new month
+        newStartDate.setMonth(newStartDate.getMonth() + (direction === 'left' ? 1 : -1));
         setStartDate(adjustStartDate(newStartDate));
     };
 
     const handlers = useSwipeable({
-        onSwipedLeft: () => handleSwipe('left'),  // Swipe left -> next month
-        onSwipedRight: () => handleSwipe('right'), // Swipe right -> previous month
+        onSwipedLeft: () => handleSwipe('left'),
+        onSwipedRight: () => handleSwipe('right'),
         preventDefaultTouchmoveEvent: true,
         trackMouse: true,
     });
 
-    // Day labels (Sunday to Saturday)
-    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
     const totalDaysInMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0).getDate();
-    const daysArray = Array.from({ length: totalDaysInMonth }, (_, index) => index + 1); // [1, 2, 3, ..., days in month]
+    const daysArray = Array.from({ length: totalDaysInMonth }, (_, index) => index + 1);
 
     return (
         <div {...handlers} className="bg-lightgray rounded-xl pb-4 mt-5 w-full p-4 flex flex-col items-center justify-center">
-
             <h1 className="small_title text-left w-full capitalize mb-3">
                 {startDate.toLocaleString('en-US', { month: 'long' })} {startDate.getFullYear()}
             </h1>
 
-            {/* Heatmap grid for current month */}
             <div className="w-full grid grid-cols-7 gap-2">
-                {/* Empty cells for the days before the first day of the month */}
                 {Array.from({ length: startDay }).map((_, index) => (
                     <div key={`empty-${index}`} className="h-8 flex justify-center items-center"></div>
                 ))}
 
-                {/* Render the actual days of the month */}
                 {daysArray.map((day) => {
-                    const count = heatmapData[day - 1] || 0; // Fetch contribution or count for the day
-                    const currentDate = new Date(startDate);
-                    currentDate.setDate(day); // Set to the correct day
+                    const { totalDhikr = 0, ChallengesCompleted = 0 } = heatmapData[day - 1] || {};
+                    const currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), day); // Create a new Date object for each day
 
                     return (
-                        <div
-                            key={day}
-                            className="h-8 flex justify-center items-center relative"
-                            style={{
-                                backgroundColor: count > 0
-                                    ? `rgb(157, 245, 157, ${Math.min(1, count / 3)})`  // Green color based on the count
-                                    : 'rgb(240 240 240)', // Light grey for no data
-                                borderRadius: '3px',
-                                cursor: 'pointer',
-                            }}
-                            title={`Date: ${currentDate.toLocaleDateString('en-US')}, Contributions: ${count}`}
-                        >
-                            {/* Display day number */}
-                            <span className="numbers">{day}</span>
+                        <div key={day} className="relative group">
+                            <div
+                                className="h-8 w-8 flex justify-center items-center rounded-md cursor-pointer"
+                                style={{
+                                    backgroundColor: totalDhikr > 0
+                                        ? `rgba(34, 197, 94, ${Math.min(1, totalDhikr / 100)})` // Green intensity based on `totalDhikr`
+                                        : 'rgb(240 240 240)',
+                                }}
+                                onClick={() => setActiveDay(activeDay === day ? null : day)} // Toggle tooltip on click
+                            >
+                                <span className="numbers">{day}</span>
+                            </div>
+
+                            {/* Tooltip */}
+                            {activeDay === day && (
+                                <div className="absolute bottom-10 z-50 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-3 rounded-md shadow-md whitespace-nowrap">
+                                    <p className='font-bold'>Dhikr: {totalDhikr}</p>
+                                    <p className='font-bold'>Challenges: {ChallengesCompleted}</p>
+                                    <div className="tooltip-pointer"></div>
+                                </div>
+                            )}
                         </div>
                     );
                 })}
             </div>
-
         </div>
     );
 };

@@ -34,8 +34,8 @@ function CounterPageContent() {
     const [showTapInstruction, setShowTapInstruction] = useState(true);
     const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
     const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0);
-    const [levelUpModalVisible, setLevelUpModalVisible] = useState(true);
-    const [newLevel, setNewLevel] = useState(1);
+    const [levelUpModalVisible, setLevelUpModalVisible] = useState(false);
+    const [newLevel, setNewLevel] = useState(null);
     const [soundEnabled, setSoundEnabled] = useState(true); // State to manage sound toggle
     const [visualFeedback, setVisualFeedback] = useState(false); // State to manage visual feedback
     const [showTooltip, setShowTooltip] = useState(false); // State for the tooltip visibility

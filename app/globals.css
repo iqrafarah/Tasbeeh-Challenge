@@ -235,3 +235,15 @@ canvas {
   text-align: center;
   flex-direction: column;
 }
+
+.tooltip-pointer {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid black;
+}

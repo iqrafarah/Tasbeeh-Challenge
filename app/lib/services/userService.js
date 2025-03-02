@@ -125,42 +125,42 @@ export const userService = {
         }
     },
 
-
     updateUserStats: async (uid, earnedPoints) => {
         const db = getFirestore(app);
         try {
             const userRef = doc(db, "users", uid);
             const userDoc = await getDoc(userRef);
-
+    
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 const numericPoints = Number(earnedPoints);
-
+    
                 let totalPoints = (userData.totalPoints || 0) + numericPoints;
                 let level = userData.level || 1;
                 let pointsToNextLevel = userData.pointsToNextLevel || 5;
-
+    
                 const growthFactor = 1.5;
                 let hasLevelChanged = false;
                 let newLevel = level;
-
+    
                 // Level up logic
                 while (totalPoints >= pointsToNextLevel) {
                     newLevel += 1;
                     pointsToNextLevel = Math.round(5 * Math.pow(newLevel, growthFactor));
                     hasLevelChanged = true; // Level has changed
                 }
-
+    
                 // If the level changed, update the level in Firestore
                 if (hasLevelChanged) {
-                    level = newLevel;
+                    level = newLevel; // Update level after loop
                 }
-
+    
                 // Update contribution data
                 const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
                 const contributions = userData.contributions || {};
                 contributions[today] = (contributions[today] || 0) + 1; // Increment today's contribution count
-
+    
+                // Update the Firestore document with the new data
                 await setDoc(
                     userRef,
                     {
@@ -172,8 +172,8 @@ export const userService = {
                     },
                     { merge: true }
                 );
-
-                // Return an object containing level change status and the new level
+    
+                // Return the level change status and the new level
                 return { hasLevelChanged, newLevel };
             }
         } catch (error) {
@@ -182,15 +182,41 @@ export const userService = {
         }
     },
 
+    getTodaysStats: async (uid) => {
+        const db = getFirestore(app);
+        try {
+            const userDoc = await getDoc(doc(db, "users", uid));
+    
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+                const dailyStats = userData.dailyStats || {};
+                return dailyStats[today] || { totalDhikr: 0, ChallengesCompleted: 0 };
+            }
+            return { totalDhikr: 0, ChallengesCompleted: 0 };
+        } catch (error) {
+            console.error("Error fetching today's stats:", error);
+            throw error;
+        }
+    },  
+
     updateTotalDhikr: async (uid, change) => {
         const db = getFirestore(app);
         try {
             const userRef = doc(db, "users", uid);
-
-            // Use updateDoc to only modify the totalDhikr field
-            await updateDoc(userRef, {
-                totalDhikr: increment(change), // Increment or decrement totalDhikr
-            });
+            const userDoc = await getDoc(userRef);
+    
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+                let dailyStats = userData.dailyStats || {};
+                dailyStats[today] = dailyStats[today] || { totalDhikr: 0, ChallengesCompleted: 0 };
+                dailyStats[today].totalDhikr += change; // Increment dhikr count for today
+    
+                await setDoc(userRef, { dailyStats }, { merge: true });
+            }
         } catch (error) {
             console.error("Error updating totalDhikr:", error);
             throw error;
