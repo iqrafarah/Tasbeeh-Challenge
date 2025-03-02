@@ -34,8 +34,8 @@ function CounterPageContent() {
     const [showTapInstruction, setShowTapInstruction] = useState(true);
     const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
     const [windowHeight, setWindowHeight] = useState(typeof window !== "undefined" ? window.innerHeight : 0);
-    const [levelUpModalVisible, setLevelUpModalVisible] = useState(false);
-    const [newLevel, setNewLevel] = useState(null);
+    const [levelUpModalVisible, setLevelUpModalVisible] = useState(true);
+    const [newLevel, setNewLevel] = useState(1);
     const [soundEnabled, setSoundEnabled] = useState(true); // State to manage sound toggle
     const [visualFeedback, setVisualFeedback] = useState(false); // State to manage visual feedback
     const [showTooltip, setShowTooltip] = useState(false); // State for the tooltip visibility
@@ -269,6 +269,12 @@ function CounterPageContent() {
 
     const percentage = challenge ? (count / challenge.requiredCount) * 100 : 0;
 
+    const handleNextChallenge = () => {
+        const currentIndex = challenges.findIndex((ch) => ch.id === challengeId);
+        const nextChallenge = challenges[(currentIndex + 1) % challenges.length];
+        router.push(`/counter?id=${nextChallenge.id}`);
+    };
+
     return (
         <ProtectedRoute>
             <div
@@ -295,7 +301,7 @@ function CounterPageContent() {
                 {/* Centered Tooltip */}
                 {showTooltip && (
                     <div
-                        className="fixed top-16 flex items-center justify-center z-40"
+                        className="absolute top-[75%] flex items-center justify-center z-40"
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowTooltip(false);
@@ -336,7 +342,7 @@ function CounterPageContent() {
                         </>
                     ) : (
                         <>
-                            <h3 className="text-xl font-bold w-[80%] text-left">{challenge?.title}</h3>    
+                            <h3 className="text-xl font-bold w-[75%] text-left">{challenge?.title}</h3>
                             <p>{challenge?.arabic}</p>                    </>
                     )}
                 </div>
@@ -366,16 +372,26 @@ function CounterPageContent() {
                                         e.stopPropagation();
                                         handleRetry();
                                     }}
-                                    className="bg-black px-5 py-4 rounded-full h-fit pointer-events-auto"
+                                    className="bg-[lightgray] px-5 py-4 rounded-full h-fit pointer-events-auto  text-lg"
                                 >
-                                    <i className="fa-solid fa-arrows-rotate text-white"></i>
+                                    <i className="fa-solid fa-arrows-rotate text-black"></i>
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleNextChallenge();
+                                    }}
+                                    className="bg-black px-5 py-4 rounded-full h-fit pointer-events-auto text-lg"
+                                >
+                                    <i className="fa-solid fa-arrow-right text-white"></i>
                                 </button>
                             </>
                         ) : (
                             <>
                                 <button
                                     onClick={handleDecrease}
-                                    className="bg-[lightgray] px-5 py-4 flex align-center rounded-full h-fit pointer-events-auto text-lg"                                >
+                                    className="bg-[lightgray] px-5 py-4 flex align-center rounded-full h-fit pointer-events-auto text-lg"
+                                >
                                     <i className="fa-solid fa-rotate-left text-xl"></i>
                                 </button>
 
