@@ -1,7 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getAuth, signOut, onAuthStateChanged, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  reauthenticateWithPopup,
+  reauthenticateWithRedirect,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
@@ -37,7 +44,7 @@ export default function SettingsPage() {
         setUserData(data);
       } catch (error) {
         console.error("Error loading user data:", error);
-      } 
+      }
     });
 
     return () => unsubscribe();
@@ -52,7 +59,10 @@ export default function SettingsPage() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
@@ -60,7 +70,7 @@ export default function SettingsPage() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
+
       setDeferredPrompt(null);
       setShowInstallModal(false);
     }
@@ -84,42 +94,60 @@ export default function SettingsPage() {
     setShowDeleteConfirmation(true);
   };
 
+  const isPWA = () => {
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    );
+  };
+
   const confirmDeleteAccount = async () => {
     setShowDeleteConfirmation(false); // Close delete confirmation modal first
-    
+
     const currentUser = auth.currentUser;
     if (!currentUser) {
       toast.error("You must be logged in to delete your account");
       return;
     }
-    
+
     setIsDeleting(true);
-    
+
     try {
-      // For Google auth, we need to reauthenticate with a popup
+      // For Google auth, we need to reauthenticate
       const provider = new GoogleAuthProvider();
-      
+
       // Show a message to inform user about re-authentication
-      toast.loading("Please re-authenticate to confirm account deletion", { duration: 3000 });
-      
-      // Delay the popup slightly to ensure the toast is visible
+      toast.loading("Please re-authenticate to confirm account deletion", {
+        duration: 3000,
+      });
+
+      // Delay the reauthentication slightly to ensure the toast is visible
       setTimeout(async () => {
         try {
-          // This will show the Google sign-in popup
-          await reauthenticateWithPopup(currentUser, provider);
-          
+          // Use appropriate reauthentication method based on environment
+          if (isPWA()) {
+            await reauthenticateWithRedirect(currentUser, provider);
+          } else {
+            await reauthenticateWithPopup(currentUser, provider);
+          }
+
           // After successful re-authentication, delete the account
           await userService.handleDeleteAccount(currentUser.uid);
-          
+
           setShowSuccessModal(true); // Show success modal after deletion
           toast.success("Account deleted successfully");
         } catch (error) {
-          console.error("Error during re-authentication or account deletion:", error);
-          
-          if (error.code === 'auth/popup-closed-by-user') {
+          console.error(
+            "Error during re-authentication or account deletion:",
+            error
+          );
+
+          if (error.code === "auth/popup-closed-by-user") {
             toast.error("Authentication canceled. Please try again.");
-          } else if (error.code === 'auth/popup-blocked') {
-            toast.error("Popup was blocked. Please allow popups for this site and try again.");
+          } else if (error.code === "auth/popup-blocked") {
+            toast.error(
+              "Popup was blocked. Please allow popups for this site and try again."
+            );
           } else {
             toast.error("Failed to delete account: " + error.message);
           }
@@ -133,7 +161,6 @@ export default function SettingsPage() {
       setIsDeleting(false);
     }
   };
-  
   const closeSuccessModal = () => {
     setShowSuccessModal(false); // Close the success modal first
     setIsAccountDeleted(true); // Set account deleted state to true
@@ -142,13 +169,18 @@ export default function SettingsPage() {
 
   // Function to get subscription info in a user-friendly format
   const getSubscriptionInfo = () => {
-    if (!userData || !userData.subscription) return { status: "Free", daysLeft: 0 };
+    if (!userData || !userData.subscription)
+      return { status: "Free", daysLeft: 0 };
 
     const { status, trialEndDate } = userData.subscription;
 
     if (status === "trial") {
-      const endDate = trialEndDate instanceof Date ? trialEndDate : trialEndDate.toDate();
-      const daysLeft = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+      const endDate =
+        trialEndDate instanceof Date ? trialEndDate : trialEndDate.toDate();
+      const daysLeft = Math.max(
+        0,
+        Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24))
+      );
       return { status: "Trial", daysLeft };
     } else if (status === "monthly") {
       return { status: "Premium Monthly" };
@@ -159,12 +191,13 @@ export default function SettingsPage() {
     }
   };
 
-  const subscriptionInfo = userData?.subscription ? getSubscriptionInfo() : { status: "Free", daysLeft: 0 };
-
+  const subscriptionInfo = userData?.subscription
+    ? getSubscriptionInfo()
+    : { status: "Free", daysLeft: 0 };
 
   if (!user || !userData) {
     return null; // If user or userData isn't available
-}
+  }
 
   return (
     <div className="overflow-y-auto pb-[130px]">
@@ -179,7 +212,8 @@ export default function SettingsPage() {
         <h1 className="title w-[80%] text-center">Settings</h1>
       </div>
 
-      {(subscriptionInfo.status === "Trial" || subscriptionInfo.status === "Free") && (
+      {(subscriptionInfo.status === "Trial" ||
+        subscriptionInfo.status === "Free") && (
         <div className="mt-5">
           {/* Upgrade to Pro Section */}
           <Link href="/pricing">
@@ -189,7 +223,9 @@ export default function SettingsPage() {
                   <i className="fa-solid fa-crown text-2xl"></i>
                 </div>
                 <div className="flex gap-1 flex-col">
-                  <h3 className="text-[15px] font-semibold capitalize">Upgrade to pro</h3>
+                  <h3 className="text-[15px] font-semibold capitalize">
+                    Upgrade to pro
+                  </h3>
                   <p className="text-xs text-gray-500">to use the app</p>
                 </div>
               </div>
@@ -203,14 +239,18 @@ export default function SettingsPage() {
 
       {/* Feedback Section */}
       <div className="mt-6">
-        <h4 className="uppercase text-gray-600 text-sm font-medium">Feedback</h4>
+        <h4 className="uppercase text-gray-600 text-sm font-medium">
+          Feedback
+        </h4>
         <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
           <div className="flex gap-3">
             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
               <i className="fa-brands fa-instagram text-2xl "></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Join Instagram Group</h3>
+              <h3 className="text-[15px] font-semibold capitalize">
+                Join Instagram Group
+              </h3>
               <p className="text-xs text-gray-500">Connect with the team!</p>
             </div>
           </div>
@@ -223,37 +263,41 @@ export default function SettingsPage() {
       {/* Legal Section */}
       <div className="mt-6">
         <Link href="/TOS">
-        <h4 className="uppercase text-gray-600 text-sm font-medium">Legal</h4>
-        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-          <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-solid fa-file-contract text-xl "></i>
+          <h4 className="uppercase text-gray-600 text-sm font-medium">Legal</h4>
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-solid fa-file-contract text-xl "></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">
+                  Terms of Use
+                </h3>
+                <p className="text-xs text-gray-500">Read our terms</p>
+              </div>
             </div>
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Terms of Use</h3>
-              <p className="text-xs text-gray-500">Read our terms</p>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
             </div>
           </div>
-          <div>
-            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-          </div>
-        </div>
         </Link>
         <Link href="/privacy-policy">
-        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-          <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-solid fa-shield text-xl "></i>
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-solid fa-shield text-xl "></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">
+                  Our Privacy Policy
+                </h3>
+                <p className="text-xs text-gray-500">View our privacy Policy</p>
+              </div>
             </div>
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Our Privacy Policy</h3>
-              <p className="text-xs text-gray-500">View our privacy Policy</p>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
             </div>
           </div>
-          <div>
-            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-          </div>
-        </div>
         </Link>
       </div>
 
@@ -266,7 +310,9 @@ export default function SettingsPage() {
               <i className="fa-solid fa-circle-info text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">App Version</h3>
+              <h3 className="text-[15px] font-semibold capitalize">
+                App Version
+              </h3>
               <p className="text-xs text-gray-500">1.0.0</p>
             </div>
           </div>
@@ -279,14 +325,21 @@ export default function SettingsPage() {
       {/* Install App Section */}
       <div className="mt-6">
         <h4 className="uppercase text-gray-500 text-sm font-medium">App</h4>
-        <div onClick={() => setShowInstallModal(true)} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer">
+        <div
+          onClick={() => setShowInstallModal(true)}
+          className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer"
+        >
           <div className="flex gap-3">
             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
               <i className="fa-solid fa-download text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">Install This App</h3>
-              <p className="text-xs text-gray-500">Install this app on your device</p>
+              <h3 className="text-[15px] font-semibold capitalize">
+                Install This App
+              </h3>
+              <p className="text-xs text-gray-500">
+                Install this app on your device
+              </p>
             </div>
           </div>
           <div>
@@ -298,7 +351,10 @@ export default function SettingsPage() {
       {/* logout & delete account */}
       <div className="mt-6">
         <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
-        <div onClick={handleLogout} className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer">
+        <div
+          onClick={handleLogout}
+          className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer"
+        >
           <div className="flex gap-3">
             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
               <i className="fa-solid fa-sign-out-alt text-xl"></i>

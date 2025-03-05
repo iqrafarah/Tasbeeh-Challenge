@@ -35,7 +35,7 @@ const darkenHexColor = (hex, amount) => {
   r = r < 0 ? 0 : r;
   g = g < 0 ? 0 : g;
   b = b < 0 ? 0 : b;
-  return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, "0")}`;
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 };
 
 export default function ChallengesPage() {
@@ -68,12 +68,17 @@ export default function ChallengesPage() {
 
       const progress = await Promise.all(
         challenges.map(async (challenge) => {
-          const userChallenge = await challengeService.getUserChallenge(uid, challenge.id);
+          const userChallenge = await challengeService.getUserChallenge(
+            uid,
+            challenge.id
+          );
           return { [challenge.id]: userChallenge ? userChallenge.count : 0 };
         })
       );
 
-      setUserProgress(progress.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+      setUserProgress(
+        progress.reduce((acc, curr) => ({ ...acc, ...curr }), {})
+      );
     } catch (error) {
       console.error("Error fetching user progress:", error);
     }
@@ -93,7 +98,10 @@ export default function ChallengesPage() {
         setUserData(data);
 
         if (data && data.subscription) {
-          if (data.subscription.status === "trial" || data.subscription.status === "free") {
+          if (
+            data.subscription.status === "trial" ||
+            data.subscription.status === "free"
+          ) {
             const trialEndDate = data.subscription.trialEndDate.toDate();
             if (new Date() > trialEndDate) {
               setIsTrialEnded(true);
@@ -143,7 +151,10 @@ export default function ChallengesPage() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
@@ -191,26 +202,34 @@ export default function ChallengesPage() {
                       <h3 className="text-lg font-bold">{challenge.title}</h3>
                       <p className="text-sm my-1">{challenge.arabic}</p>
                       <p className="text-sm mb-1">{challenge.meaning}</p>
-                      <p className="text-xs font-semibold">
-                      </p>
+                      <p className="text-xs font-semibold"></p>
                     </div>
                     <div className="flex justify-between">
                       <div className="flex items-center gap-2">
                         <span
                           className="border-2 text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
-                          style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}
+                          style={{
+                            borderColor: darkenedColor,
+                            backgroundColor: darkenedColor,
+                          }}
                         >
-                          <i className="fas fa-praying-hands"></i> {challenge.requiredCount} Times
+                          <i className="fas fa-praying-hands"></i>{" "}
+                          {challenge.requiredCount} Times
                         </span>
                         <span
                           className="border-2 bg-black text-black font-semibold px-3 text-xs py-1 h-fit rounded-full"
-                          style={{ borderColor: darkenedColor, backgroundColor: darkenedColor }}
+                          style={{
+                            borderColor: darkenedColor,
+                            backgroundColor: darkenedColor,
+                          }}
                         >
                           <i className="fas fa-coins"></i> {challenge.points}
                         </span>
                       </div>
                       {isStarted ? (
-                        <span className="text-2xl font-black">{percentage}%</span>
+                        <span className="text-xl font-black">
+                          {percentage >= 100 ? "Completed" : `${percentage}%`}
+                        </span>
                       ) : (
                         <span className="text-2xl font-black">Start</span>
                       )}
@@ -229,7 +248,12 @@ export default function ChallengesPage() {
       </div>
 
       {/* Trial Ended Modal */}
-      {isTrialEnded && <TrialEndModal isOpen={isTrialEnded} onClose={() => setIsTrialEnded(false)} />}
+      {isTrialEnded && (
+        <TrialEndModal
+          isOpen={isTrialEnded}
+          onClose={() => setIsTrialEnded(false)}
+        />
+      )}
     </ProtectedRoute>
   );
 }
