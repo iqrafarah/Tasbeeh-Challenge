@@ -405,6 +405,50 @@ function CounterPageContent() {
                 </div>
               </div>
             </div>
+
+            <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-50">
+              {completed ? (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRetry();
+                    }}
+                    className="bg-[lightgray] px-5 py-4 rounded-full h-fit pointer-events-auto  text-lg"
+                  >
+                    <i className="fa-solid fa-arrows-rotate text-black"></i>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNextChallenge();
+                    }}
+                    className="bg-black px-5 py-4 rounded-full h-fit pointer-events-auto text-lg"
+                  >
+                    <i className="fa-solid fa-arrow-right text-white"></i>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleDecrease}
+                    className="bg-[lightgray] px-5 py-4 flex align-center rounded-full h-fit pointer-events-auto text-lg"
+                  >
+                    <i className="fa-solid fa-rotate-left text-xl"></i>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRetry();
+                    }}
+                    className="bg-black px-5 py-4 flex align-center rounded-full h-fit pointer-events-auto"
+                  >
+                    <i className="fa-solid fa-arrows-rotate text-xl text-white"></i>
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

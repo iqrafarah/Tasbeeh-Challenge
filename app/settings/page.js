@@ -416,7 +416,7 @@ export default function SettingsPage() {
         >
           <div className="flex gap-3">
             <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-solid fa-sign-out-alt text-xl"></i>
+              <i className="fa-solid fa-user-minus text-xl"></i>
             </div>
             <div className="flex gap-1 flex-col">
               <h3 className="text-[15px] font-semibold capitalize">
