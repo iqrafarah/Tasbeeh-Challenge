@@ -406,7 +406,7 @@ function CounterPageContent() {
               </div>
             </div>
 
-            <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-50">
+            <div className="w-full flex justify-center mt-6 pb-6 gap-6 z-45">
               {completed ? (
                 <>
                   <button
