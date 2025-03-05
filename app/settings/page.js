@@ -15,6 +15,7 @@ import app from "../lib/firebase.config";
 import ConfirmationModal from "../components/confirmationModal";
 import InstallAppModal from "../components/installApp";
 import { toast } from "react-hot-toast";
+import { paymentService } from "../lib/services/paymentService"; // Import the paymentService
 
 export default function SettingsPage() {
   const auth = getAuth(app);
@@ -24,10 +25,12 @@ export default function SettingsPage() {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false); // Added state for cancel confirmation
   const [isAccountDeleted, setIsAccountDeleted] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false); // Add state for cancellation process
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -161,6 +164,54 @@ export default function SettingsPage() {
       setIsDeleting(false);
     }
   };
+
+  const handleCancelSubscription = async () => {
+    if (!userData || !userData.subscription) {
+      toast.error("No subscription found to cancel");
+      return;
+    }
+
+    const { id, status } = userData.subscription;
+
+    if (status !== "monthly") {
+      toast.error("Only monthly subscriptions can be cancelled");
+      return;
+    }
+
+    setShowCancelConfirmation(true); // Show cancel confirmation modal
+  };
+
+  const confirmCancelSubscription = async () => {
+    setShowCancelConfirmation(false); // Close cancel confirmation modal first
+
+    if (!userData || !userData.subscription) {
+      toast.error("No subscription found to cancel");
+      return;
+    }
+
+    const { id, status } = userData.subscription;
+
+    if (status !== "monthly") {
+      toast.error("Only monthly subscriptions can be cancelled");
+      return;
+    }
+
+    setIsCancelling(true);
+
+    try {
+      await paymentService.cancelSubscription(id);
+      toast.success("Subscription cancelled successfully");
+      // Update user data to reflect the cancellation
+      const updatedUserData = { ...userData, subscription: null };
+      setUserData(updatedUserData);
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      toast.error("Failed to cancel subscription: " + error.message);
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const closeSuccessModal = () => {
     setShowSuccessModal(false); // Close the success modal first
     setIsAccountDeleted(true); // Set account deleted state to true
@@ -249,7 +300,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex gap-1 flex-col">
               <h3 className="text-[15px] font-semibold capitalize">
-                Join Instagram Group
+                Join Instagram Community
               </h3>
               <p className="text-xs text-gray-500">Connect with the team!</p>
             </div>
@@ -351,6 +402,34 @@ export default function SettingsPage() {
       {/* logout & delete account */}
       <div className="mt-6">
         <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
+
+        {/* Cancel Subscription Section */}
+        {subscriptionInfo.status === "Premium Monthly" && (
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <button
+              className="flex gap-3"
+              onClick={handleCancelSubscription}
+              disabled={isCancelling}
+            >
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-solid fa-file-invoice-dollar text-xl"></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize text-left">
+                  Subscription
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {isCancelling ? "Processing..." : "Cancel Subscription"}
+                </p>
+              </div>
+            </button>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+            </div>
+          </div>
+        )}
+
+        {/* Logout Section */}
         <div
           onClick={handleLogout}
           className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer"
@@ -369,13 +448,28 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <button
-          className="text-sm mt-3 text-red-500 font-semibold"
+        {/* Delete Account Section */}
+        <div
           onClick={handleDeleteAccount}
-          disabled={isDeleting}
+          className={`mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer ${
+            isDeleting ? "cursor-not-allowed" : ""
+          }`}
         >
-          {isDeleting ? "Processing..." : "Delete My Account"}
-        </button>
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-sign-out-alt text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">
+                {isDeleting ? "Processing..." : "Delete My Account"}
+              </h3>
+              <p className="text-xs text-gray-500">Delete current account</p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
       </div>
 
       <ConfirmationModal
@@ -386,6 +480,17 @@ export default function SettingsPage() {
         message="Are you sure you want to log out?"
         confirmText="Logout"
         confirmColor="bg-red-500"
+      />
+
+      <ConfirmationModal
+        isOpen={showCancelConfirmation} // Modal for cancel subscription
+        onClose={() => setShowCancelConfirmation(false)} // Close modal on cancel
+        onConfirm={confirmCancelSubscription} // Proceed with cancel subscription
+        title="Cancel Subscription"
+        message="Are you sure you want to cancel your subscription? You will lose premium access."
+        confirmText={isCancelling ? "Processing..." : "Yes"}
+        confirmColor="bg-red-500"
+        disabled={isCancelling} // Disable confirm button while processing
       />
 
       <ConfirmationModal
