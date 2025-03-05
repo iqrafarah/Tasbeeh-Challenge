@@ -1,375 +1,514 @@
 import {
-    getFirestore, doc, getDoc, getDocs, collection, updateDoc, writeBatch, setDoc, addDoc, deleteDoc, serverTimestamp, increment
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  updateDoc,
+  writeBatch,
+  setDoc,
+  addDoc,
+  deleteDoc,
+  serverTimestamp,
+  increment,
 } from "firebase/firestore";
 import { getAuth, deleteUser } from "firebase/auth";
 import app from "../firebase.config";
 
 export const userService = {
-    // Save user to firestore
-    saveUser: async (userData) => {
-        const db = getFirestore(app);
-        try {
-            const userRef = doc(db, "users", userData.uid);
-            const userDoc = await getDoc(userRef);
+  // Save user to firestore
+  saveUser: async (userData) => {
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", userData.uid);
+      const userDoc = await getDoc(userRef);
 
-            if (userDoc.exists()) {
-                // User already exists, update only necessary fields
-                await setDoc(userRef, {
-                    email: userData.email,
-                    displayName: userData.displayName,
-                    photoURL: userData.photoURL,
-                    lastActive: serverTimestamp(),
-                }, { merge: true });
-            } else {
-                // User does not exist, create a new user document
-                const trialStartDate = new Date();
-                const trialEndDate = new Date(trialStartDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from trialStartDate
+      if (userDoc.exists()) {
+        // User already exists, update only necessary fields
+        await setDoc(
+          userRef,
+          {
+            email: userData.email,
+            displayName: userData.displayName,
+            photoURL: userData.photoURL,
+            lastActive: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } else {
+        // User does not exist, create a new user document
+        const trialStartDate = new Date();
+        const trialEndDate = new Date(
+          trialStartDate.getTime() + 7 * 24 * 60 * 60 * 1000
+        ); // 7 days from trialStartDate
 
-                const newUserDoc = {
-                    uid: userData.uid,
-                    email: userData.email,
-                    displayName: userData.displayName,
-                    photoURL: userData.photoURL,
-                    streak: 0,
-                    level: 1,
-                    totalPoints: 0,
-                    pointsToNextLevel: 100,
-                    totalDhikr: 0,
-                    ChallengesCompleted: 0,
-                    longestStreak: 0,
-                    contributions: {},
-                    settings: {
-                        theme: "light", notifications: true, soundEnabled: true, vibrationEnabled: true,
-                    },
-                    subscription: {
-                        status: "trial", // "trial", "free", "monthly", "lifetime"
-                        trialStartDate: trialStartDate,
-                        trialEndDate: trialEndDate,
-                        subscriptionId: null,
-                        orderId: null,
-                        planType: null,
-                    },
-                    onBoarded: false,
-                    createdAt: serverTimestamp(),
-                    lastActive: serverTimestamp(),
-                };
-                await setDoc(userRef, newUserDoc, { merge: true });
-            }
-        } catch (error) {
-            console.error("Error saving user to Firestore:", error);
-            throw error;
+        const newUserDoc = {
+          uid: userData.uid,
+          email: userData.email,
+          displayName: userData.displayName,
+          photoURL: userData.photoURL,
+          streak: 0,
+          level: 1,
+          totalPoints: 0,
+          pointsToNextLevel: 100,
+          totalDhikr: 0,
+          ChallengesCompleted: 0,
+          longestStreak: 0,
+          contributions: {},
+          settings: {
+            theme: "light",
+            notifications: true,
+            soundEnabled: true,
+            vibrationEnabled: true,
+          },
+          subscription: {
+            status: "trial", // "trial", "free", "monthly", "lifetime"
+            trialStartDate: trialStartDate,
+            trialEndDate: trialEndDate,
+            subscriptionId: null,
+            orderId: null,
+            planType: null,
+          },
+          onBoarded: false,
+          createdAt: serverTimestamp(),
+          lastActive: serverTimestamp(),
+        };
+        await setDoc(userRef, newUserDoc, { merge: true });
+      }
+    } catch (error) {
+      console.error("Error saving user to Firestore:", error);
+      throw error;
+    }
+  },
+
+  updateLastActive: async (uid) => {
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        let lastActive = userData.lastActive
+          ? userData.lastActive.toDate()
+          : null;
+        const today = new Date();
+
+        if (lastActive) {
+          lastActive.setHours(0, 0, 0, 0);
+          today.setHours(0, 0, 0, 0);
+
+          const daysDiff = Math.floor(
+            (today - lastActive) / (1000 * 60 * 60 * 24)
+          );
+
+          let newStreak = userData.streak || 0;
+          if (daysDiff === 1) newStreak += 1;
+          else if (daysDiff > 1) newStreak = 1;
+
+          const longestStreak = userData.longestStreak || 0;
+          const newLongestStreak =
+            newStreak > longestStreak ? newStreak : longestStreak;
+
+          await setDoc(
+            userRef,
+            {
+              streak: newStreak,
+              longestStreak: newLongestStreak,
+              lastActive: serverTimestamp(),
+            },
+            { merge: true }
+          );
         }
-    },
+      }
+    } catch (error) {
+      console.error("Error updating last active and streak:", error);
+      throw error;
+    }
+  },
 
-    updateLastActive: async (uid) => {
-        const db = getFirestore(app);
-        try {
-            const userRef = doc(db, "users", uid);
-            const userDoc = await getDoc(userRef);
+  updateUser: async (uid, data) => {
+    const db = getFirestore(app);
 
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                let lastActive = userData.lastActive ? userData.lastActive.toDate() : null;
-                const today = new Date();
+    const userRef = doc(db, "users", uid);
+    try {
+      await setDoc(userRef, data, { merge: true });
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  },
 
-                if (lastActive) {
-                    lastActive.setHours(0, 0, 0, 0);
-                    today.setHours(0, 0, 0, 0);
+  // Get user data
+  getUser: async (uid) => {
+    if (!uid) return null;
+    const db = getFirestore(app);
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        return userDoc.data();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      throw error;
+    }
+  },
 
-                    const daysDiff = Math.floor((today - lastActive) / (1000 * 60 * 60 * 24));
+  updateLastActive: async (uid) => {
+    console.log(`Updating last active for user: ${uid}`); // Debug log
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
 
-                    let newStreak = userData.streak || 0;
-                    if (daysDiff === 1) newStreak += 1; else if (daysDiff > 1) newStreak = 1;
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-                    const longestStreak = userData.longestStreak || 0;
-                    const newLongestStreak = newStreak > longestStreak ? newStreak : longestStreak;
+        const lastActive = userData.lastActive
+          ? userData.lastActive.toDate()
+          : null;
 
-                    await setDoc(userRef, {
-                        streak: newStreak,
-                        longestStreak: newLongestStreak,
-                        lastActive: serverTimestamp(),
-                    }, { merge: true });
+        console.log("Last Active:", lastActive); // Debug log
 
-                }
-            }
-        } catch (error) {
-            console.error("Error updating last active and streak:", error);
-            throw error;
-        }
-    },
+        let newStreak = userData.streak || 0;
+        let longestStreak = userData.longestStreak || 0;
 
-    updateUser: async (uid, data) => {
-        const db = getFirestore(app);
+        if (lastActive) {
+          lastActive.setHours(0, 0, 0, 0);
+          const daysDiff = Math.floor(
+            (today - lastActive) / (1000 * 60 * 60 * 24)
+          );
 
-        const userRef = doc(db, "users", uid);
-        try {
-            await setDoc(userRef, data, { merge: true });
-        } catch (error) {
-            console.error("Error updating user data:", error);
-        }
-    },
+          console.log("Days difference:", daysDiff); // Debug log
 
-    // Get user data
-    getUser: async (uid) => {
-        if (!uid) return null;
-        const db = getFirestore(app);
-        try {
-            const userDoc = await getDoc(doc(db, "users", uid));
-            if (userDoc.exists()) {
-                return userDoc.data();
-            }
-            return null;
-        } catch (error) {
-            console.error("Error getting user:", error);
-            throw error;
-        }
-    },
+          if (daysDiff === 1) {
+            newStreak += 1;
+          } else if (daysDiff > 1) {
+            newStreak = 1;
+          }
 
-    updateUserStats: async (uid, earnedPoints) => {
-        const db = getFirestore(app);
-        try {
-            const userRef = doc(db, "users", uid);
-            const userDoc = await getDoc(userRef);
-    
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const numericPoints = Number(earnedPoints);
-    
-                let totalPoints = (userData.totalPoints || 0) + numericPoints;
-                let level = userData.level || 1;
-                let pointsToNextLevel = userData.pointsToNextLevel || 5;
-    
-                const growthFactor = 1.5;
-                let hasLevelChanged = false;
-                let newLevel = level;
-    
-                // Level up logic
-                while (totalPoints >= pointsToNextLevel) {
-                    newLevel += 1;
-                    pointsToNextLevel = Math.round(5 * Math.pow(newLevel, growthFactor));
-                    hasLevelChanged = true; // Level has changed
-                }
-    
-                // If the level changed, update the level in Firestore
-                if (hasLevelChanged) {
-                    level = newLevel; // Update level after loop
-                }
-    
-                // Update contribution data
-                const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-                const contributions = userData.contributions || {};
-                contributions[today] = (contributions[today] || 0) + 1; // Increment today's contribution count
-    
-                // Update the Firestore document with the new data
-                await setDoc(
-                    userRef,
-                    {
-                        totalPoints: totalPoints,
-                        level: level,
-                        pointsToNextLevel: pointsToNextLevel,
-                        ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
-                        contributions: contributions, // Update contributions
-                    },
-                    { merge: true }
-                );
-    
-                // Return the level change status and the new level
-                return { hasLevelChanged, newLevel };
-            }
-        } catch (error) {
-            console.error("Error updating user stats:", error);
-            throw error;
-        }
-    },
-
-    getTodaysStats: async (uid) => {
-        const db = getFirestore(app);
-        try {
-            const userDoc = await getDoc(doc(db, "users", uid));
-    
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
-                const dailyStats = userData.dailyStats || {};
-                return dailyStats[today] || { totalDhikr: 0, ChallengesCompleted: 0 };
-            }
-            return { totalDhikr: 0, ChallengesCompleted: 0 };
-        } catch (error) {
-            console.error("Error fetching today's stats:", error);
-            throw error;
-        }
-    },  
-
-    updateTotalDhikr: async (uid, change) => {
-        const db = getFirestore(app);
-        try {
-            const userRef = doc(db, "users", uid);
-            const userDoc = await getDoc(userRef);
-    
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
-                let dailyStats = userData.dailyStats || {};
-                dailyStats[today] = dailyStats[today] || { totalDhikr: 0, ChallengesCompleted: 0 };
-                dailyStats[today].totalDhikr += change; // Increment dhikr count for today
-    
-                await setDoc(userRef, { dailyStats }, { merge: true });
-            }
-        } catch (error) {
-            console.error("Error updating totalDhikr:", error);
-            throw error;
-        }
-    },
-
-    addFriend: async (userUid, friendUid) => {
-        if (userUid === friendUid) {
-            return
+          longestStreak = Math.max(newStreak, longestStreak);
+        } else {
+          // First time tracking
+          newStreak = 1;
+          longestStreak = 1;
         }
 
-        const db = getFirestore(app);
-        try {
+        console.log(
+          `New Streak: ${newStreak}, Longest Streak: ${longestStreak}`
+        );
 
-            // Add friend to the user's 'friends' subcollection (requester adds receiver)
-            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
-            await setDoc(userFriendRef, {
-                friendId: friendUid,
-                addedAt: serverTimestamp(),
-                status: "accepted",
+        await setDoc(
+          userRef,
+          {
+            streak: newStreak,
+            longestStreak: longestStreak,
+            lastActive: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        return { newStreak, longestStreak };
+      }
+    } catch (error) {
+      console.error("Error updating last active and streak:", error);
+      throw error;
+    }
+  },
+
+  updateUserStats: async (uid, earnedPoints) => {
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const numericPoints = Number(earnedPoints);
+
+        let totalPoints = (userData.totalPoints || 0) + numericPoints;
+        let level = userData.level || 1;
+        let pointsToNextLevel = userData.pointsToNextLevel || 100;
+
+        const growthFactor = 1.5;
+        let hasLevelChanged = false;
+        let newLevel = level;
+
+        // Level up logic
+        while (totalPoints >= pointsToNextLevel) {
+          newLevel += 1;
+          pointsToNextLevel = Math.round(
+            100 * Math.pow(newLevel, growthFactor)
+          );
+          hasLevelChanged = true;
+        }
+
+        // Update contribution data
+        const today = new Date().toISOString().split("T")[0];
+        const contributions = userData.contributions || {};
+        contributions[today] = (contributions[today] || 0) + 1;
+
+        // Track daily stats
+        let dailyStats = userData.dailyStats || {};
+        dailyStats[today] = dailyStats[today] || {
+          totalDhikr: 0,
+          ChallengesCompleted: 0,
+        };
+        dailyStats[today].ChallengesCompleted += 1;
+
+        // Update the Firestore document with the new data
+        await setDoc(
+          userRef,
+          {
+            totalPoints: totalPoints,
+            level: newLevel,
+            pointsToNextLevel: pointsToNextLevel,
+            ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
+            contributions: contributions,
+            dailyStats: dailyStats,
+            // Always update last active to help with streak tracking
+            lastActive: serverTimestamp(),
+            // Increment streak
+            streak: (userData.streak || 0) + 1,
+            longestStreak: Math.max(
+              (userData.streak || 0) + 1,
+              userData.longestStreak || 0
+            ),
+          },
+          { merge: true }
+        );
+
+        // Call last active update to ensure consistent streak tracking
+        await userService.updateLastActive(uid);
+
+        return {
+          hasLevelChanged,
+          newLevel,
+          newStreak: (userData.streak || 0) + 1,
+        };
+      }
+    } catch (error) {
+      console.error("Error updating user stats:", error);
+      throw error;
+    }
+  },
+
+  getTodaysStats: async (uid) => {
+    const db = getFirestore(app);
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+        const dailyStats = userData.dailyStats || {};
+        return dailyStats[today] || { totalDhikr: 0, ChallengesCompleted: 0 };
+      }
+      return { totalDhikr: 0, ChallengesCompleted: 0 };
+    } catch (error) {
+      console.error("Error fetching today's stats:", error);
+      throw error;
+    }
+  },
+  updateTotalDhikr: async (uid, change) => {
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const today = new Date().toISOString().split("T")[0];
+
+        // Update total dhikr in main user document
+        const currentTotalDhikr = userData.totalDhikr || 0;
+        const newTotalDhikr = currentTotalDhikr + change;
+
+        let dailyStats = userData.dailyStats || {};
+        dailyStats[today] = dailyStats[today] || {
+          totalDhikr: 0,
+          ChallengesCompleted: 0,
+        };
+        dailyStats[today].totalDhikr += change;
+
+        await setDoc(
+          userRef,
+          {
+            totalDhikr: newTotalDhikr,
+            dailyStats,
+          },
+          { merge: true }
+        );
+
+        return newTotalDhikr;
+      }
+    } catch (error) {
+      console.error("Error updating totalDhikr:", error);
+      throw error;
+    }
+  },
+
+  addFriend: async (userUid, friendUid) => {
+    if (userUid === friendUid) {
+      return;
+    }
+
+    const db = getFirestore(app);
+    try {
+      // Add friend to the user's 'friends' subcollection (requester adds receiver)
+      const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
+      await setDoc(userFriendRef, {
+        friendId: friendUid,
+        addedAt: serverTimestamp(),
+        status: "accepted",
+      });
+
+      // Add user to the friend's 'friends' subcollection (receiver adds requester)
+      const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
+      await setDoc(friendUserRef, {
+        friendId: userUid,
+        addedAt: serverTimestamp(),
+        status: "accepted",
+      });
+    } catch (error) {
+      console.error("Error adding friend to Firestore:", error);
+      throw error;
+    }
+  },
+
+  deleteFriend: async (userUid, friendUid) => {
+    const db = getFirestore(app);
+
+    try {
+      // Remove friend from the user's 'friends' subcollection
+      const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
+      await deleteDoc(userFriendRef);
+
+      // Remove user from the friend's 'friends' subcollection
+      const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
+      await deleteDoc(friendUserRef);
+    } catch (error) {
+      console.error("Error deleting friend from Firestore:", error);
+      throw error;
+    }
+  },
+
+  handleDeleteAccount: async (uid) => {
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+
+    try {
+      // Make sure user is authenticated and UID matches (additional security check)
+      if (!user || user.uid !== uid) {
+        throw new Error(
+          "Authentication error: User not authenticated or UID mismatch"
+        );
+      }
+
+      // Get user document reference
+      const userRef = doc(db, "users", uid);
+
+      // Delete user challenges
+      try {
+        const userChallengesRef = collection(
+          db,
+          "userChallenges",
+          uid,
+          "challenges"
+        );
+        const userChallengesSnapshot = await getDocs(userChallengesRef);
+        const batch = writeBatch(db);
+
+        userChallengesSnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+
+        if (userChallengesSnapshot.size > 0) {
+          await batch.commit();
+        }
+      } catch (error) {
+        console.warn("Error deleting user challenges:", error);
+        // Continue with deletion even if this fails
+      }
+
+      // Delete user subcollections (friends, notifications)
+      const subcollections = ["friends", "notifications"];
+      for (const subcollection of subcollections) {
+        try {
+          const subcollectionRef = collection(db, "users", uid, subcollection);
+          const subcollectionSnapshot = await getDocs(subcollectionRef);
+
+          if (subcollectionSnapshot.size > 0) {
+            const batch = writeBatch(db);
+            subcollectionSnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
             });
-
-            // Add user to the friend's 'friends' subcollection (receiver adds requester)
-            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
-            await setDoc(friendUserRef, {
-                friendId: userUid,
-                addedAt: serverTimestamp(),
-                status: "accepted",
-            });
+            await batch.commit();
+          }
         } catch (error) {
-            console.error("Error adding friend to Firestore:", error);
-            throw error;
+          console.warn(`Error deleting ${subcollection} subcollection:`, error);
+          // Continue with deletion even if this fails
         }
-    },
+      }
 
-    deleteFriend: async (userUid, friendUid) => {
-        const db = getFirestore(app);
+      // Delete user document from Firestore
+      await deleteDoc(userRef);
 
-        try {
-            // Remove friend from the user's 'friends' subcollection
-            const userFriendRef = doc(db, "users", userUid, "friends", friendUid);
-            await deleteDoc(userFriendRef);
+      // Delete auth user
+      await deleteUser(user);
 
-            // Remove user from the friend's 'friends' subcollection
-            const friendUserRef = doc(db, "users", friendUid, "friends", userUid);
-            await deleteDoc(friendUserRef);
-        } catch (error) {
-            console.error("Error deleting friend from Firestore:", error);
-            throw error;
-        }
-    },
+      console.log("User account and associated data deleted successfully");
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting user account:", error);
 
-    handleDeleteAccount: async (uid) => {
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const user = auth.currentUser;
+      // Check if this is a requires-recent-login error
+      if (error.code === "auth/requires-recent-login") {
+        throw new Error("Please reauthenticate to delete your account.");
+      }
 
-        try {
-            // Make sure user is authenticated and UID matches (additional security check)
-            if (!user || user.uid !== uid) {
-                throw new Error("Authentication error: User not authenticated or UID mismatch");
-            }
+      throw error;
+    }
+  },
 
-            // Get user document reference
-            const userRef = doc(db, "users", uid);
+  sendNotification: async (userId, senderName, senderPhotoURL) => {
+    const db = getFirestore(app);
+    try {
+      await addDoc(collection(db, "users", userId, "notifications"), {
+        body: `${senderName} has added you as a friend!`,
+        url: "https://tasbeehchallenge.com/friends",
+        timestamp: serverTimestamp(),
+        read: false,
+        photoURL: senderPhotoURL,
+      });
+    } catch (error) {
+      console.error("Error adding notification:", error);
+    }
+  },
 
-            // Delete user challenges
-            try {
-                const userChallengesRef = collection(db, "userChallenges", uid, "challenges");
-                const userChallengesSnapshot = await getDocs(userChallengesRef);
-                const batch = writeBatch(db);
-                
-                userChallengesSnapshot.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-                
-                if (userChallengesSnapshot.size > 0) {
-                    await batch.commit();
-                }
-            } catch (error) {
-                console.warn("Error deleting user challenges:", error);
-                // Continue with deletion even if this fails
-            }
-
-            // Delete user subcollections (friends, notifications)
-            const subcollections = ["friends", "notifications"];
-            for (const subcollection of subcollections) {
-                try {
-                    const subcollectionRef = collection(db, "users", uid, subcollection);
-                    const subcollectionSnapshot = await getDocs(subcollectionRef);
-                    
-                    if (subcollectionSnapshot.size > 0) {
-                        const batch = writeBatch(db);
-                        subcollectionSnapshot.forEach((doc) => {
-                            batch.delete(doc.ref);
-                        });
-                        await batch.commit();
-                    }
-                } catch (error) {
-                    console.warn(`Error deleting ${subcollection} subcollection:`, error);
-                    // Continue with deletion even if this fails
-                }
-            }
-
-            // Delete user document from Firestore
-            await deleteDoc(userRef);
-            
-            // Delete auth user
-            await deleteUser(user);
-            
-            console.log("User account and associated data deleted successfully");
-            return { success: true };
-            
-        } catch (error) {
-            console.error("Error deleting user account:", error);
-            
-            // Check if this is a requires-recent-login error
-            if (error.code === 'auth/requires-recent-login') {
-                throw new Error("Please reauthenticate to delete your account.");
-            }
-            
-            throw error;
-        }
-    },
-
-    sendNotification: async (userId, senderName, senderPhotoURL) => {
-        const db = getFirestore(app);
-        try {
-            await addDoc(collection(db, "users", userId, "notifications"), {
-                body: `${senderName} has added you as a friend!`,
-                url: "https://tasbeehchallenge.com/friends",
-                timestamp: serverTimestamp(),
-                read: false,
-                photoURL: senderPhotoURL
-            });
-        } catch (error) {
-            console.error("Error adding notification:", error);
-        }
-    },
-
-    sendLeaderboardNotification: async (userId, senderName, senderPhotoURL, previousRank, newRank) => {
-        const db = getFirestore(app);
-        try {
-            const body = `${senderName} took your leaderboard spot!`;
-            await addDoc(collection(db, "users", userId, "notifications"), {
-                body,
-                url: "https://tasbeehchallenge.com/leaderboard",
-                timestamp: serverTimestamp(),
-                read: false,
-                photoURL: senderPhotoURL
-            });
-        } catch (error) {
-            console.error("Error adding leaderboard notification:", error);
-        }
-    },
+  sendLeaderboardNotification: async (
+    userId,
+    senderName,
+    senderPhotoURL,
+    previousRank,
+    newRank
+  ) => {
+    const db = getFirestore(app);
+    try {
+      const body = `${senderName} took your leaderboard spot!`;
+      await addDoc(collection(db, "users", userId, "notifications"), {
+        body,
+        url: "https://tasbeehchallenge.com/leaderboard",
+        timestamp: serverTimestamp(),
+        read: false,
+        photoURL: senderPhotoURL,
+      });
+    } catch (error) {
+      console.error("Error adding leaderboard notification:", error);
+    }
+  },
 };
