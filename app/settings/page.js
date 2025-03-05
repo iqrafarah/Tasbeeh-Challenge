@@ -1,14 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  getAuth,
-  signOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  reauthenticateWithPopup,
-  reauthenticateWithRedirect,
-} from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { userService } from "../lib/services/userService";
 import app from "../lib/firebase.config";
@@ -103,7 +96,6 @@ export default function SettingsPage() {
       window.navigator.standalone === true
     );
   };
-
   const confirmDeleteAccount = async () => {
     setShowDeleteConfirmation(false); // Close delete confirmation modal first
 
@@ -116,51 +108,18 @@ export default function SettingsPage() {
     setIsDeleting(true);
 
     try {
-      // For Google auth, we need to reauthenticate
-      const provider = new GoogleAuthProvider();
+      // Directly delete the account without re-authentication
+      await userService.handleDeleteAccount(currentUser.uid);
 
-      // Show a message to inform user about re-authentication
-      toast.loading("Please re-authenticate to confirm account deletion", {
-        duration: 3000,
-      });
+      setShowSuccessModal(true); // Show success modal after deletion
+      toast.success("Account deleted successfully");
 
-      // Delay the reauthentication slightly to ensure the toast is visible
-      setTimeout(async () => {
-        try {
-          // Use appropriate reauthentication method based on environment
-          if (isPWA()) {
-            await reauthenticateWithRedirect(currentUser, provider);
-          } else {
-            await reauthenticateWithPopup(currentUser, provider);
-          }
-
-          // After successful re-authentication, delete the account
-          await userService.handleDeleteAccount(currentUser.uid);
-
-          setShowSuccessModal(true); // Show success modal after deletion
-          toast.success("Account deleted successfully");
-        } catch (error) {
-          console.error(
-            "Error during re-authentication or account deletion:",
-            error
-          );
-
-          if (error.code === "auth/popup-closed-by-user") {
-            toast.error("Authentication canceled. Please try again.");
-          } else if (error.code === "auth/popup-blocked") {
-            toast.error(
-              "Popup was blocked. Please allow popups for this site and try again."
-            );
-          } else {
-            toast.error("Failed to delete account: " + error.message);
-          }
-        } finally {
-          setIsDeleting(false);
-        }
-      }, 1500);
+      // Redirect to home page after account deletion
+      router.push("/"); // This will redirect the user to the home page
     } catch (error) {
-      console.error("Error in deletion process:", error);
-      toast.error("An unexpected error occurred");
+      console.error("Error during account deletion:", error);
+      toast.error("Failed to delete account: " + error.message);
+    } finally {
       setIsDeleting(false);
     }
   };
@@ -498,7 +457,7 @@ export default function SettingsPage() {
         onClose={() => setShowDeleteConfirmation(false)}
         onConfirm={confirmDeleteAccount}
         title="Delete Account"
-        message="Are you sure you want to delete this account? You'll need to re-authenticate with Google to confirm."
+        message="Are you sure you want to delete this account? This action cannot be undone."
         confirmText={isDeleting ? "Processing..." : "Delete"}
         confirmColor="bg-red-500"
         disabled={isDeleting}
