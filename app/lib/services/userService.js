@@ -81,54 +81,6 @@ export const userService = {
     }
   },
 
-  updateLastActive: async (uid) => {
-    const db = getFirestore(app);
-    try {
-      const userRef = doc(db, "users", uid);
-      const userDoc = await getDoc(userRef);
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const today = new Date().toISOString().split("T")[0]; // Get today's date (YYYY-MM-DD)
-
-        // Initialize streak and longestStreak
-        let newStreak = 0;
-        let longestStreak = userData.longestStreak || 0;
-
-        // Check if the user completed any challenges today
-        const dailyStats = userData.dailyStats || {};
-        const todayStats = dailyStats[today];
-
-        if (
-          todayStats &&
-          (todayStats.totalDhikr > 0 || todayStats.ChallengesCompleted > 0)
-        ) {
-          newStreak = 1; // Completed one or more challenges today
-        }
-
-        // Calculate the new longest streak
-        if (newStreak > longestStreak) {
-          longestStreak = newStreak;
-        }
-
-        await setDoc(
-          userRef,
-          {
-            streak: newStreak,
-            longestStreak: longestStreak,
-            lastActive: serverTimestamp(),
-          },
-          { merge: true }
-        );
-
-        return { newStreak, longestStreak };
-      }
-    } catch (error) {
-      console.error("Error updating last active and streak:", error);
-      throw error;
-    }
-  },
-
   updateUser: async (uid, data) => {
     const db = getFirestore(app);
 
@@ -295,7 +247,15 @@ export const userService = {
       throw error;
     }
   },
+
   updateTotalDhikr: async (uid, change) => {
+    const numericChange = Number(change);
+
+    if (isNaN(numericChange)) {
+      console.error("Invalid change value for totalDhikr:", change);
+      return null;
+    }
+
     const db = getFirestore(app);
     try {
       const userRef = doc(db, "users", uid);
@@ -305,34 +265,114 @@ export const userService = {
         const userData = userDoc.data();
         const today = new Date().toISOString().split("T")[0];
 
-        // Update total dhikr in main user document
+        // Get current values
         const currentTotalDhikr = userData.totalDhikr || 0;
-        const newTotalDhikr = currentTotalDhikr + change;
 
-        let dailyStats = userData.dailyStats || {};
-        dailyStats[today] = dailyStats[today] || {
-          totalDhikr: 0,
-          ChallengesCompleted: 0,
+        // Create a deep copy of dailyStats
+        let dailyStats = JSON.parse(JSON.stringify(userData.dailyStats || {}));
+
+        // Initialize today's entry if it doesn't exist yet
+        if (!dailyStats[today]) {
+          dailyStats[today] = {
+            totalDhikr: 0,
+            ChallengesCompleted: 0,
+          };
+        }
+
+        // Calculate new values
+        const currentDailyDhikr = dailyStats[today].totalDhikr || 0;
+        const newTotalDhikr = currentTotalDhikr + numericChange;
+        const newDailyDhikr = currentDailyDhikr + numericChange;
+
+        // Update daily stats for today - preserve any existing properties
+        dailyStats[today] = {
+          ...dailyStats[today],
+          totalDhikr: newDailyDhikr,
         };
-        dailyStats[today].totalDhikr += change;
 
+        console.log(
+          `Updating Dhikr for user: ${uid}
+        Current Total Dhikr: ${currentTotalDhikr}
+        Adding: ${numericChange}
+        New Total Dhikr: ${newTotalDhikr}
+        Today's Daily Dhikr: ${newDailyDhikr}
+        Today's Daily Stats: `,
+          dailyStats[today]
+        );
+
+        // Update the Firestore document
         await setDoc(
           userRef,
           {
             totalDhikr: newTotalDhikr,
             dailyStats,
+            lastActive: serverTimestamp(),
           },
           { merge: true }
         );
 
-        return newTotalDhikr;
+        return {
+          totalDhikr: newTotalDhikr,
+          dailyDhikr: newDailyDhikr,
+        };
       }
+
+      console.error("User not found");
+      return null;
     } catch (error) {
       console.error("Error updating totalDhikr:", error);
       throw error;
     }
   },
 
+  syncDhikrCounts: async (uid) => {
+    const db = getFirestore(app);
+    try {
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const today = new Date().toISOString().split("T")[0];
+
+        // Get the current values
+        const totalDhikr = userData.totalDhikr || 0;
+        const dailyStats = userData.dailyStats || {};
+
+        // Initialize today's entry if it doesn't exist
+        if (!dailyStats[today]) {
+          dailyStats[today] = {
+            totalDhikr: 0,
+            ChallengesCompleted: 0,
+          };
+        }
+
+        // Check for discrepancy
+        if (dailyStats[today].totalDhikr !== totalDhikr) {
+          console.log(`Fixing dhikr count discrepancy for user ${uid}:`);
+          console.log(
+            `Total dhikr: ${totalDhikr}, Daily dhikr: ${dailyStats[today].totalDhikr}`
+          );
+
+          // Update daily stats to match the total
+          dailyStats[today].totalDhikr = totalDhikr;
+
+          // Update Firestore
+          await setDoc(userRef, { dailyStats }, { merge: true });
+        }
+
+        return {
+          totalDhikr,
+          dailyDhikr: dailyStats[today].totalDhikr,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error syncing dhikr counts:", error);
+      throw error;
+    }
+  },
   addFriend: async (userUid, friendUid) => {
     if (userUid === friendUid) {
       return;
