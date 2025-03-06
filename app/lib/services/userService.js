@@ -89,37 +89,39 @@ export const userService = {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        let lastActive = userData.lastActive
-          ? userData.lastActive.toDate()
-          : null;
-        const today = new Date();
+        const today = new Date().toISOString().split("T")[0]; // Get today's date (YYYY-MM-DD)
 
-        if (lastActive) {
-          lastActive.setHours(0, 0, 0, 0);
-          today.setHours(0, 0, 0, 0);
+        // Initialize streak and longestStreak
+        let newStreak = 0;
+        let longestStreak = userData.longestStreak || 0;
 
-          const daysDiff = Math.floor(
-            (today - lastActive) / (1000 * 60 * 60 * 24)
-          );
+        // Check if the user completed any challenges today
+        const dailyStats = userData.dailyStats || {};
+        const todayStats = dailyStats[today];
 
-          let newStreak = userData.streak || 0;
-          if (daysDiff === 1) newStreak += 1;
-          else if (daysDiff > 1) newStreak = 1;
-
-          const longestStreak = userData.longestStreak || 0;
-          const newLongestStreak =
-            newStreak > longestStreak ? newStreak : longestStreak;
-
-          await setDoc(
-            userRef,
-            {
-              streak: newStreak,
-              longestStreak: newLongestStreak,
-              lastActive: serverTimestamp(),
-            },
-            { merge: true }
-          );
+        if (
+          todayStats &&
+          (todayStats.totalDhikr > 0 || todayStats.ChallengesCompleted > 0)
+        ) {
+          newStreak = 1; // Completed one or more challenges today
         }
+
+        // Calculate the new longest streak
+        if (newStreak > longestStreak) {
+          longestStreak = newStreak;
+        }
+
+        await setDoc(
+          userRef,
+          {
+            streak: newStreak,
+            longestStreak: longestStreak,
+            lastActive: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        return { newStreak, longestStreak };
       }
     } catch (error) {
       console.error("Error updating last active and streak:", error);
@@ -155,65 +157,20 @@ export const userService = {
   },
 
   updateLastActive: async (uid) => {
-    console.log(`Updating last active for user: ${uid}`); // Debug log
     const db = getFirestore(app);
     try {
       const userRef = doc(db, "users", uid);
-      const userDoc = await getDoc(userRef);
 
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const lastActive = userData.lastActive
-          ? userData.lastActive.toDate()
-          : null;
-
-        console.log("Last Active:", lastActive); // Debug log
-
-        let newStreak = userData.streak || 0;
-        let longestStreak = userData.longestStreak || 0;
-
-        if (lastActive) {
-          lastActive.setHours(0, 0, 0, 0);
-          const daysDiff = Math.floor(
-            (today - lastActive) / (1000 * 60 * 60 * 24)
-          );
-
-          console.log("Days difference:", daysDiff); // Debug log
-
-          if (daysDiff === 1) {
-            newStreak += 1;
-          } else if (daysDiff > 1) {
-            newStreak = 1;
-          }
-
-          longestStreak = Math.max(newStreak, longestStreak);
-        } else {
-          // First time tracking
-          newStreak = 1;
-          longestStreak = 1;
-        }
-
-        console.log(
-          `New Streak: ${newStreak}, Longest Streak: ${longestStreak}`
-        );
-
-        await setDoc(
-          userRef,
-          {
-            streak: newStreak,
-            longestStreak: longestStreak,
-            lastActive: serverTimestamp(),
-          },
-          { merge: true }
-        );
-
-        return { newStreak, longestStreak };
-      }
+      // Just update the lastActive timestamp without modifying streak
+      await setDoc(
+        userRef,
+        {
+          lastActive: serverTimestamp(),
+        },
+        { merge: true }
+      );
     } catch (error) {
-      console.error("Error updating last active and streak:", error);
+      console.error("Error updating last active:", error);
       throw error;
     }
   },
@@ -252,11 +209,44 @@ export const userService = {
 
         // Track daily stats
         let dailyStats = userData.dailyStats || {};
+
+        // Check if this is the first challenge completed today
+        const isFirstChallengeToday =
+          !dailyStats[today] || dailyStats[today].ChallengesCompleted === 0;
+
         dailyStats[today] = dailyStats[today] || {
           totalDhikr: 0,
           ChallengesCompleted: 0,
         };
         dailyStats[today].ChallengesCompleted += 1;
+
+        // Handle streak logic
+        let currentStreak = userData.streak || 0;
+        let longestStreak = userData.longestStreak || 0;
+
+        // Only update the streak if this is the first challenge completed today
+        if (isFirstChallengeToday) {
+          // Get yesterday's date
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+          // Check if user completed any challenges yesterday
+          const hadChallengeYesterday =
+            dailyStats[yesterdayStr] &&
+            dailyStats[yesterdayStr].ChallengesCompleted > 0;
+
+          if (currentStreak === 0 || hadChallengeYesterday) {
+            // If streak was 0 or user completed challenge yesterday, increment streak
+            currentStreak += 1;
+          } else {
+            // Otherwise reset to 1 (start new streak)
+            currentStreak = 1;
+          }
+
+          // Update longest streak if needed
+          longestStreak = Math.max(currentStreak, longestStreak);
+        }
 
         // Update the Firestore document with the new data
         await setDoc(
@@ -268,25 +258,17 @@ export const userService = {
             ChallengesCompleted: (userData.ChallengesCompleted || 0) + 1,
             contributions: contributions,
             dailyStats: dailyStats,
-            // Always update last active to help with streak tracking
             lastActive: serverTimestamp(),
-            // Increment streak
-            streak: (userData.streak || 0) + 1,
-            longestStreak: Math.max(
-              (userData.streak || 0) + 1,
-              userData.longestStreak || 0
-            ),
+            streak: currentStreak,
+            longestStreak: longestStreak,
           },
           { merge: true }
         );
 
-        // Call last active update to ensure consistent streak tracking
-        await userService.updateLastActive(uid);
-
         return {
           hasLevelChanged,
           newLevel,
-          newStreak: (userData.streak || 0) + 1,
+          newStreak: currentStreak,
         };
       }
     } catch (error) {
