@@ -249,25 +249,66 @@ export default function SettingsPage() {
 
       {/* Feedback Section */}
       <div className="mt-6">
-        <h4 className="uppercase text-gray-600 text-sm font-medium">
-          Feedback
-        </h4>
-        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-          <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-brands fa-instagram text-2xl "></i>
+        <h4 className="uppercase text-gray-600 text-sm font-medium">Socials</h4>
+        <Link href="https://discord.gg/DChsuaXZ" target="_blank">
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-brands fa-discord text-2xl "></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">
+                  Join Discord Community
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Share your thoughts with us
+                </p>
+              </div>
             </div>
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">
-                Join Instagram Community
-              </h3>
-              <p className="text-xs text-gray-500">Connect with the team!</p>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
             </div>
           </div>
-          <div>
-            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+        </Link>
+        <Link
+          href="https://www.instagram.com/tasbeehchallenge/"
+          target="_blank"
+        >
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-brands fa-instagram text-2xl "></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">
+                  Follow us on Instagram
+                </h3>
+                <p className="text-xs text-gray-500">See our latest posts</p>
+              </div>
+            </div>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+            </div>
           </div>
-        </div>
+        </Link>
+        <Link href="https://www.tiktok.com/@tasbeehchallenge" target="_blank">
+          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+            <div className="flex gap-3">
+              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                <i className="fa-brands fa-tiktok text-2xl "></i>
+              </div>
+              <div className="flex gap-1 flex-col">
+                <h3 className="text-[15px] font-semibold capitalize">
+                  Follow us on Tiktok
+                </h3>
+                <p className="text-xs text-gray-500">Get the latest updates</p>
+              </div>
+            </div>
+            <div>
+              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Legal Section */}
@@ -311,27 +352,6 @@ export default function SettingsPage() {
         </Link>
       </div>
 
-      {/* Info Section */}
-      <div className="mt-6">
-        <h4 className="uppercase text-gray-500 text-sm font-medium">Info</h4>
-        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-          <div className="flex gap-3">
-            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-              <i className="fa-solid fa-circle-info text-xl"></i>
-            </div>
-            <div className="flex gap-1 flex-col">
-              <h3 className="text-[15px] font-semibold capitalize">
-                App Version
-              </h3>
-              <p className="text-xs text-gray-500">1.0.0</p>
-            </div>
-          </div>
-          <div>
-            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
-          </div>
-        </div>
-      </div>
-
       {/* Install App Section */}
       <div className="mt-6">
         <h4 className="uppercase text-gray-500 text-sm font-medium">App</h4>
@@ -350,6 +370,27 @@ export default function SettingsPage() {
               <p className="text-xs text-gray-500">
                 Install this app on your device
               </p>
+            </div>
+          </div>
+          <div>
+            <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Section */}
+      <div className="mt-6">
+        <h4 className="uppercase text-gray-500 text-sm font-medium">Info</h4>
+        <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+          <div className="flex gap-3">
+            <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+              <i className="fa-solid fa-circle-info text-xl"></i>
+            </div>
+            <div className="flex gap-1 flex-col">
+              <h3 className="text-[15px] font-semibold capitalize">
+                App Version
+              </h3>
+              <p className="text-xs text-gray-500">1.0.0</p>
             </div>
           </div>
           <div>
