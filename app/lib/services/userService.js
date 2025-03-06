@@ -512,16 +512,10 @@ export const userService = {
     }
   },
 
-  sendLeaderboardNotification: async (
-    userId,
-    senderName,
-    senderPhotoURL,
-    previousRank,
-    newRank
-  ) => {
+  sendLeaderboardNotification: async (userId, senderName, senderPhotoURL) => {
     const db = getFirestore(app);
     try {
-      const body = `${senderName} took your leaderboard spot!`;
+      const body = `${senderName} took your place on the leaderboard!`;
       await addDoc(collection(db, "users", userId, "notifications"), {
         body,
         url: "https://tasbeehchallenge.com/leaderboard",
@@ -529,6 +523,7 @@ export const userService = {
         read: false,
         photoURL: senderPhotoURL,
       });
+      console.log("Leaderboard notification added successfully!");
     } catch (error) {
       console.error("Error adding leaderboard notification:", error);
     }
