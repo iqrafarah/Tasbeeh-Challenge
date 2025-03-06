@@ -414,7 +414,7 @@ function CounterPageContent() {
                       e.stopPropagation();
                       handleRetry();
                     }}
-                    className="flex align-center bg-[lightgray] px-5 py-5 rounded-full h-fit pointer-events-auto  text-lg"
+                    className="flex align-center bg-[lightgray] px-4 py-4 rounded-full h-fit pointer-events-auto  text-lg"
                   >
                     <i className="fa-solid fa-arrows-rotate text-black text-xl"></i>
                   </button>
@@ -423,7 +423,7 @@ function CounterPageContent() {
                       e.stopPropagation();
                       handleNextChallenge();
                     }}
-                    className="flex align-center bg-black px-5 py-5 rounded-full h-fit pointer-events-auto  text-lg"
+                    className="flex align-center bg-black px-4 py-4 rounded-full h-fit pointer-events-auto  text-lg"
                   >
                     <i className="fa-solid fa-arrow-right text-white text-xl"></i>
                   </button>
@@ -432,7 +432,7 @@ function CounterPageContent() {
                 <>
                   <button
                     onClick={handleDecrease}
-                    className="flex align-center bg-[lightgray] px-5 py-5 rounded-full h-fit pointer-events-auto  text-lg"
+                    className="flex align-center bg-[lightgray] px-4 py-4 rounded-full h-fit pointer-events-auto  text-lg"
                   >
                     <i className="fa-solid fa-rotate-left text-xl"></i>
                   </button>
@@ -442,7 +442,7 @@ function CounterPageContent() {
                       e.stopPropagation();
                       handleRetry();
                     }}
-                    className="flex align-center bg-black px-5 py-5 rounded-full h-fit pointer-events-auto  text-lg"
+                    className="flex align-center bg-black px-4 py-4 rounded-full h-fit pointer-events-auto  text-lg"
                   >
                     <i className="fa-solid fa-arrows-rotate text-xl text-white"></i>
                   </button>
