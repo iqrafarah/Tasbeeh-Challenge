@@ -1,7 +1,20 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
-import { getFirestore, collection, query, orderBy, limit, getDocs, writeBatch, where, doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  writeBatch,
+  where,
+  doc,
+  getDoc,
+  updateDoc,
+  onSnapshot,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import app, { userService } from "../lib/services/userService";
 import Image from "next/image";
@@ -12,7 +25,8 @@ import ProtectedRoute from "../components/protectedRoute";
 
 export default function Leaderboard() {
   const [users, setUsers] = useState([]);
-  const [tab, setTab] = useState('community');
+  const [previousUsers, setPreviousUsers] = useState([]);
+  const [tab, setTab] = useState("community");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [friendLink, setFriendLink] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -40,14 +54,19 @@ export default function Leaderboard() {
       const usersRef = collection(db, "users");
       let q;
 
-      if (tab === 'friends') {
+      if (tab === "friends") {
         const friendsRef = collection(db, "users", user.uid, "friends");
         const friendsSnapshot = await getDocs(friendsRef);
-        const friends = friendsSnapshot.docs.map(doc => doc.data().friendId);
+        const friends = friendsSnapshot.docs.map((doc) => doc.data().friendId);
         friends.push(user.uid);
 
         if (friends.length > 0) {
-          q = query(usersRef, where("uid", "in", friends), orderBy("totalPoints", "desc"), limit(20));
+          q = query(
+            usersRef,
+            where("uid", "in", friends),
+            orderBy("totalPoints", "desc"),
+            limit(20)
+          );
         } else {
           setUsers([]);
           return;
@@ -58,10 +77,31 @@ export default function Leaderboard() {
 
       try {
         const querySnapshot = await getDocs(q);
-        const leaderboardData = querySnapshot.docs.map(doc => ({
+        const leaderboardData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
+
+        // Compare previous leaderboard with current leaderboard
+        if (previousUsers.length > 0) {
+          leaderboardData.forEach((user, index) => {
+            if (previousUsers[index] && previousUsers[index].id !== user.id) {
+              // Notify the previous user that their place was taken
+              const previousUser = previousUsers[index];
+              if (previousUser) {
+                const senderName = user.displayName || "Someone";
+                const senderPhotoURL = user.photoURL || "/default-avatar.png";
+                userService.sendLeaderboardNotification(
+                  previousUser.id,
+                  senderName,
+                  senderPhotoURL
+                );
+              }
+            }
+          });
+        }
+
+        setPreviousUsers(leaderboardData);
         setUsers(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
@@ -76,16 +116,21 @@ export default function Leaderboard() {
 
     const fetchNotifications = async () => {
       const db = getFirestore(app);
-      const notificationsRef = collection(db, "users", user.uid, "notifications");
+      const notificationsRef = collection(
+        db,
+        "users",
+        user.uid,
+        "notifications"
+      );
       const q = query(notificationsRef, orderBy("timestamp", "desc"));
 
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const fetchedNotifications = querySnapshot.docs.map(doc => ({
+        const fetchedNotifications = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setNotifications(fetchedNotifications);
-        setUnreadCount(fetchedNotifications.filter(n => !n.read).length);
+        setUnreadCount(fetchedNotifications.filter((n) => !n.read).length);
       });
 
       return () => unsubscribe();
@@ -103,7 +148,13 @@ export default function Leaderboard() {
 
     notifications.forEach((n) => {
       if (!n.read) {
-        const notificationRef = doc(db, "users", user.uid, "notifications", n.id);
+        const notificationRef = doc(
+          db,
+          "users",
+          user.uid,
+          "notifications",
+          n.id
+        );
         batch.update(notificationRef, { read: true });
       }
     });
@@ -114,9 +165,17 @@ export default function Leaderboard() {
   const handleAddFriend = async () => {
     if (!friendLink) return;
 
-    const friendUid = friendLink.split('/').pop();
+    const friendUid = friendLink.split("/").pop();
     if (user.uid === friendUid) {
       setModalMessage("You cannot add yourself as a friend.");
+      setModalType("error");
+      setModalOpen(true);
+      return;
+    }
+
+    // if already friends
+    if (users.find((u) => u.uid === friendUid)) {
+      setModalMessage("You are already friends with this user.");
       setModalType("error");
       setModalOpen(true);
       return;
@@ -138,13 +197,17 @@ export default function Leaderboard() {
       const friendRef = doc(db, "users", friendUid);
       const friendDoc = await getDoc(friendRef);
       if (friendDoc.exists()) {
-        setUsers((prevUsers) => [...prevUsers, { id: friendDoc.id, ...friendDoc.data() }]);
+        setUsers((prevUsers) => [
+          ...prevUsers,
+          { id: friendDoc.id, ...friendDoc.data() },
+        ]);
       }
 
       setModalMessage("Friend added successfully.");
       setModalType("success");
       setModalOpen(true);
       setIsModalOpen(false);
+      setFriendLink("");
     } catch (error) {
       console.error("Error adding friend:", error);
       setModalMessage("Failed to add friend. Please try again.");
@@ -202,7 +265,10 @@ export default function Leaderboard() {
 
         {/* Notification Dropdown */}
         {showNotifications && (
-           <Notification notifications={notifications} onClose={handleOpenNotifications} /> 
+          <Notification
+            notifications={notifications}
+            onClose={handleOpenNotifications}
+          />
         )}
 
         {/* Friend Modal */}
@@ -221,14 +287,18 @@ export default function Leaderboard() {
           <div className="space-y-4 w-full">
             <div className="flex justify-between mb-5 space-x-4">
               <button
-                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${tab === 'community' ? 'bg-black text-white' : ''}`}
-                onClick={() => setTab('community')}
+                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${
+                  tab === "community" ? "bg-black text-white" : ""
+                }`}
+                onClick={() => setTab("community")}
               >
                 Community
               </button>
               <button
-                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${tab === 'friends' ? 'bg-black text-white' : ''}`}
-                onClick={() => setTab('friends')}
+                className={`px-6 text-sm font-semibold py-3 w-1/2 rounded-xl ${
+                  tab === "friends" ? "bg-black text-white" : ""
+                }`}
+                onClick={() => setTab("friends")}
               >
                 Friends
               </button>
@@ -251,17 +321,33 @@ export default function Leaderboard() {
                       ) : index === 2 ? (
                         <i className="fa-solid fa-medal text-[#cd7f32] text-xl"></i>
                       ) : (
-                        <span className="small_title ml-[5px] mr-1.5">{index + 1}</span>
+                        <span className="small_title ml-[5px] mr-1.5">
+                          {index + 1}
+                        </span>
                       )}
                       <div className="flex gap-2 items-center">
-                        <Image src={user.photoURL} alt={user.displayName} width={100} height={100} className="w-12 h-12 rounded-full" />
+                        <Image
+                          src={user.photoURL}
+                          alt={user.displayName}
+                          width={100}
+                          height={100}
+                          className="w-12 h-12 rounded-full"
+                        />
                         <div>
-                          <h3 className="text-sm font-semibold">{user.uid === auth.currentUser.uid ? "You" : user.displayName || "Anonymous"}</h3>
-                          <p className="text-xs text-gray-500">Lvl {user.level}</p>
+                          <h3 className="text-sm font-semibold">
+                            {user.uid === auth.currentUser.uid
+                              ? "You"
+                              : user.displayName || "Anonymous"}
+                          </h3>
+                          <p className="text-xs text-gray-500">
+                            Lvl {user.level}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    <span className="text-sm font-semibold w-1/2 text-right">{user.totalPoints} pts</span>
+                    <span className="text-sm font-semibold w-1/2 text-right">
+                      {user.totalPoints} pts
+                    </span>
                   </div>
                 ))
               ) : (
@@ -273,7 +359,12 @@ export default function Leaderboard() {
 
         {/* Profile Modal */}
         {selectedUser && (
-          <ProfileModal user={selectedUser} onClose={() => setSelectedUser(null)} currentUser={user} onDeleteFriend={handleDeleteFriend} />
+          <ProfileModal
+            user={selectedUser}
+            onClose={() => setSelectedUser(null)}
+            currentUser={user}
+            onDeleteFriend={handleDeleteFriend}
+          />
         )}
       </div>
     </ProtectedRoute>
