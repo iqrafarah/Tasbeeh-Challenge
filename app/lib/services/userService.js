@@ -193,7 +193,7 @@ export const userService = {
             currentStreak += 1;
           } else {
             // Otherwise reset to 1 (start new streak)
-            currentStreak = 1;
+            currentStreak = 0;
           }
 
           // Update longest streak if needed

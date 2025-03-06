@@ -62,7 +62,9 @@ export default function Leaderboard() {
       }
 
       try {
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(
+          q || query(usersRef, orderBy("totalPoints", "desc"), limit(20))
+        );
         const leaderboardData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
