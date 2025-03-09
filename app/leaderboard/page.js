@@ -55,16 +55,28 @@ export default function Leaderboard() {
       let q;
 
       if (tab === "friends") {
-        // Friends tab logic remains the same
-        // ...
+        const friendsRef = collection(db, "users", user.uid, "friends");
+        const friendsSnapshot = await getDocs(friendsRef);
+        const friends = friendsSnapshot.docs.map((doc) => doc.data().friendId);
+        friends.push(user.uid);
+
+        if (friends.length > 0) {
+          q = query(
+            usersRef,
+            where("uid", "in", friends),
+            orderBy("totalPoints", "desc"),
+            limit(20)
+          );
+        } else {
+          setUsers([]);
+          return;
+        }
       } else {
         q = query(usersRef, orderBy("totalPoints", "desc"), limit(20));
       }
 
       try {
-        const querySnapshot = await getDocs(
-          q || query(usersRef, orderBy("totalPoints", "desc"), limit(20))
-        );
+        const querySnapshot = await getDocs(q);
         const leaderboardData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
