@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 export default function BottomNav() {
   const pathname = usePathname();
 
-  if (pathname === "/") {
+  if (pathname === "/" || pathname === "/pricing/") {
     return null;
   }
 
@@ -54,9 +54,7 @@ export default function BottomNav() {
         <Link
           href="/profile"
           className={`flex flex-col items-center p-3 rounded-full ${
-            pathname === "/profile/" ||
-            pathname.includes("/settings") ||
-            pathname.includes("/pricing")
+            pathname === "/profile/" || pathname.includes("/settings")
               ? "text-black bg-white"
               : "text-gray-500"
           }`}
@@ -73,9 +71,7 @@ export default function BottomNav() {
               clipRule="evenodd"
               d="M11 11C8.5734 11 6.6 9.0266 6.6 6.6C6.6 4.1734 8.5734 2.2 11 2.2C13.4266 2.2 15.4 4.1734 15.4 6.6C15.4 9.0266 13.4266 11 11 11ZM15.1338 11.7403C16.6364 10.5314 17.6 8.679 17.6 6.6C17.6 2.9546 14.6454 0 11 0C7.3546 0 4.4 2.9546 4.4 6.6C4.4 8.679 5.36361 10.5314 6.86621 11.7403C2.84131 13.2528 0 16.9895 0 22H2.2C2.2 16.5 6.1479 13.2 11 13.2C15.8521 13.2 19.8 16.5 19.8 22H22C22 16.9895 19.1587 13.2528 15.1338 11.7403Z"
               fill={` ${
-                pathname === "/profile/" ||
-                pathname.includes("/settings/") ||
-                pathname.includes("/pricing/")
+                pathname === "/profile/" || pathname.includes("/settings/")
                   ? "black"
                   : "white"
               }`}

@@ -359,6 +359,11 @@ function CounterPageContent() {
               "#e8c4f2",
               "#f2d4c4",
             ]}
+            style={{
+              height: "100vh",
+              left: "-21px",
+              top: "420%",
+            }}
           />
         )}
 

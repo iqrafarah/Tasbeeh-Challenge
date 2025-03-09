@@ -103,116 +103,197 @@ export default function PricingPage() {
             <i className="fa-solid fa-chevron-left text-lg cursor-pointer mr-4"></i>
           </Link>
 
-          {/* Trial Notice */}
-          {subscriptionInfo.status === "Trial" && (
-            <div className="bg-gray-100 rounded-lg p-4 my-4 flex items-center">
-              <i className="fa-solid fa-circle-check text-bklack mr-3 text-lg"></i>
-              <div className="text-sm">
-                <p>
-                  Your free trial expires in{" "}
-                  <b>{subscriptionInfo.daysLeft} days</b>
-                </p>
-                <p className="text-sm">keep your Dhikr streak going!</p>
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="bg-lightgray rounded-lg p-4">
+              <div className="flex items-center">
+                <Image
+                  src="/ahmar.jpg"
+                  alt="Upgrade to premium"
+                  width={300}
+                  height={300}
+                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                />
+                <span className="text-xs font-semibold">Ahmar Ali Khan</span>
+              </div>
+
+              <p className="text-[10px] mt-2">
+                Awesome, i found this in the month of Ramadan.{" "}
+              </p>
+
+              <div className="flex  text-xs text-[#949CD0] text-left mt-2">
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
               </div>
             </div>
-          )}
+            <div className="bg-lightgray rounded-lg p-4">
+              <div className="flex items-center">
+                <Image
+                  src="/jay.jpg"
+                  alt="Upgrade to premium"
+                  width={300}
+                  height={300}
+                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                />
+                <span className="text-xs font-semibold">Jay Jihane</span>
+              </div>
 
-          {/* Main message */}
-          <div className="text-center my-6">
-            <h2 className="text-2xl font-bold mb-1">
-              Upgrade now to stay consistent in
-            </h2>
-            <h2 className="text-2xl font-bold mb-4"> Dhikr and level up!</h2>
+              <p className="text-[10px] mt-2">
+                Beautiful idea! May Allah bless your work :)
+              </p>
 
-            <div className="flex justify-center text-yellow-400 mb-2">
-              <i className="fa-solid fa-star"></i>
-              <i className="fa-solid fa-star"></i>
-              <i className="fa-solid fa-star"></i>
-              <i className="fa-solid fa-star"></i>
-              <i className="fa-solid fa-star"></i>
+              <div className="flex  text-xs text-[#949CD0] text-left mt-2">
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+              </div>
             </div>
+            <div className="bg-lightgray rounded-lg p-4">
+              <div className="flex items-center">
+                <Image
+                  src="/jawad.jpg"
+                  alt="Upgrade to premium"
+                  width={300}
+                  height={300}
+                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                />
+                <span className="text-xs font-semibold">Jawad Binazam</span>
+              </div>
 
-            {/* <div className="flex items-center justify-center mb-6">
-                            <div className="flex -space-x-2">
-                                <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
-                                <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
-                                <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
-                                <Image src="/icon.png" width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full border-2 border-white" alt="User" />
-                            </div>
-                        </div> */}
+              <p className="text-[10px] mt-2">
+                This app helps me stay consistent with my Dhikr. I’ll be sharing
+                it with my mom and sister
+              </p>
 
-            <p className="mb-4 text-xs">
-              <span className="font-bold">4.8/5</span> from 23,000+ dedicated
-              muslims
-            </p>
+              <div className="flex  text-xs text-[#949CD0] text-left mt-2">
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+              </div>
+            </div>
+            <div className="bg-lightgray rounded-lg p-4">
+              <div className="flex items-center">
+                <Image
+                  src="/shugri.png"
+                  alt="Upgrade to premium"
+                  width={300}
+                  height={300}
+                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                />
+                <span className="text-xs font-semibold">Shugri</span>
+              </div>
 
-            <h3 className="text-xl font-bold mt-6 mb-1">
-              Consistency in Dhikr is key
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Don't let your streak break—stay motivated!
-            </p>
+              <p className="text-[10px] mt-2">
+                Loving this app! It’s super easy to use, and it keeps me on
+                track with my Dhikr{" "}
+              </p>
+
+              <div className="flex  text-xs text-[#949CD0] text-left mt-2">
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+                <i className="fa-solid fa-star"></i>
+              </div>
+            </div>
           </div>
 
+          {/* Main message */}
+          <div className="text-center my-6 mt-8">
+            <h2 className="text-xl font-semibold my-3">
+              Keep track of your DHIKR
+            </h2>
+
+            <div className="flex flex-col justify-start gap-2">
+              <p className="text-left flex items-center font-medium">
+                <i className="fa-solid fa-circle-check text-[#949CD0] mr-2"></i>
+                <span className="text-sm">
+                  Track your streaks, levels, and daily achievements
+                </span>
+              </p>
+              <p className="text-left flex items-center font-medium">
+                <i className="fa-solid fa-circle-check text-[#949CD0] mr-2"></i>
+                <span className="text-sm">
+                  View detailed analytics of your completed challenges
+                </span>
+              </p>
+
+              <p className="text-left flex items-center font-medium">
+                <i className="fa-solid fa-circle-check text-[#949CD0] mr-2"></i>
+                <span className="text-sm">
+                  Check your daily total Dhikr and monitor progress
+                </span>
+              </p>
+              <p className="text-left flex items-center font-medium">
+                <i className="fa-solid fa-circle-check text-[#949CD0] mr-2"></i>
+                <span className="text-sm">
+                  Compete with the top 20 worldwide and your friends on the
+                  leaderboard
+                </span>
+              </p>
+            </div>
+          </div>
           {/* Pricing Plans */}
-          <div className="space-y-4 mt-8">
+          <div className="grid grid-cols-2 gap-4 mt-8">
             {/* Monthly Plan */}
-            <label
-              className={`block border rounded-lg p-4 cursor-pointer transition-all ${
+            <div
+              className={` rounded-lg cursor-pointer flex items-center justify-center border-2 transition-all ${
                 selectedPlan === "monthly"
-                  ? "border-[#949CD0] bg-[#d8d8f2] shadow-md"
-                  : "border-gray-200"
+                  ? "border-[#949CD0] bg-[#d8d8f2]"
+                  : "border-gray-200 bg-lightgray"
               }`}
+              onClick={() => setSelectedPlan("monthly")}
             >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value="monthly"
-                    checked={selectedPlan === "monthly"}
-                    onChange={() => setSelectedPlan("monthly")}
-                    className="mr-3 h-5 w-5 accent-blue-500"
-                  />
-                  <div>
-                    <h3 className="text-sm font-medium">Monthly</h3>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">$3.99/month</p>
-                </div>
+              <div className="flex items-center flex-col gap-2 text-center ">
+                <input
+                  type="radio"
+                  name="plan"
+                  value="monthly"
+                  checked={selectedPlan === "monthly"}
+                  className="mr-3 h-5 w-5 accent-blue-500"
+                  readOnly
+                />
+                <h3 className="text-sm font-semibold text-center mx-auto ">
+                  Monthly
+                  <br />
+                </h3>
+                <span className="text-xl font-semibold">
+                  $2.99<span className="text-xs">/mo</span>
+                </span>
               </div>
-            </label>
+            </div>
 
             {/* Lifetime Plan */}
-            <label
-              className={`block border rounded-lg p-4 cursor-pointer transition-all ${
+            <div
+              className={`rounded-lg p-4 cursor-pointer flex flex-col items-center justify-center border-2 transition-all ${
                 selectedPlan === "lifetime"
-                  ? "border-[#949CD0] bg-[#d8d8f2] shadow-md"
-                  : "border-gray-200"
+                  ? "border-[#949CD0] bg-[#d8d8f2]"
+                  : "border-gray-200 bg-lightgray"
               }`}
+              onClick={() => setSelectedPlan("lifetime")}
             >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value="lifetime"
-                    checked={selectedPlan === "lifetime"}
-                    onChange={() => setSelectedPlan("lifetime")}
-                    className="mr-3 h-5 w-5 accent-blue-500"
-                  />
-                  <div>
-                    <h3 className="text-sm font-medium">
-                      Pay once, yours forever
-                    </h3>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">$29.99</p>
-                </div>
+              <div className="flex items-center flex-col gap-2 text-center ">
+                <input
+                  type="radio"
+                  name="plan"
+                  value="lifetime"
+                  checked={selectedPlan === "lifetime"}
+                  className="mr-3 h-5 w-5 accent-blue-500"
+                  readOnly
+                />
+                <h3 className="text-sm font-semibold text-center mx-auto ">
+                  One-time
+                  <br />
+                </h3>
+                <span className="text-xl font-semibold">$39.99</span>
               </div>
-            </label>
+            </div>
           </div>
 
           {/* CTA Button */}
