@@ -274,7 +274,7 @@ export const userService = {
         // Initialize today's entry if it doesn't exist yet
         if (!dailyStats[today]) {
           dailyStats[today] = {
-            totalDhikr: 0,
+            totalDhikr: 0, // Start with 0, not the current totalDhikr
             ChallengesCompleted: 0,
           };
         }
@@ -282,23 +282,13 @@ export const userService = {
         // Calculate new values
         const currentDailyDhikr = dailyStats[today].totalDhikr || 0;
         const newTotalDhikr = currentTotalDhikr + numericChange;
-        const newDailyDhikr = currentDailyDhikr + numericChange;
+        const newDailyDhikr = currentDailyDhikr + numericChange; // This is correct - we're adding the change to today's count
 
         // Update daily stats for today - preserve any existing properties
         dailyStats[today] = {
           ...dailyStats[today],
           totalDhikr: newDailyDhikr,
         };
-
-        console.log(
-          `Updating Dhikr for user: ${uid}
-        Current Total Dhikr: ${currentTotalDhikr}
-        Adding: ${numericChange}
-        New Total Dhikr: ${newTotalDhikr}
-        Today's Daily Dhikr: ${newDailyDhikr}
-        Today's Daily Stats: `,
-          dailyStats[today]
-        );
 
         // Update the Firestore document
         await setDoc(
@@ -342,22 +332,16 @@ export const userService = {
         // Initialize today's entry if it doesn't exist
         if (!dailyStats[today]) {
           dailyStats[today] = {
-            totalDhikr: 0,
+            totalDhikr: 0, // Initialize with 0, not totalDhikr
             ChallengesCompleted: 0,
           };
         }
 
-        // Check for discrepancy
-        if (dailyStats[today].totalDhikr !== totalDhikr) {
-          console.log(`Fixing dhikr count discrepancy for user ${uid}:`);
-          console.log(
-            `Total dhikr: ${totalDhikr}, Daily dhikr: ${dailyStats[today].totalDhikr}`
-          );
+        // No need to check for discrepancy between daily and total
+        // as they should be different values by design
 
-          // Update daily stats to match the total
-          dailyStats[today].totalDhikr = totalDhikr;
-
-          // Update Firestore
+        // Update Firestore if we added a new day's entry
+        if (!userData.dailyStats || !userData.dailyStats[today]) {
           await setDoc(userRef, { dailyStats }, { merge: true });
         }
 
@@ -373,6 +357,7 @@ export const userService = {
       throw error;
     }
   },
+
   addFriend: async (userUid, friendUid) => {
     if (userUid === friendUid) {
       return;
@@ -483,7 +468,6 @@ export const userService = {
       // Delete auth user
       await deleteUser(user);
 
-      console.log("User account and associated data deleted successfully");
       return { success: true };
     } catch (error) {
       console.error("Error deleting user account:", error);
@@ -523,7 +507,6 @@ export const userService = {
         read: false,
         photoURL: senderPhotoURL,
       });
-      console.log("Leaderboard notification added successfully!");
     } catch (error) {
       console.error("Error adding leaderboard notification:", error);
     }
