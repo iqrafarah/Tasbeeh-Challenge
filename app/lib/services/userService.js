@@ -265,45 +265,35 @@ export const userService = {
         const userData = userDoc.data();
         const today = new Date().toISOString().split("T")[0];
 
-        // Get current values
-        const currentTotalDhikr = userData.totalDhikr || 0;
+        // Ensure dailyStats exists
+        let dailyStats = userData.dailyStats || {};
 
-        // Create a deep copy of dailyStats
-        let dailyStats = JSON.parse(JSON.stringify(userData.dailyStats || {}));
-
-        // Initialize today's entry if it doesn't exist yet
+        // Ensure today's stats exist
         if (!dailyStats[today]) {
           dailyStats[today] = {
-            totalDhikr: 0, // Start with 0, not the current totalDhikr
+            totalDhikr: 0, // Ensure it starts at 0 for today
             ChallengesCompleted: 0,
           };
         }
 
         // Calculate new values
-        const currentDailyDhikr = dailyStats[today].totalDhikr || 0;
-        const newTotalDhikr = currentTotalDhikr + numericChange;
-        const newDailyDhikr = currentDailyDhikr + numericChange; // This is correct - we're adding the change to today's count
+        dailyStats[today].totalDhikr += numericChange;
+        const newTotalDhikr = (userData.totalDhikr || 0) + numericChange;
 
-        // Update daily stats for today - preserve any existing properties
-        dailyStats[today] = {
-          ...dailyStats[today],
-          totalDhikr: newDailyDhikr,
-        };
-
-        // Update the Firestore document
+        // Ensure Firestore update is done correctly
         await setDoc(
           userRef,
           {
-            totalDhikr: newTotalDhikr,
-            dailyStats,
+            totalDhikr: newTotalDhikr, // Store all-time total correctly
+            dailyStats, // Store today's updated dhikr correctly
             lastActive: serverTimestamp(),
           },
           { merge: true }
         );
 
         return {
-          totalDhikr: newTotalDhikr,
-          dailyDhikr: newDailyDhikr,
+          totalDhikr: newTotalDhikr, // All-time total
+          dailyDhikr: dailyStats[today].totalDhikr, // Today's total
         };
       }
 
