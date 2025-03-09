@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   getFirestore,
   collection,
@@ -12,7 +12,6 @@ import {
   where,
   doc,
   getDoc,
-  updateDoc,
   onSnapshot,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -38,6 +37,8 @@ export default function Leaderboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const auth = getAuth();
   const [user, setUser] = useState(null);
+  const [prevTab, setPrevTab] = useState("community");
+  const lastNotificationSent = useRef({});
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -82,7 +83,12 @@ export default function Leaderboard() {
           ...doc.data(),
         }));
 
-        if (previousUsers.length > 0) {
+        // Only check for position changes if we're not switching tabs and the user count is consistent
+        if (
+          previousUsers.length > 0 &&
+          previousUsers.length === leaderboardData.length &&
+          tab === prevTab // Add a state variable to track previous tab
+        ) {
           // Create a map of previous positions by user ID
           const prevPositions = {};
           previousUsers.forEach((user, index) => {
@@ -93,8 +99,12 @@ export default function Leaderboard() {
           leaderboardData.forEach((user, currentIndex) => {
             const prevIndex = prevPositions[user.id];
 
-            // If user moved up in rank (lower index is better)
-            if (prevIndex !== undefined && prevIndex > currentIndex) {
+            // Only send notifications if user genuinely moved up in rank due to points change
+            if (
+              prevIndex !== undefined &&
+              prevIndex > currentIndex &&
+              user.totalPoints > previousUsers[prevIndex].totalPoints
+            ) {
               // User moved up, find who they passed
               for (let i = currentIndex; i < prevIndex; i++) {
                 if (i < previousUsers.length) {
@@ -103,22 +113,33 @@ export default function Leaderboard() {
                     `${user.displayName} passed ${passedUser.displayName}`
                   );
 
-                  // Send notification to the passed user
-                  const senderName = user.displayName || "Someone";
-                  const senderPhotoURL = user.photoURL || "/default-avatar.png";
+                  // Check if a notification was sent recently for this user
+                  const now = Date.now();
+                  if (
+                    !lastNotificationSent.current[passedUser.id] ||
+                    now - lastNotificationSent.current[passedUser.id] > 60000 // 1 minute threshold
+                  ) {
+                    // Send notification to the passed user
+                    const senderName = user.displayName || "Someone";
+                    const senderPhotoURL =
+                      user.photoURL || "/default-avatar.png";
 
-                  userService
-                    .sendLeaderboardNotification(
-                      passedUser.id,
-                      senderName,
-                      senderPhotoURL
-                    )
-                    .catch((error) => {
-                      console.error(
-                        "Error sending leaderboard notification:",
-                        error
-                      );
-                    });
+                    userService
+                      .sendLeaderboardNotification(
+                        passedUser.id,
+                        senderName,
+                        senderPhotoURL
+                      )
+                      .then(() => {
+                        lastNotificationSent.current[passedUser.id] = now; // Update the last notification sent time for this user
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Error sending leaderboard notification:",
+                          error
+                        );
+                      });
+                  }
                 }
               }
             }
@@ -128,13 +149,14 @@ export default function Leaderboard() {
         // Update state after comparison is complete
         setPreviousUsers(leaderboardData);
         setUsers(leaderboardData);
+        setPrevTab(tab); // Store current tab for next comparison
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
       }
     };
 
     fetchLeaderboard();
-  }, [tab, user, previousUsers]);
+  }, [tab, user, previousUsers, prevTab]);
 
   useEffect(() => {
     if (!user) return;
@@ -376,7 +398,7 @@ export default function Leaderboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-500"></p>
+                <p className="text-center text-gray-500">No users found</p>
               )}
             </div>
           </div>
