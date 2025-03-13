@@ -58,7 +58,7 @@ export default function AddFriendPage() {
         <div className="text-center">
           <h2 className="text-lg font-bold mb-4">Please Log In</h2>
           <p className="mb-4">You need to be logged in to add friends.</p>
-          <Link href="/login">
+          <Link href="/">
             <button className="px-6 py-3 bg-[#94D098] text-white rounded-full">
               Log In
             </button>
