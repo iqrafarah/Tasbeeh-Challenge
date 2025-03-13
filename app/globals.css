@@ -248,6 +248,6 @@ canvas {
   border-top: 5px solid black;
 }
 
-input {
+.pricing input {
   display: none;
 }

@@ -97,7 +97,7 @@ export default function PricingPage() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen flex flex-col overflow-y-auto pb-[130px]">
+      <div className="pricing h-screen flex flex-col overflow-y-auto pb-[30px]">
         <div className="    ">
           <Link href="/profile">
             <i className="fa-solid fa-chevron-left text-lg cursor-pointer mr-4"></i>
@@ -111,7 +111,7 @@ export default function PricingPage() {
                   alt="Upgrade to premium"
                   width={300}
                   height={300}
-                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                  className="rounded-full w-[35px] h-[35px] object-cover  mr-2"
                 />
                 <span className="text-xs font-semibold">Ahmar Ali Khan</span>
               </div>
@@ -135,7 +135,7 @@ export default function PricingPage() {
                   alt="Upgrade to premium"
                   width={300}
                   height={300}
-                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                  className="rounded-full w-[35px] h-[35px] object-cover  mr-2"
                 />
                 <span className="text-xs font-semibold">Jay Jihane</span>
               </div>
@@ -159,7 +159,7 @@ export default function PricingPage() {
                   alt="Upgrade to premium"
                   width={300}
                   height={300}
-                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                  className="rounded-full w-[35px] h-[35px] object-cover  mr-2"
                 />
                 <span className="text-xs font-semibold">Jawad Binazam</span>
               </div>
@@ -184,7 +184,7 @@ export default function PricingPage() {
                   alt="Upgrade to premium"
                   width={300}
                   height={300}
-                  className="rounded-full w-[30px] h-[28px] object-cover  mr-2"
+                  className="rounded-full w-[35px] h-[35px] object-cover  mr-2"
                 />
                 <span className="text-xs font-semibold">Shugri</span>
               </div>

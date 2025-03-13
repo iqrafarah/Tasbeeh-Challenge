@@ -330,7 +330,7 @@ export default function Leaderboard() {
         )}
 
         {/* Leaderboard Section */}
-        <div className="bg-lightgray rounded-xl mt-6 w-full p-4 flex flex-col items-center">
+        <div className="bg-lightgray rounded-xl mt-6 w-full p-4 flex flex-col items-center mb-[120px]">
           <div className="space-y-4 w-full">
             <div className="flex justify-between mb-5 space-x-4">
               <button
