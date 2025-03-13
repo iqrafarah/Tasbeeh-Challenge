@@ -171,6 +171,7 @@ export const userService = {
           ChallengesCompleted: 0,
         };
         dailyStats[today].ChallengesCompleted += 1;
+        dailyStats[today].totalDhikr += 1; // Increment totalDhikr for today
 
         // Handle streak logic
         let currentStreak = userData.streak || 0;
