@@ -9,7 +9,7 @@ export default function FriendModal({
 }) {
   const [showLink, setShowLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState("");
-  const [copyButtonText, setCopyButtonText] = useState("Generate Link");
+  const [copyButtonText, setCopyButtonText] = useState("Generate Code");
 
   const handleGenerateLink = () => {
     const link = onGenerateLink();
@@ -45,7 +45,7 @@ export default function FriendModal({
           </button>
           {showLink && (
             <div className="mt-2 p-3 border border-gray-300 bg-lightgray rounded-xl">
-              <p className="text-sm">Share this link with your friend:</p>
+              <p className="text-sm">Share this code with your friend:</p>
               <p className="text-sm text-[#94D098] break-all">
                 {generatedLink}
               </p>
@@ -55,7 +55,7 @@ export default function FriendModal({
             type="text"
             value={friendLink}
             onChange={(e) => setFriendLink(e.target.value)}
-            placeholder="Enter friend link"
+            placeholder="Enter friend code..."
             className="w-full p-2 py-3 border border-border rounded"
           />
           <div className="flex justify-end space-x-2">

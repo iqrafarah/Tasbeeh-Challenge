@@ -212,7 +212,7 @@ export default function Leaderboard() {
   const handleAddFriend = async () => {
     if (!friendLink) return;
 
-    const friendUid = friendLink.split("/").pop();
+    const friendUid = friendLink.trim();
     if (user.uid === friendUid) {
       setModalMessage("You cannot add yourself as a friend.");
       setModalType("error");
@@ -265,7 +265,7 @@ export default function Leaderboard() {
 
   const handleGenerateLink = () => {
     if (typeof window !== "undefined") {
-      return `${window.location.origin}/add-friend/${user.uid}`;
+      return `${user.uid}`;
     }
     return "";
   };
@@ -356,7 +356,7 @@ export default function Leaderboard() {
               {users.length > 0 ? (
                 users.map((user, index) => (
                   <div
-                    key={user.id}
+                    key={`${user.id}-${index}`}
                     className="flex items-center justify-between py-3 border-b last:border-b-0 cursor-pointer"
                     onClick={() => handleUserClick(user.id)}
                   >
