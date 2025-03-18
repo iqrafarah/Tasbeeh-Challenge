@@ -96,10 +96,32 @@ export const userService = {
   getUser: async (uid) => {
     if (!uid) return null;
     const db = getFirestore(app);
+
     try {
-      const userDoc = await getDoc(doc(db, "users", uid));
+      const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
+
       if (userDoc.exists()) {
-        return userDoc.data();
+        const userData = userDoc.data();
+        const lastActiveTimestamp = userData.lastActive?.toDate();
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        let currentStreak = userData.streak || 0;
+        let longestStreak = userData.longestStreak || 0;
+
+        // If last active is before yesterday, reset streak
+        if (lastActiveTimestamp && lastActiveTimestamp < yesterday) {
+          currentStreak = 0;
+        }
+
+        // If we had to reset the streak, update Firestore
+        if (currentStreak !== userData.streak) {
+          await setDoc(userRef, { streak: currentStreak }, { merge: true });
+        }
+
+        return { ...userData, streak: currentStreak };
       }
       return null;
     } catch (error) {
@@ -112,15 +134,43 @@ export const userService = {
     const db = getFirestore(app);
     try {
       const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
 
-      // Just update the lastActive timestamp without modifying streak
-      await setDoc(
-        userRef,
-        {
-          lastActive: serverTimestamp(),
-        },
-        { merge: true }
-      );
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const today = new Date().toISOString().split("T")[0];
+        const dailyStats = userData.dailyStats || {};
+
+        // Find the last day the user completed a challenge
+        const dates = Object.keys(dailyStats).sort(); // Sort in ascending order
+        const lastChallengeDate =
+          dates.length > 0 ? dates[dates.length - 1] : null;
+
+        // Get yesterday's date
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        let currentStreak = userData.streak || 0;
+
+        // If last challenge wasn't yesterday or today, reset the streak
+        if (
+          lastChallengeDate &&
+          lastChallengeDate !== today &&
+          lastChallengeDate !== yesterdayStr
+        ) {
+          currentStreak = 0;
+        }
+
+        await setDoc(
+          userRef,
+          {
+            lastActive: serverTimestamp(),
+            streak: currentStreak,
+          },
+          { merge: true }
+        );
+      }
     } catch (error) {
       console.error("Error updating last active:", error);
       throw error;
