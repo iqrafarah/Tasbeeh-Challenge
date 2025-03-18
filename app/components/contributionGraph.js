@@ -124,9 +124,21 @@ const HeatTracker = ({ uid }) => {
 
               {/* Tooltip */}
               {activeDay === day && (
-                <div className="absolute bottom-10 z-50 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-3 rounded-md shadow-md whitespace-nowrap">
-                  <p className="font-bold">Dhikr: {totalDhikr}</p>
-                  <p className="font-bold">Challenges: {ChallengesCompleted}</p>
+                <div className="absolute bottom-10 z-50 left-1/2 text-LEFT -translate-x-1/2 bg-black text-white text-xs px-4 py-3 rounded-md shadow-md whitespace-nowrap">
+                  <p className="font-bold text-[10px]">
+                    <i className="fas fa-calendar-day mr-1"></i>
+                    {currentDate.toLocaleDateString("en-US", {
+                      weekday: "long",
+                    })}
+                  </p>
+                  <p className="font-bold text-[10px]">
+                    <i className="fas fa-praying-hands mr-1"></i>
+                    Dhikr: {totalDhikr}
+                  </p>
+                  <p className="font-bold text-[10px]">
+                    <i className="fas fa-trophy mr-1"></i>
+                    Challenges: {ChallengesCompleted}
+                  </p>
                   <div className="tooltip-pointer"></div>
                 </div>
               )}
