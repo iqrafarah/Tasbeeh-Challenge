@@ -404,30 +404,31 @@ export default function SettingsPage() {
         <h4 className="uppercase text-gray-500 text-sm font-medium">Account</h4>
 
         {/* Cancel Subscription Section */}
-        {subscriptionInfo.status === "Premium Monthly" && (
-          <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
-            <button
-              className="flex gap-3"
-              onClick={handleCancelSubscription}
-              disabled={isCancelling}
-            >
-              <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
-                <i className="fa-solid fa-file-invoice-dollar text-xl"></i>
+        {subscriptionInfo.status === "Premium Monthly" ||
+          (subscriptionInfo.status === "lifetime" && (
+            <div className="mt-3 border border-gray-100 flex items-center justify-between px-4 py-3 rounded-xl">
+              <button
+                className="flex gap-3"
+                onClick={handleCancelSubscription}
+                disabled={isCancelling}
+              >
+                <div className="w-[50px] h-[50px] flex items-center justify-center rounded-lg bg-lightgray overflow-hidden">
+                  <i className="fa-solid fa-file-invoice-dollar text-xl"></i>
+                </div>
+                <div className="flex gap-1 flex-col">
+                  <h3 className="text-[15px] font-semibold capitalize text-left">
+                    Subscription
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {isCancelling ? "Processing..." : "Cancel Subscription"}
+                  </p>
+                </div>
+              </button>
+              <div>
+                <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
               </div>
-              <div className="flex gap-1 flex-col">
-                <h3 className="text-[15px] font-semibold capitalize text-left">
-                  Subscription
-                </h3>
-                <p className="text-xs text-gray-500">
-                  {isCancelling ? "Processing..." : "Cancel Subscription"}
-                </p>
-              </div>
-            </button>
-            <div>
-              <i className="fa-solid fa-chevron-right text-sm text-gray-500"></i>
             </div>
-          </div>
-        )}
+          ))}
 
         {/* Logout Section */}
         <div
