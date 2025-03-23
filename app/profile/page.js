@@ -66,8 +66,6 @@ export default function ProfileScreen() {
         Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24))
       );
       return { status: "Trial", daysLeft };
-    } else if (status === "monthly") {
-      return { status: "Premium Monthly" };
     } else if (status === "lifetime") {
       return { status: "Premium Lifetime" };
     } else {

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import app from "../lib/firebase.config";
 import { userService } from "../lib/services/userService";
@@ -18,7 +17,6 @@ export default function PricingPage() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState(null);
   const [isTrialEnded, setIsTrialEnded] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("lifetime"); // Default to lifetime plan
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
@@ -50,16 +48,11 @@ export default function PricingPage() {
   const openCheckout = () => {
     setProcessingPayment(true);
 
-    const urls = {
-      monthly:
-        "https://tasbeehchallenge.lemonsqueezy.com/buy/a9a111d9-119c-4478-a343-c17df5fdd8fe",
-      lifetime:
-        "https://tasbeehchallenge.lemonsqueezy.com/buy/df6dcae4-0f15-4016-a481-c199ee13d564",
-    };
+    const url =
+      "https://tasbeehchallenge.lemonsqueezy.com/buy/df6dcae4-0f15-4016-a481-c199ee13d564";
 
-    const url = urls[selectedPlan];
     if (!url) {
-      console.error("Invalid plan type");
+      console.error("Invalid checkout URL");
       setProcessingPayment(false);
       return;
     }
@@ -82,8 +75,6 @@ export default function PricingPage() {
         Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24))
       );
       return { status: "Trial", daysLeft };
-    } else if (status === "monthly") {
-      return { status: "Premium Monthly" };
     } else if (status === "lifetime") {
       return { status: "Premium Lifetime" };
     } else {
@@ -103,6 +94,7 @@ export default function PricingPage() {
             <i className="fa-solid fa-chevron-left text-lg cursor-pointer mr-4"></i>
           </Link>
 
+          {/* Testimonials */}
           <div className="grid grid-cols-2 gap-3 mt-4">
             <div className="bg-lightgray rounded-lg p-4">
               <div className="flex items-center">
@@ -239,79 +231,20 @@ export default function PricingPage() {
               </p>
             </div>
           </div>
-          {/* Pricing Plans */}
-          <div className="grid grid-cols-2 gap-4 mt-8">
-            {/* Monthly Plan */}
-            <div
-              className={` rounded-lg cursor-pointer flex items-center justify-center border-2 transition-all ${
-                selectedPlan === "monthly"
-                  ? "border-[#949CD0] bg-[#d8d8f2]"
-                  : "border-gray-200 bg-lightgray"
-              }`}
-              onClick={() => setSelectedPlan("monthly")}
-            >
-              <div className="flex items-center flex-col gap-2 text-center ">
-                <input
-                  type="radio"
-                  name="plan"
-                  value="monthly"
-                  checked={selectedPlan === "monthly"}
-                  className="mr-3 h-5 w-5 accent-blue-500"
-                  readOnly
-                />
-                <h3 className="text-sm font-semibold text-center mx-auto ">
-                  Monthly
-                  <br />
-                </h3>
-                <span className="text-xl font-semibold">
-                  $2.99<span className="text-xs">/mo</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Lifetime Plan */}
-            <div
-              className={`rounded-lg p-4 cursor-pointer flex flex-col items-center justify-center border-2 transition-all ${
-                selectedPlan === "lifetime"
-                  ? "border-[#949CD0] bg-[#d8d8f2]"
-                  : "border-gray-200 bg-lightgray"
-              }`}
-              onClick={() => setSelectedPlan("lifetime")}
-            >
-              <div className="flex items-center flex-col gap-2 text-center ">
-                <input
-                  type="radio"
-                  name="plan"
-                  value="lifetime"
-                  checked={selectedPlan === "lifetime"}
-                  className="mr-3 h-5 w-5 accent-blue-500"
-                  readOnly
-                />
-                <h3 className="text-sm font-semibold text-center mx-auto ">
-                  One-time
-                  <br />
-                </h3>
-                <span className="text-xl font-semibold">$39.99</span>
-              </div>
-            </div>
-          </div>
 
           {/* CTA Button */}
           <button
-            className="button mt-6 py-4 "
+            className="button mt-6 py-4  text-sm"
             onClick={openCheckout}
             disabled={
               processingPayment ||
-              (selectedPlan === "monthly" &&
-                subscriptionInfo.status === "Premium Monthly") ||
-              (selectedPlan === "lifetime" &&
-                subscriptionInfo.status === "Premium Lifetime")
+              subscriptionInfo.status === "Premium Lifetime"
             }
           >
             {processingPayment ? (
               "Processing..."
             ) : (
-              <>UPGRADE & LEVEL UP YOUR DHIKR 🌙</>
+              <>$5.99 UPGRADE & LEVEL UP YOUR DHIKR 🌙</>
             )}
           </button>
 

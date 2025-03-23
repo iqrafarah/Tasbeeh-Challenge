@@ -13,8 +13,8 @@ export default function TrialEndModal({ isOpen, onClose }) {
           </div>
           <h2 className="title mb-2">Your free trial has ended</h2>
           <p className="text-gray-600 text-sm">
-            Keep your Dhikr streak strong—upgrade to premium and level up your
-            spiritual journey today✨
+            To keep the app running and maintain your Dhikr streak, please
+            upgrade to premium. Level up your spiritual journey today✨
           </p>
         </div>
 
@@ -23,24 +23,11 @@ export default function TrialEndModal({ isOpen, onClose }) {
             <div className="flex justify-between items-center">
               <div className="flex items-center">
                 <div>
-                  <h3 className="text-sm font-medium">Monthly Premium</h3>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium">$2.99/month</p>
-              </div>
-            </div>
-          </label>
-
-          <label className="block border rounded-lg p-4 cursor-pointer transition-all border-gray-200">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div>
                   <h3 className="text-sm font-medium">Lifetime Access</h3>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium">$39.99 (one-time)</p>
+                <p className="text-sm font-medium">$5.99 (one-time)</p>
               </div>
             </div>
           </label>

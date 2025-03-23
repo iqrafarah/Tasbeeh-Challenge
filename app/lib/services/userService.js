@@ -62,7 +62,7 @@ export const userService = {
             vibrationEnabled: true,
           },
           subscription: {
-            status: "trial", // "trial", "free", "monthly", "lifetime"
+            status: "trial", // "trial", "free", "lifetime"
             trialStartDate: trialStartDate,
             trialEndDate: trialEndDate,
             subscriptionId: null,
