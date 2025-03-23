@@ -8,17 +8,16 @@ const API_BASE_URL = "https://api.lemonsqueezy.com/v1";
 const API_KEY = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_API_KEY;
 
 export const paymentService = {
-  createSubscription: async (customerEmail, planId, trialDays = 7) => {
+  createOrder: async (customerEmail, productId) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/subscriptions`,
+        `${API_BASE_URL}/orders`,
         {
           data: {
-            type: "subscriptions",
+            type: "orders",
             attributes: {
               customer_email: customerEmail,
-              plan_id: planId,
-              trial_days: trialDays,
+              product_id: productId,
             },
           },
         },
@@ -33,49 +32,25 @@ export const paymentService = {
       return response.data;
     } catch (error) {
       console.error(
-        "Error creating subscription:",
+        "Error creating order:",
         error.response ? error.response.data : error.message
       );
       throw error;
     }
   },
 
-  getSubscription: async (subscriptionId) => {
+  getOrder: async (orderId) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/subscriptions/${subscriptionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+        },
+      });
 
       return response.data;
     } catch (error) {
       console.error(
-        "Error fetching subscription:",
-        error.response ? error.response.data : error.message
-      );
-      throw error;
-    }
-  },
-
-  cancelSubscription: async (subscriptionId) => {
-    try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/subscriptions/${subscriptionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error(
-        "Error cancelling subscription:",
+        "Error fetching order:",
         error.response ? error.response.data : error.message
       );
       throw error;

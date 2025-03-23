@@ -333,7 +333,7 @@ export default function SettingsPage() {
               <h3 className="text-[15px] font-semibold capitalize">
                 App Version
               </h3>
-              <p className="text-xs text-gray-500">1.0.0</p>
+              <p className="text-xs text-gray-500">1.0.1</p>
             </div>
           </div>
           <div>

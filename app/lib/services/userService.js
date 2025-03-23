@@ -65,9 +65,7 @@ export const userService = {
             status: "trial", // "trial", "free", "lifetime"
             trialStartDate: trialStartDate,
             trialEndDate: trialEndDate,
-            subscriptionId: null,
             orderId: null,
-            planType: null,
           },
           onBoarded: false,
           createdAt: serverTimestamp(),

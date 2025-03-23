@@ -103,7 +103,10 @@ export default function ChallengesPage() {
             data.subscription.status === "free"
           ) {
             const trialEndDate = data.subscription.trialEndDate.toDate();
-            if (new Date() > trialEndDate) {
+            if (
+              new Date() > trialEndDate ||
+              data.subscription.status === "free"
+            ) {
               setIsTrialEnded(true);
             } else {
               setIsTrialEnded(false);
